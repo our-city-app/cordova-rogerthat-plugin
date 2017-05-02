@@ -1,0 +1,23 @@
+{
+    "name": "rogerthat-plugin",
+    "description": "Cordova Rogerthat Plugin.",
+    "version": "0.1.0",
+    "cordova": {
+        "id": "rogerthat-plugin",
+        "platforms": [
+            "android"
+        ]
+    },
+    "keywords": [
+        "cordova",
+        "Rogerthat"
+    ],
+    "engines": [
+        {
+            "name": "cordova",
+            "version": ">=5.0.0"
+        }
+    ],
+    "author": "Mobicage",
+    "license": "Apache-2.0"
+}

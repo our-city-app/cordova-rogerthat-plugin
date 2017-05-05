@@ -6,20 +6,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.v4.content.ContextCompat;
-
-import org.apache.cordova.PluginResult;
-import org.jivesoftware.smack.util.Base64;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.google.zxing.client.android.CaptureActivity;
 import com.google.zxing.client.android.Intents;
 import com.mobicage.rogerthat.MainService;
-import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
-import com.mobicage.rogerthat.plugins.friends.FriendStore;
 import com.mobicage.rogerthat.plugins.friends.Poker;
-import com.mobicage.rogerthat.plugins.friends.QRCodeScanner;
 import com.mobicage.rogerthat.plugins.friends.ServiceApiCallbackResult;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
@@ -30,12 +20,15 @@ import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
-
-import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.PluginResult;
+import org.jivesoftware.smack.util.Base64;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.simple.JSONValue;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -128,8 +121,8 @@ public class RogerthatPlugin extends CordovaPlugin {
                         setInfo();
 
                     } else if (action.equals("log")) {
-                        logError(callbackContext, args.optJSONObject(0));
-
+                        log(args.optJSONObject(0));
+                        callbackContext.success(new JSONObject());
                     } else if (action.equals("api_call")) {
                         sendApiCall(callbackContext, args.optJSONObject(0));
 
@@ -216,10 +209,15 @@ public class RogerthatPlugin extends CordovaPlugin {
         sendCallbackUpdate("setInfo", new JSONObject(info));
     }
 
-    private void logError(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        final String e = args.optString("e", null);
-        mActivity.getActionScreenUtils().logError(mActivity.getServiceEmail(), mActivity.getItemLabel(), mActivity.getItemCoords(), e);
-        callbackContext.success(new JSONObject());
+    private void log(final JSONObject args) throws JSONException {
+        final String errorMessage = args.optString("e", null);
+        final String message = args.optString("m", null);
+        if (errorMessage != null) {
+            mActivity.getActionScreenUtils().logError(mActivity.getServiceEmail(), mActivity.getItemLabel(),
+                  mActivity.getItemCoords(), message);
+        } else {
+            L.i("[BRANDING] " + message);
+        }
     }
 
     private void sendApiCall(final CallbackContext callbackContext, final JSONObject args) {

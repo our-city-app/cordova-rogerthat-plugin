@@ -57,7 +57,9 @@ var utils = {
             rogerthatPlugin.features.callback('backgroundSize');
     },
     exec : function (success, fail, action, args) {
-        utils.logFunctionName("utils.exec -> " + action);
+        if (action !== 'log') {
+            utils.logFunctionName("utils.exec -> " + action);
+        }
         exec(utils.getSuccessCallback(success, action), utils.getErrorCallback(fail, action), "RogerthatPlugin", action, args);
     },
     generateCallbacksRegister : function(callbacks) {
@@ -78,7 +80,7 @@ var utils = {
         } else {
             return function (result) {
                 console.log("The injected error callback of '" + functionName + "' received: " + JSON.stringify(result));
-            }
+            };
         }
     },
     getSuccessCallback : function (scb, functionName) {
@@ -87,7 +89,7 @@ var utils = {
         } else {
             return function (result) {
                 console.log("The injected success callback of '" + functionName + "' received: " + JSON.stringify(result));
-            }
+            };
         }
     },
     processCallbackResult : function (result) {
@@ -162,6 +164,7 @@ var utils = {
 
 function RogerthatPlugin() {
     utils.logFunctionName("constructor");
+    patchConsole();
 }
 
 var apiCallbacksRegister = utils.generateCallbacksRegister(apiUserCallbacks);
@@ -221,6 +224,9 @@ RogerthatPlugin.prototype.camera = {
 };
 
 RogerthatPlugin.prototype.features = {
+    FEATURE_CHECKING: FEATURE_CHECKING,
+    FEATURE_SUPPORTED: FEATURE_SUPPORTED,
+    FEATURE_NOT_SUPPORTED: FEATURE_NOT_SUPPORTED,
     base64URI : FEATURE_CHECKING,
     backgroundSize : FEATURE_CHECKING,
     beacons : FEATURE_CHECKING,
@@ -320,7 +326,7 @@ RogerthatPlugin.prototype.util = {
         return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
     },
     _translateHTML : function() {
-        var tags = document.getElementsByTagName('x-rogerthat-t')
+        var tags = document.getElementsByTagName('x-rogerthat-t');
         for (var i = tags.length - 1; i >= 0; i--){
             var obj = tags[i];
             var translatedString = rogerthatPlugin.util.translate(obj.innerHTML);
@@ -340,10 +346,11 @@ RogerthatPlugin.prototype.util = {
         values : {
         // eg; "Name": { "fr": "Nom", "nl": "Naam" }
         }
-    },
+    }
 };
 
-var exceptionToObject = function(exception) {
+
+function exceptionToObject(exception) {
     var result = {};
     if (!exception) {
         return result;
@@ -370,7 +377,7 @@ var exceptionToObject = function(exception) {
         result.description = exception.description;
     }
     return result;
-};
+}
 
 var bind = function(context, fn) {
     return function () {
@@ -378,16 +385,16 @@ var bind = function(context, fn) {
     };
 };
 
-var windowErrorHandler = function(msg, url, line, column, errorObj) {
+function windowErrorHandler(msg, url, line, column, errorObj) {
     var result = {
         msg: msg,
         url: url,
         line: line,
         column: column,
         errorObj: exceptionToObject(errorObj)
-    }
-    utils.exec(null, null, "log", [{"e": JSON.stringify(result)}]);
-};
+    };
+    utils.exec(_dummy, _dummy, "log", [{"e": JSON.stringify(result)}]);
+}
 
 if (typeof window !== 'undefined') {
     window.onerror = bind(this, windowErrorHandler);
@@ -395,6 +402,62 @@ if (typeof window !== 'undefined') {
 
 if (typeof rogerthat_translations !== "undefined") {
     RogerthatPlugin.prototype.util._translations = rogerthat_translations;
+}
+
+function getStackTrace(e) {
+    if (RogerthatPlugin.prototype.system !== undefined && RogerthatPlugin.prototype.system.os === 'android') {
+        var stack = (e.stack + '\n').replace(/^\S[^\(]+?[\n$]/gm, '')
+            .replace(/^\s+(at eval )?at\s+/gm, '')
+            .replace(/^([^\(]+?)([\n$])/gm, '{anonymous}()@$1$2')
+            .replace(/^Object.<anonymous>\s*\(([^\)]+)\)/gm, '{anonymous}()@$1').split('\n');
+        stack.pop();
+        return stack.join('\n');
+    } else {
+        return e.stack.replace(/\[native code]\n/m, '')
+            .replace(/^(?=\w+Error:).*$\n/m, '')
+            .replace(/^@/gm, '{anonymous}()@');
+    }
+}
+
+/**
+ * Extends the default console functions so it dispatches the logs to the app
+ * This can can in turn dispatch it to the server if log forwarding is enabled.
+ */
+function patchConsole() {
+    var logFunction = console.log;
+    var errorFunction = console.error || console.log;
+    var warnFunction = console.warn || console.log;
+    var infoFunction = console.info || console.log;
+    var debugFunction = console.debug || console.log;
+
+    function logToApp(args) {
+        var log = args.length === 1 ? JSON.stringify(args[0]) : JSON.stringify(args);
+        utils.exec(_dummy, _dummy, 'log', [{m: log}]);
+    }
+
+    console.log = function () {
+        logFunction.apply(this, arguments);
+        logToApp(arguments);
+    };
+    console.error = function (e) {
+        errorFunction.apply(this, arguments);
+        if (e.stack) {
+            e = e.name + ': ' + e.message + '\n' + getStackTrace(e);
+        }
+        utils.exec(_dummy, _dummy, 'log', [{e: JSON.stringify(e)}]);
+    };
+    console.warn = function () {
+        warnFunction.apply(this, arguments);
+        logToApp(arguments);
+    };
+    console.info = function () {
+        infoFunction.apply(this, arguments);
+        logToApp(arguments);
+    };
+    console.debug = function () {
+        debugFunction.apply(this, arguments);
+        logToApp(arguments);
+    };
 }
 
 var rogerthatPlugin = new RogerthatPlugin();

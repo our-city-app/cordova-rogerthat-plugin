@@ -30,8 +30,10 @@ import com.mobicage.rpc.config.CloudConstants;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
+import org.json.simple.JSONValue;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -59,12 +61,14 @@ public class RogerthatPlugin extends CordovaPlugin {
 
         @Override
         public void userDataUpdated(String userData) {
-            sendCallbackUpdate("userDataUpdated", userData);
+            Map<String, Object> jsonMap = userData == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(userData);
+            sendCallbackUpdate("userDataUpdated", new JSONObject(jsonMap));
         }
 
         @Override
         public void serviceDataUpdated(String serviceData) {
-            sendCallbackUpdate("serviceDataUpdated", serviceData);
+            Map<String, Object> jsonMap = serviceData == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(serviceData);
+            sendCallbackUpdate("serviceDataUpdated", new JSONObject(jsonMap));
         }
 
         @Override

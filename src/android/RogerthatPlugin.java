@@ -4,6 +4,7 @@ package com.mobicage.rogerthat.cordova;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 
 import org.apache.cordova.PluginResult;
@@ -15,7 +16,9 @@ import org.json.JSONObject;
 import com.google.zxing.client.android.CaptureActivity;
 import com.google.zxing.client.android.Intents;
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendStore;
+import com.mobicage.rogerthat.plugins.friends.Poker;
 import com.mobicage.rogerthat.plugins.friends.QRCodeScanner;
 import com.mobicage.rogerthat.plugins.friends.ServiceApiCallbackResult;
 import com.mobicage.rogerthat.plugins.messaging.Message;
@@ -50,6 +53,9 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     private CordovaActionScreenActivity mActivity = null;
     private ScanCommunication mScanCommunication = null;
+
+    private static final String POKE = "poke://";
+    private Poker<CordovaActionScreenActivity> mPoker;
 
     protected final static String[] permissions = { Manifest.permission.CAMERA };
 
@@ -180,6 +186,19 @@ public class RogerthatPlugin extends CordovaPlugin {
         });
         return true;
     }
+
+    public boolean onOverrideUrlLoading(String url) {
+        L.i("Branding is loading url: " + url);
+        Uri uri = Uri.parse(url);
+        String lowerCaseUrl = url.toLowerCase();
+        if (lowerCaseUrl.startsWith(POKE)) {
+            String tag = url.substring(POKE.length());
+            poke(tag);
+            return true;
+        }
+        return super.onOverrideUrlLoading(url);
+    }
+
 
     public void onDestroy() {
         if (mIsListeningBacklogConnectivityChanged) {
@@ -504,6 +523,17 @@ public class RogerthatPlugin extends CordovaPlugin {
         } catch (JSONException e) {
             L.e("JSONException... This should never happen", e);
         }
+    }
+
+    private void poke(String tag) {
+        if (mActivity == null) {
+            mActivity = (CordovaActionScreenActivity) cordova.getActivity();
+        }
+        if (mPoker == null) {
+            mPoker = new Poker<>(mActivity, mActivity.getServiceEmail());
+        }
+
+        mPoker.poke(tag, null);
     }
 
     @Override

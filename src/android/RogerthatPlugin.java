@@ -98,6 +98,10 @@ public class RogerthatPlugin extends CordovaPlugin {
             @Override
             protected void safeRun() throws Exception {
                 try {
+                    if(action == null){
+                        callbackContext.error("Cannot excute 'null' action");
+                        return;
+                    }
                     if (action.equals("start")) {
                         if (mCallbackContext != null) {
                             callbackContext.error("RogerthatPlugin already running.");
@@ -116,48 +120,48 @@ public class RogerthatPlugin extends CordovaPlugin {
                     } else if (action.equals("log")) {
                         logError(callbackContext, args.optJSONObject(0));
 
-                    } else if (action.equals("api.call")) {
+                    } else if (action.equals("api_call")) {
                         sendApiCall(callbackContext, args.optJSONObject(0));
 
-                    } else if (action.equals("api.resultHandlerConfigured")) {
+                    } else if (action.equals("api_resultHandlerConfigured")) {
                         mApiResultHandlerSet = true;
                         mActivity.getActionScreenUtils().deliverAllApiResults();
                         callbackContext.success(new JSONObject());
 
-                    } else if (action.equals("camera.startScanningQrCode")) {
+                    } else if (action.equals("camera_startScanningQrCode")) {
                         startScanningQrCode(callbackContext);
 
-                    } else if (action.equals("camera.stopScanningQrCode")) {
+                    } else if (action.equals("camera_stopScanningQrCode")) {
                         stopScanningQrCode(callbackContext);
 
-                    } else if (action.equals("message.open")) {
+                    } else if (action.equals("message_open")) {
                         openMessage(callbackContext, args.optJSONObject(0));
 
-                    } else if (action.equals("security.sign")) {
+                    } else if (action.equals("security_sign")) {
                         signPayload(callbackContext, args.optJSONObject(0));
 
-                    } else if (action.equals("security.verify")) {
+                    } else if (action.equals("security_verify")) {
                         verifySignedPayload(callbackContext, args.optJSONObject(0));
 
-                    } else if (action.equals("service.getBeaconsInReach")) {
+                    } else if (action.equals("service_getBeaconsInReach")) {
                         getBeaconsInReach(callbackContext);
 
-                    } else if (action.equals("system.onBackendConnectivityChanged")) {
+                    } else if (action.equals("system_onBackendConnectivityChanged")) {
                         onBackendConnectivityChanged(callbackContext);
 
-                    } else if (action.equals("ui.hideKeyboard")) {
+                    } else if (action.equals("ui_hideKeyboard")) {
                         hideKeyboard(callbackContext);
 
-                    } else if (action.equals("user.put")) {
+                    } else if (action.equals("user_put")) {
                         putUserData(callbackContext, args.optJSONObject(0));
 
-                    } else if (action.equals("util.isConnectedToInternet")) {
+                    } else if (action.equals("util_isConnectedToInternet")) {
                         isConnectedToInternet(callbackContext);
 
-                    } else if (action.equals("util.open")) {
+                    } else if (action.equals("util_open")) {
                         openActivity(callbackContext, args.optJSONObject(0));
 
-                    } else if (action.equals("util.playAudio")) {
+                    } else if (action.equals("util_playAudio")) {
                         playAudio(callbackContext, args.optJSONObject(0));
 
                     } else {
@@ -219,7 +223,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             obj.put("result", r.result);
             obj.put("error", r.error);
             obj.put("tag", r.tag);
-            sendCallbackUpdate("api.result", obj);
+            sendCallbackUpdate("apiResult", obj);
         } catch (JSONException e) {
             L.e("JSONException... This should never happen", e);
         }

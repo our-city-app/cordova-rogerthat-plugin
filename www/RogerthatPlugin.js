@@ -99,7 +99,7 @@ var utils = {
             rogerthatPlugin.util._translateHTML();
             userCallbacks.ready();
 
-        } else if (result.callback === "api.result") {
+        } else if (result.callback === "apiResult") {
             apiUserCallbacks.resultReceived(result.args.method, result.args.result, result.args.error, result.args.tag);
 
         } else if (result.callback === "onBackendConnectivityChanged") {
@@ -123,7 +123,7 @@ var utils = {
             userCallbacks.serviceDataUpdated();
 
         } else {
-            utils.logFunctionName("processCallbackResult was unhandeld");
+            utils.logFunctionName("processCallbackResult was unhandled");
         }
     },
     setRogerthatData : function(info) {
@@ -176,13 +176,13 @@ apiCallbacksRegister.resultReceived = function(callback) {
     apiResultReceivedCallbackSet = true;
 
     // Notify the app that a resultHandler is set
-    utils.exec(null, null, "api.resultHandlerConfigured", []);
+    utils.exec(null, null, "api_resultHandlerConfigured", []);
 };
 
 RogerthatPlugin.prototype.api = {
     callbacks: apiCallbacksRegister,
     call : function(method, params, tag) {
-        utils.exec(null, null, "api.call", [{"method": method,
+        utils.exec(null, null, "api_call", [{"method": method,
                                              "params": params,
                                              "tag": tag}]);
     }
@@ -213,10 +213,10 @@ RogerthatPlugin.prototype.camera = {
     FRONT : "front",
     BACK : "back",
     startScanningQrCode : function (cameraType, successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "camera.startScanningQrCode", []);
+        utils.exec(successCallback, errorCallback, "camera_startScanningQrCode", []);
     },
     stopScanningQrCode : function (cameraType, successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "camera.stopScanningQrCode", []);
+        utils.exec(successCallback, errorCallback, "camera_stopScanningQrCode", []);
     }
 };
 
@@ -234,49 +234,49 @@ RogerthatPlugin.prototype.init = function () {
 
 RogerthatPlugin.prototype.message = {
     open : function(messageKey, successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "message.open", [{"message_key": messageKey}]);
+        utils.exec(successCallback, errorCallback, "message_open", [{"message_key": messageKey}]);
     }
 };
 
 RogerthatPlugin.prototype.security = {
     sign : function (message, payload, forcePin, successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "security.sign", [{"message": message,
+        utils.exec(successCallback, errorCallback, "security_sign", [{"message": message,
                                                                       "payload": payload,
                                                                       "force_pin": forcePin}]);
     },
     verify : function (payload, payloadSignature, successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "security.verify", [{"payload": payload,
+        utils.exec(successCallback, errorCallback, "security_verify", [{"payload": payload,
                                                                         "payload_signature": payloadSignature}]);
     }
 };
 
 RogerthatPlugin.prototype.service = {
     getBeaconsInReach : function (successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "service.getBeaconsInReach", []);
+        utils.exec(successCallback, errorCallback, "service_getBeaconsInReach", []);
     }
 };
 
 RogerthatPlugin.prototype.system = {
     onBackendConnectivityChanged : function (successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "system.onBackendConnectivityChanged", []);
+        utils.exec(successCallback, errorCallback, "system_onBackendConnectivityChanged", []);
     }
 };
 
 RogerthatPlugin.prototype.ui = {
     hideKeyboard : function () {
-        utils.exec(null, null, "ui.hideKeyboard", []);
+        utils.exec(null, null, "ui_hideKeyboard", []);
     }
 };
 
 RogerthatPlugin.prototype.user = {
     put : function () {
-        utils.exec(null, null, "user.put", [{"u": rogerthatPlugin.user.data}]);
+        utils.exec(null, null, "user_put", [{"u": rogerthatPlugin.user.data}]);
     }
 };
 
 RogerthatPlugin.prototype.util = {
     isConnectedToInternet : function(successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "util.isConnectedToInternet", []);
+        utils.exec(successCallback, errorCallback, "util_isConnectedToInternet", []);
     },
     open : function(params, successCallback, errorCallback) {
         if (!params) {
@@ -285,10 +285,10 @@ RogerthatPlugin.prototype.util = {
         if (params.action_type) {
             params.action = SHA256_hash(params.action);
         }
-        utils.exec(successCallback, errorCallback, "util.open", [params]);
+        utils.exec(successCallback, errorCallback, "util_open", [params]);
     },
     playAudio : function (url, successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "util.playAudio", [{"url": url}]);
+        utils.exec(successCallback, errorCallback, "util_playAudio", [{"url": url}]);
     },
     translate : function(key, parameters) {
         var language = rogerthatPlugin.user.language || rogerthatPlugin.util._translations.defaultLanguage;

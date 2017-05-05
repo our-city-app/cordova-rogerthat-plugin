@@ -227,11 +227,6 @@ RogerthatPlugin.prototype.features = {
     callback : undefined
 };
 
-RogerthatPlugin.prototype.init = function () {
-    utils.checkCapabilities();
-    utils.exec(utils.processCallbackResult, null, "start", []);
-};
-
 RogerthatPlugin.prototype.message = {
     open : function(messageKey, successCallback, errorCallback) {
         utils.exec(successCallback, errorCallback, "message_open", [{"message_key": messageKey}]);
@@ -326,9 +321,9 @@ RogerthatPlugin.prototype.util = {
     },
     _translateHTML : function() {
         var tags = document.getElementsByTagName('x-rogerthat-t')
-        for (var i = 0; i< tags.length; i++){
-            var translatedString = rogerthatPlugin.util.translate(tags[i].innerHTML);
+        for (var i = tags.length - 1; i >= 0; i--){
             var obj = tags[i];
+            var translatedString = rogerthatPlugin.util.translate(obj.innerHTML);
             if(obj.outerHTML) {
                 obj.outerHTML = translatedString;
             } else {
@@ -404,6 +399,9 @@ if (typeof rogerthat_translations !== "undefined") {
 
 var rogerthatPlugin = new RogerthatPlugin();
 module.exports = rogerthatPlugin;
+
+utils.checkCapabilities();
+utils.exec(utils.processCallbackResult, null, "start", []);
 
 /*
  *  jssha256 version 0.1  -  Copyright 2006 B. Poettering

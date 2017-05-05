@@ -93,7 +93,9 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     @Override
     public boolean execute(final String action, final JSONArray args, final CallbackContext callbackContext) {
-        L.i("RogerthatPlugin.execute '" + action + "'");
+        if (action != "log") {
+            L.i("RogerthatPlugin.execute '" + action + "'");
+        }
         if (mActivity == null) {
             mActivity = (CordovaActionScreenActivity) cordova.getActivity();
         }
@@ -416,7 +418,7 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     private void getBeaconsInReach(final CallbackContext callbackContext) throws JSONException {
         JSONObject obj = new JSONObject();
-        obj.put("beacons", mActivity.getActionScreenUtils().getBeaconsInReach());
+        obj.put("beacons", new JSONArray(mActivity.getActionScreenUtils().getBeaconsInReach()));
         callbackContext.success(obj);
     }
 

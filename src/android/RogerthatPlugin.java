@@ -1,3 +1,21 @@
+/*
+ * Copyright 2017 GIG Technology NV
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @@license_version:1.3@@
+ */
+
 package com.mobicage.rogerthat.cordova;
 
 
@@ -5,6 +23,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
 import com.google.zxing.client.android.CaptureActivity;
 import com.google.zxing.client.android.Intents;
@@ -184,11 +203,19 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     public boolean onOverrideUrlLoading(String url) {
         L.i("Branding is loading url: " + url);
+        if (mActivity == null) {
+            mActivity = (CordovaActionScreenActivity) cordova.getActivity();
+        }
         Uri uri = Uri.parse(url);
         String lowerCaseUrl = url.toLowerCase();
         if (lowerCaseUrl.startsWith(POKE)) {
             String tag = url.substring(POKE.length());
             poke(tag);
+            return true;
+        } else if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")) {
+            CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
+            CustomTabsIntent customTabsIntent = customTabsBuilder.build();
+            customTabsIntent.launchUrl(mActivity, uri);
             return true;
         }
         return super.onOverrideUrlLoading(url);

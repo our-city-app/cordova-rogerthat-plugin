@@ -37,7 +37,7 @@
 
 - (NSDictionary *)params
 {
-    return self.arguments[0];
+    return self.arguments.count ? self.arguments[0] : @{};
 }
 
 @end

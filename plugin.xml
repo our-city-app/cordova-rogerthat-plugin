@@ -19,6 +19,16 @@
       <source-file src="src/android/RogerthatPlugin.java" target-dir="src/com/mobicage/rogerthat/cordova" />
     </platform>
 
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="RogerthatPlugin">
+                <param name="ios-package" value="MCTRogerthatCordovaPlugin" />
+            </feature>
+        </config-file>
+        <header-file src="src/ios/MCTRogerthatCordovaPlugin.h" />
+        <source-file src="src/ios/MCTRogerthatCordovaPlugin.m" />
+    </platform>
+
     <js-module src="www/RogerthatPlugin.js" name="RogerthatPlugin">
       <clobbers target="rogerthat"/>
     </js-module>

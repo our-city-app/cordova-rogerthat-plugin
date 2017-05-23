@@ -33,4 +33,8 @@
       <clobbers target="rogerthat"/>
     </js-module>
 
+    <js-module src="www/Sha256.js" name="Sha256">
+      <clobbers target="sha256"/>
+    </js-module>
+
 </plugin>

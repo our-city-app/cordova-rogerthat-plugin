@@ -514,19 +514,6 @@ public class RogerthatPlugin extends CordovaPlugin {
         callbackContext.success(new JSONObject());
     }
 
-    private void sendCallbackUpdate(String callback, String args) {
-        try {
-            JSONObject obj = new JSONObject();
-            obj.put("callback", callback);
-            obj.put("args", args);
-            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, obj);
-            pluginResult.setKeepCallback(true);
-            mCallbackContext.sendPluginResult(pluginResult);
-        } catch (JSONException e) {
-            L.e("JSONException... This should never happen", e);
-        }
-    }
-
     private void sendCallbackUpdate(String callback, boolean args) {
         try {
             JSONObject obj = new JSONObject();
@@ -567,8 +554,9 @@ public class RogerthatPlugin extends CordovaPlugin {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         L.i("RogerthatPlugin.onActivityResult requestCode -> " + requestCode);
-        if (resultCode == RESULT_OK) {
-            if (requestCode == ScanTabActivity.ZXING_SCAN_RESULT) {
+        if (requestCode == ScanTabActivity.ZXING_SCAN_RESULT) {
+            mQRCodeScannerOpen = false;
+            if (resultCode == RESULT_OK) {
                 L.i("onActivityResult ZXING_SCAN_RESULT");
                 mQRCodeScannerOpen = false;
                 final String rawScanResult = intent.getStringExtra("SCAN_RESULT");

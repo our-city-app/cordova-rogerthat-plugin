@@ -27,6 +27,10 @@
         </config-file>
         <header-file src="src/ios/MCTRogerthatCordovaPlugin.h" />
         <source-file src="src/ios/MCTRogerthatCordovaPlugin.m" />
+
+        <js-module src="www/ExitApp.js" name="ExitApp">
+          <clobbers target="navigator.app"/>
+        </js-module>
     </platform>
 
     <js-module src="www/RogerthatPlugin.js" name="RogerthatPlugin">

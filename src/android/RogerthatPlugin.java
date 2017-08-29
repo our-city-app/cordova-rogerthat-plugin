@@ -25,8 +25,10 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
+
 import com.google.zxing.client.android.CaptureActivity;
 import com.google.zxing.client.android.Intents;
+import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.friends.Poker;
 import com.mobicage.rogerthat.plugins.friends.ServiceApiCallbackResult;
@@ -34,12 +36,11 @@ import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.ActionScreenUtils;
-import com.mobicage.rogerthat.util.Security;
 import com.mobicage.rogerthat.util.TextUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rpc.config.AppConstants;
 import com.mobicage.rpc.config.CloudConstants;
+
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
@@ -61,6 +62,7 @@ public class RogerthatPlugin extends CordovaPlugin {
     private final int PERMISSION_REQUEST_CAMERA = 1;
 
     private CallbackContext mCallbackContext = null;
+
     private boolean mApiResultHandlerSet = false;
     private boolean mIsListeningBacklogConnectivityChanged = false;
 
@@ -113,7 +115,7 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     @Override
     public boolean execute(final String action, final JSONArray args, final CallbackContext callbackContext) {
-        if (action != "log") {
+        if (!"log".equals(action)) {
             L.i("RogerthatPlugin.execute '" + action + "'");
         }
         if (mActivity == null) {
@@ -159,8 +161,26 @@ public class RogerthatPlugin extends CordovaPlugin {
                     } else if (action.equals("camera_stopScanningQrCode")) {
                         stopScanningQrCode(callbackContext);
 
+                    } else if (action.equals("context")) {
+                        getContext(callbackContext);
+
                     } else if (action.equals("message_open")) {
                         openMessage(callbackContext, args.optJSONObject(0));
+
+                    } else if (action.equals("security_createKeyPair")) {
+                        createKeyPair(callbackContext, args.optJSONObject(0));
+
+                    } else if (action.equals("security_hasKeyPair")) {
+                        hasKeyPair(callbackContext, args.optJSONObject(0));
+
+                    } else if (action.equals("security_getPublicKey")) {
+                        getPublicKey(callbackContext, args.optJSONObject(0));
+
+                    } else if (action.equals("security_getSeed")) {
+                        getSeed(callbackContext, args.optJSONObject(0));
+
+                    } else if (action.equals("security_getAddress")) {
+                        getAddress(callbackContext, args.optJSONObject(0));
 
                     } else if (action.equals("security_sign")) {
                         signPayload(callbackContext, args.optJSONObject(0));
@@ -179,6 +199,9 @@ public class RogerthatPlugin extends CordovaPlugin {
 
                     } else if (action.equals("user_put")) {
                         putUserData(callbackContext, args.optJSONObject(0));
+
+                    } else if (action.equals("util_embeddedAppTranslations")) {
+                        embeddedAppTranslations(callbackContext);
 
                     } else if (action.equals("util_isConnectedToInternet")) {
                         isConnectedToInternet(callbackContext);
@@ -200,6 +223,15 @@ public class RogerthatPlugin extends CordovaPlugin {
             }
         });
         return true;
+    }
+
+    public Boolean shouldAllowRequest(String url) {
+        final String lowerCaseUrl = url.toLowerCase();
+        if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")) {
+            return true;
+        }
+
+        return super.shouldAllowRequest(url);
     }
 
     public boolean onOverrideUrlLoading(String url) {
@@ -283,9 +315,7 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     private void startScanningQrCode(final CallbackContext callbackContext) throws JSONException {
         if (mQRCodeScannerOpen) {
-            JSONObject obj = new JSONObject();
-            obj.put("exception", "Camera was already open");
-            callbackContext.error(obj);
+            error(callbackContext, "camera_was_already_open", mActivity.getString(R.string.camera_was_already_open));
             return;
         }
 
@@ -300,9 +330,8 @@ public class RogerthatPlugin extends CordovaPlugin {
             final SafeRunnable cancelRunnable = new SafeRunnable() {
                 @Override
                 protected void safeRun() throws Exception {
-                    JSONObject obj = new JSONObject();
-                    obj.put("exception", "Camera permission was not granted");
-                    callbackContext.error(obj);
+                    error(callbackContext, "camera_permission_was_not_granted",
+                            mActivity.getString(R.string.camera_permission_was_not_granted));
                 }
             };
             if (mActivity.askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
@@ -327,6 +356,13 @@ public class RogerthatPlugin extends CordovaPlugin {
         callbackContext.success(new JSONObject());
     }
 
+    private void getContext(final CallbackContext callbackContext) throws JSONException {
+        JSONObject obj = new JSONObject();
+        String context = mActivity.getContext();
+        obj.put("context", context == null ? new JSONObject() : new JSONObject(context));
+        callbackContext.success(obj);
+    }
+
     private void openMessage(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
         if (args == null) {
             returnArgsMissing(callbackContext);
@@ -344,104 +380,145 @@ public class RogerthatPlugin extends CordovaPlugin {
         callbackContext.success(new JSONObject());
     }
 
-    private void signPayload(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        if (!AppConstants.SECURE_APP) {
-            JSONObject obj = new JSONObject();
-            obj.put("exception", "Security is not enabled in your app.");
-            callbackContext.error(obj);
-            return;
+    private abstract class SecurityCallback<T> implements MainService.SecurityCallback<T> {
+        private CallbackContext callbackContext;
+
+        public SecurityCallback(CallbackContext callbackContext) {
+            this.callbackContext = callbackContext;
         }
-        final String message= TextUtils.optString(args, "message", null);
-        final String payload= TextUtils.optString(args, "payload", null);
-        final boolean forcePin = args.optBoolean("force_pin", false);
 
-        mActivity.getMainService().postAtFrontOfUIHandler(new SafeRunnable() {
+        public abstract void populateResult(final T result, final JSONObject obj) throws JSONException;
+
+        @Override
+        public void onSuccess(T result) {
+            try {
+                JSONObject obj = new JSONObject();
+                populateResult(result, obj);
+                callbackContext.success(obj);
+            } catch(JSONException je) {
+                L.e("JSONException... This should never happen", je);
+                callbackContext.error("Could not process json...");
+            }
+        }
+
+        @Override
+        public void onError(String code, String errorMessage) {
+            error(callbackContext, code, errorMessage);
+        }
+
+    }
+
+    private void error(final CallbackContext callbackContext, String code, String errorMessage) {
+        try {
+            JSONObject obj = new JSONObject();
+            obj.put("code", code);
+            obj.put("message", errorMessage);
+            callbackContext.error(obj);
+        } catch(JSONException je) {
+            L.e("JSONException... This should never happen", je);
+            callbackContext.error("Could not process json...");
+        }
+    }
+
+    private void createKeyPair(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+        SecurityCallback<MainService.CreateKeyPairResult> sc = new SecurityCallback<MainService.CreateKeyPairResult>(callbackContext) {
             @Override
-            protected void safeRun() throws Exception {
-                try {
-                    final byte[] payloadData = Security.sha256Digest(payload);
-                    if (payloadData == null) {
-                        throw new Exception("payloadData was null");
-                    }
+            public void populateResult(MainService.CreateKeyPairResult r, JSONObject obj) throws JSONException {
+                obj.put("public_key", r.publicKey);
+                obj.put("seed", r.seed);
+            }
+        };
 
-                    MainService.SecurityCallback sc = new MainService.SecurityCallback() {
-                        @Override
-                        public void onSuccess(Object result) {
-                            try {
-                                byte[] payloadSignature = (byte[]) result;
-                                JSONObject obj = new JSONObject();
-                                obj.put("payload", payload);
-                                obj.put("payload_signature", Base64.encodeBytes(payloadSignature, Base64.DONT_BREAK_LINES));
-                                callbackContext.success(obj);
-                            } catch (Exception e) {
-                                L.d("'security/sign' onSuccess exception", e);
-                                try {
-                                    JSONObject obj = new JSONObject();
-                                    obj.put("exception", "Payload signature not of correct format.");
-                                    callbackContext.error(obj);
-                                } catch(JSONException je) {
-                                    L.e("JSONException... This should never happen", e);
-                                }
-                            }
-                        }
+        mActivity.getActionScreenUtils().createKeyPair(args, sc);
+    }
 
-                        @Override
-                        public void onError(Exception error) {
-                            L.d("'security/sign' onError", error);
-                            try {
-                                JSONObject obj = new JSONObject();
-                                obj.put("exception", error.getMessage());
-                                callbackContext.error(obj);
-                            } catch(JSONException je) {
-                                L.e("JSONException... This should never happen", je);
-                            }
-                        }
-                    };
+    private void hasKeyPair(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+        SecurityCallback<Boolean> sc = new SecurityCallback<Boolean>(callbackContext) {
+            @Override
+            public void populateResult(Boolean exists, JSONObject obj) throws JSONException {
+                obj.put("exists", exists);
+            }
+        };
 
-                    mActivity.getMainService().sign(message, payloadData, forcePin, sc);
+        mActivity.getActionScreenUtils().hasKeyPair(args, sc);
+    }
 
-                }  catch (Exception e) {
-                    JSONObject obj = new JSONObject();
-                    obj.put("exception", "Payload not of correct format.");
-                    callbackContext.error(obj);
+    private void getPublicKey(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+        SecurityCallback<String> sc = new SecurityCallback<String>(callbackContext) {
+            @Override
+            public void populateResult(String publicKey, JSONObject obj) throws JSONException {
+                obj.put("public_key", publicKey);
+            }
+
+            @Override
+            public void onSuccess(String publicKey) {
+                if (publicKey == null) {
+                    onError("key_not_found", mActivity.getString(R.string.key_not_found));
+                } else {
+                    super.onSuccess(publicKey);
                 }
             }
-        });
+        };
+
+        mActivity.getActionScreenUtils().getPublicKey(args, sc);
+    }
+
+    private void getSeed(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+        SecurityCallback<String> sc = new SecurityCallback<String>(callbackContext) {
+            @Override
+            public void populateResult(String seed, JSONObject obj) throws JSONException {
+                obj.put("seed", seed);
+            }
+        };
+
+        mActivity.getActionScreenUtils().getSeed(args, sc);
+    }
+
+    private void getAddress(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+        SecurityCallback<String> sc = new SecurityCallback<String>(callbackContext) {
+            @Override
+            public void populateResult(String address, JSONObject obj) throws JSONException {
+                obj.put("address", address);
+            }
+        };
+
+        mActivity.getActionScreenUtils().getAddress(args, sc);
+    }
+
+    private void signPayload(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+        final String payload = TextUtils.optString(args, "payload", null);
+
+        SecurityCallback<byte[]> sc = new SecurityCallback<byte[]>(callbackContext) {
+            @Override
+            public void populateResult(byte[] result, JSONObject obj) throws JSONException {
+            }
+
+            @Override
+            public void onSuccess(byte[] payloadSignature) {
+                try {
+                    JSONObject obj = new JSONObject();
+                    obj.put("payload", payload);
+                    obj.put("payload_signature", Base64.encodeBytes(payloadSignature, Base64.DONT_BREAK_LINES));
+                    callbackContext.success(obj);
+                } catch (Exception e) {
+                    L.bug("signPayload onSuccess exception", e);
+                    onError("unknown_error_occurred", mActivity.getString(R.string.unknown_error_occurred));
+                }
+            }
+        };
+
+        mActivity.getActionScreenUtils().signPayload(args, payload, sc);
     }
 
     private void verifySignedPayload(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        if (!AppConstants.SECURE_APP) {
-            JSONObject obj = new JSONObject();
-            obj.put("exception", "Security is not enabled in your app.");
-            callbackContext.error(obj);
-            return;
-        }
-        final String payload= TextUtils.optString(args, "payload", null);
-        final String payloadSignature = TextUtils.optString(args, "payload_signature", null);
-
-        mActivity.getMainService().postAtFrontOfUIHandler(new SafeRunnable() {
+        SecurityCallback<Boolean> sc = new SecurityCallback<Boolean>(callbackContext) {
             @Override
-            protected void safeRun() throws Exception {
-
-                try {
-                    final byte[] payloadData = Security.sha256Digest(payload);
-                    if (payloadData == null) {
-                        throw new Exception("payloadData was null");
-                    }
-
-                    final byte[] payloadDataSignature = Base64.decode(payloadSignature);
-                    boolean valid = mActivity.getMainService().validate(payloadData, payloadDataSignature);
-                    JSONObject obj = new JSONObject();
-                    obj.put("valid", valid);
-                    callbackContext.success(obj);
-                } catch (Exception e) {
-                    L.d("'security/verify' onSuccess exception", e);
-                    JSONObject obj = new JSONObject();
-                    obj.put("exception", "Payload not of correct format.");
-                    callbackContext.error(obj);
-                }
+            public void populateResult(Boolean valid, JSONObject obj) throws JSONException {
+                obj.put("valid", valid);
             }
-        });
+        };
+
+        mActivity.getActionScreenUtils().verifySignedPayload(args, sc);
     }
 
     private void getBeaconsInReach(final CallbackContext callbackContext) throws JSONException {
@@ -476,6 +553,19 @@ public class RogerthatPlugin extends CordovaPlugin {
         callbackContext.success(new JSONObject());
     }
 
+    private void embeddedAppTranslations(final CallbackContext callbackContext) throws JSONException {
+        String embeddedApp = mActivity.getEmbeddedApp();
+        if (embeddedApp == null) {
+            error(callbackContext, "unknown_error_occurred", mActivity.getString(R.string.unknown_error_occurred));
+            return;
+        }
+
+        String translations = mActivity.getSystemPlugin().getStore().getEmbeddedAppTranslations(embeddedApp);
+        JSONObject obj = new JSONObject();
+        obj.put("translations", translations == null ? new JSONObject() : new JSONObject(translations));
+        callbackContext.success(obj);
+    }
+
     private void isConnectedToInternet(final CallbackContext callbackContext) throws JSONException {
         boolean wifiConnected = mActivity.getMainService().getNetworkConnectivityManager().isWifiConnected();
         JSONObject obj = new JSONObject();
@@ -495,9 +585,7 @@ public class RogerthatPlugin extends CordovaPlugin {
 
         String errorMessage = mActivity.getActionScreenUtils().openActivity(actionType, action, title);
         if (errorMessage != null) {
-            JSONObject obj = new JSONObject();
-            obj.put("exception", errorMessage);
-            callbackContext.error(obj);
+            error(callbackContext, "unknown_error_occurred", errorMessage);
             return;
         }
         callbackContext.success(new JSONObject());

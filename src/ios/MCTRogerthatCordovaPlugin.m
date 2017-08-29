@@ -1,10 +1,20 @@
-//
-//  MCTRogerthatCordovaPlugin.m
-//  rogerthat
-//
-//  Created by Bart Pede on 03/05/2017.
-//
-//
+/*
+ * Copyright 2017 GIG Technology NV
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @@license_version:1.3@@
+ */
 
 #import "MCTBeaconProximity.h"
 #import "MCTComponentFramework.h"
@@ -98,6 +108,13 @@
     }
 }
 
+- (NSDictionary *)getRequestParams:(CDVInvokedUrlCommand *)command
+{
+    NSMutableDictionary *d = [[NSMutableDictionary alloc] initWithDictionary:command.params];
+    [d setObject:command.callbackId forKey:@"id"];
+    return d;
+}
+
 
 #pragma mark - RogerthatPlugin interface
 
@@ -124,14 +141,14 @@
 - (void)log:(CDVInvokedUrlCommand *)command
 {
     HERE();
-    [self.helper log:command.params];
+    [self.helper log:[self getRequestParams:command]];
     [self commandProcessed:command];
 }
 
 - (void)api_call:(CDVInvokedUrlCommand *)command
 {
     HERE();
-    [self.helper sendApiCall:command.params];
+    [self.helper sendApiCall:[self getRequestParams:command]];
     [self commandProcessed:command];
 }
 
@@ -146,35 +163,77 @@
 {
     HERE();
     [self.helper startScanningQrCodeWithResultHandler:[self defaultResultHandlerWithCommand:command]
-                                               params:command.params];
+                                               params:[self getRequestParams:command]];
 }
 
 - (void)camera_stopScanningQrCode:(CDVInvokedUrlCommand *)command
 {
     HERE();
     [self.helper stopScanningQrCodeWithResultHandler:[self defaultResultHandlerWithCommand:command]
-                                              params:command.params];
+                                              params:[self getRequestParams:command]];
+}
+
+- (void)context:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self commandProcessed:command withResult:@{@"context": OR([self.vc.context MCT_JSONValue], @{})}];
 }
 
 - (void)message_open:(CDVInvokedUrlCommand *)command
 {
     HERE();
     [self.helper openMessageWithResultHandler:[self defaultResultHandlerWithCommand:command]
-                                       params:command.params];
+                                       params:[self getRequestParams:command]];
 }
+
+- (void)security_createKeyPair:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper createKeyPairWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                         params:[self getRequestParams:command]];
+}
+
+- (void)security_hasKeyPair:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper hasKeyPairWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                      params:[self getRequestParams:command]];
+}
+
+- (void)security_getPublicKey:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper getPublicKeyWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                        params:[self getRequestParams:command]];
+}
+
+- (void)security_getSeed:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper getSeedWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                   params:[self getRequestParams:command]];
+}
+
+- (void)security_getAddress:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper getAddressWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                      params:[self getRequestParams:command]];
+}
+
 
 - (void)security_sign:(CDVInvokedUrlCommand *)command
 {
     HERE();
     [self.helper signWithResultHandler:[self defaultResultHandlerWithCommand:command]
-                                params:command.params];
+                                params:[self getRequestParams:command]];
 }
 
 - (void)security_verify:(CDVInvokedUrlCommand *)command
 {
     HERE();
     [self.helper verifyWithResultHandler:[self defaultResultHandlerWithCommand:command]
-                                  params:command.params];
+                                  params:[self getRequestParams:command]];
 
 }
 
@@ -199,7 +258,22 @@
 - (void)user_put:(CDVInvokedUrlCommand *)command
 {
     HERE();
-    [self.helper putUserData:command.params];
+    [self.helper putUserData:[self getRequestParams:command]];
+}
+
+- (void)util_embeddedAppTranslations:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    if (self.vc.embeddedApp == nil) {
+        NSString *errorMessage = MCTLocalizedString(@"An unknown error occurred", nil);
+        [self commandProcessed:command withError:@{@"code": @"unknown_error_occurred",
+                                                   @"message": errorMessage,
+                                                   @"exception": errorMessage}];
+        return;
+    }
+
+    NSString *translations = [[MCTComponentFramework systemPlugin].store translationsForEmbeddedApp:self.vc.embeddedApp];
+    [self commandProcessed:command withResult:@{@"translations": OR([translations MCT_JSONValue], @{})}];
 }
 
 - (void)util_isConnectedToInternet:(CDVInvokedUrlCommand *)command
@@ -212,14 +286,21 @@
 {
     HERE();
     [self.helper openNavigationItemWithResultHandler:[self defaultResultHandlerWithCommand:command]
-                                              params:command.params];
+                                              params:[self getRequestParams:command]];
 }
 
 - (void)util_playAudio:(CDVInvokedUrlCommand *)command
 {
     HERE();
     [self.helper playAudioWithResultHandler:[self defaultResultHandlerWithCommand:command]
-                                              params:command.params];
+                                              params:[self getRequestParams:command]];
+}
+
+- (void)exitApp:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.vc exitApp];
+    [self commandProcessed:command];
 }
 
 
@@ -339,7 +420,7 @@
     [self sendCallback:@"onBackendConnectivityChanged" withArguments:@(connected)];
 }
 
-- (void)signedWithRequestId:(NSString *)requestId result:(NSDictionary *)result error:(NSDictionary *)error
+- (void)onSecurityResultWithRequestId:(NSString *)requestId result:(NSDictionary *)result error:(NSDictionary *)error
 {
     [self commandProcessed:[CDVInvokedUrlCommand commandWithCallbackId:requestId]
                 withResult:result

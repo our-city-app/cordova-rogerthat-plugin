@@ -224,6 +224,10 @@ RogerthatPlugin.prototype.camera = {
     }
 };
 
+RogerthatPlugin.prototype.context = function (successCallback, errorCallback) {
+    utils.exec(successCallback, errorCallback, "context", []);
+};
+
 RogerthatPlugin.prototype.features = {
     FEATURE_CHECKING: FEATURE_CHECKING,
     FEATURE_SUPPORTED: FEATURE_SUPPORTED,
@@ -241,13 +245,47 @@ RogerthatPlugin.prototype.message = {
 };
 
 RogerthatPlugin.prototype.security = {
-    sign : function (message, payload, forcePin, successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "security_sign", [{"message": message,
+    createKeyPair : function(successCallback, errorCallback, algorithm, name, message, force, seed) {
+        utils.exec(successCallback, errorCallback, "security_createKeyPair", [{"key_algorithm": algorithm,
+                                                                               "key_name": name,
+                                                                               "message": message,
+                                                                               "force": force,
+                                                                               "seed": seed}]);
+    },
+    hasKeyPair: function(successCallback, errorCallback, algorithm, name, index) {
+        utils.exec(successCallback, errorCallback, "security_hasKeyPair", [{"key_algorithm": algorithm,
+                                                                            "key_name": name,
+                                                                            "key_index": index}]);
+    },
+    getPublicKey: function(successCallback, errorCallback, algorithm, name, index) {
+        utils.exec(successCallback, errorCallback, "security_getPublicKey", [{"key_algorithm": algorithm,
+                                                                              "key_name": name,
+                                                                              "key_index": index}]);
+    },
+    getSeed: function(successCallback, errorCallback, algorithm, name, message) {
+        utils.exec(successCallback, errorCallback, "security_getSeed", [{"key_algorithm": algorithm,
+                                                                         "key_name": name,
+                                                                         "message": message}]);
+    },
+    getAddress: function(successCallback, errorCallback, algorithm, name, index, message) {
+        utils.exec(successCallback, errorCallback, "security_getAddress", [{"key_algorithm": algorithm,
+                                                                            "key_name": name,
+                                                                            "key_index": index,
+                                                                            "message": message}]);
+    },
+    sign : function (successCallback, errorCallback, algorithm, name, index, message, payload, forcePin) {
+        utils.exec(successCallback, errorCallback, "security_sign", [{"key_algorithm": algorithm,
+                                                                      "key_name": name,
+                                                                      "key_index": index,
+                                                                      "message": message,
                                                                       "payload": payload,
                                                                       "force_pin": forcePin}]);
     },
-    verify : function (payload, payloadSignature, successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "security_verify", [{"payload": payload,
+    verify : function (successCallback, errorCallback, algorithm, name, index, payload, payloadSignature) {
+        utils.exec(successCallback, errorCallback, "security_verify", [{"key_algorithm": algorithm,
+                                                                        "key_name": name,
+                                                                        "key_index": index,
+                                                                        "payload": payload,
                                                                         "payload_signature": payloadSignature}]);
     }
 };
@@ -277,6 +315,9 @@ RogerthatPlugin.prototype.user = {
 };
 
 RogerthatPlugin.prototype.util = {
+    embeddedAppTranslations : function(successCallback, errorCallback) {
+       utils.exec(successCallback, errorCallback, "util_embeddedAppTranslations", []);
+    },
     isConnectedToInternet : function(successCallback, errorCallback) {
         utils.exec(successCallback, errorCallback, "util_isConnectedToInternet", []);
     },
@@ -432,7 +473,12 @@ function patchConsole() {
     var debugFunction = console.debug || console.log;
 
     function logToApp(args) {
-        var log = args.length === 1 ? JSON.stringify(args[0]) : JSON.stringify(args);
+        var log;
+        try{
+            log = args.length === 1 ? JSON.stringify(args[0]) : JSON.stringify(args);
+        }catch(exception){
+            log = args.length === 1 ? args[0] : args;
+        }
         utils.exec(_dummy, _dummy, 'log', [{m: log}]);
     }
 

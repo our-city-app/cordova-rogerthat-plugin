@@ -488,10 +488,16 @@ function patchConsole() {
     };
     console.error = function (e) {
         errorFunction.apply(this, arguments);
-        if (e.stack) {
-            e = e.name + ': ' + e.message + '\n' + getStackTrace(e);
+        var message = '';
+        for(var i = 0; i < arguments.length; i++){
+            var arg = arguments[i]
+            if (arg instanceof Error) {
+                message += arg.name + ': ' + arg.message + '\n' + getStackTrace(arg);
+            } else {
+                message += arg + '\n';
+            }
         }
-        utils.exec(_dummy, _dummy, 'log', [{e: JSON.stringify(e)}]);
+        utils.exec(_dummy, _dummy, 'log', [{e: JSON.stringify(message)}]);
     };
     console.warn = function () {
         warnFunction.apply(this, arguments);

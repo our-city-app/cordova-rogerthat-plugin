@@ -176,7 +176,8 @@
 - (void)context:(CDVInvokedUrlCommand *)command
 {
     HERE();
-    [self commandProcessed:command withResult:@{@"context": OR([self.vc.context MCT_JSONValue], @{})}];
+    NSDictionary *contextDict = [self.vc.context MCT_JSONValue];
+    [self commandProcessed:command withResult:@{@"context":OR(contextDict, @{})}];
 }
 
 - (void)message_open:(CDVInvokedUrlCommand *)command
@@ -273,7 +274,8 @@
     }
 
     NSString *translations = [[MCTComponentFramework systemPlugin].store translationsForEmbeddedApp:self.vc.embeddedApp];
-    [self commandProcessed:command withResult:@{@"translations": OR([translations MCT_JSONValue], @{})}];
+    NSDictionary *translationsDict = [translations MCT_JSONValue];
+    [self commandProcessed:command withResult:@{@"translations":OR(translationsDict, @{})}];
 }
 
 - (void)util_isConnectedToInternet:(CDVInvokedUrlCommand *)command

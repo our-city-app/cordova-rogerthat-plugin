@@ -1,4 +1,3 @@
-console.log("Loading RogerthatPlugin v0.1.0");
 var exec = cordova.require("cordova/exec");
 var sha256 = require("./Sha256");
 
@@ -95,7 +94,6 @@ var utils = {
     },
     processCallbackResult : function (result) {
         utils.logFunctionName("processCallbackResult <- " + result.callback);
-        console.log(result);
         if (result.callback === "setInfo") {
             ready = true;
             utils.setRogerthatData(result.args);
@@ -131,7 +129,9 @@ var utils = {
     },
     setRogerthatData : function(info) {
         Object.keys(info).forEach(function(key) {
-            Object.assign(rogerthatPlugin[key], info[key]);
+            if(info[key]) {
+                rogerthatPlugin[key] = Object.assign({}, info[key]);
+            }
         });
 
         if (info.system === undefined) {
@@ -243,6 +243,9 @@ RogerthatPlugin.prototype.message = {
         utils.exec(successCallback, errorCallback, "message_open", [{"message_key": messageKey}]);
     }
 };
+
+// Set via info call
+RogerthatPlugin.prototype.menuItem = null;
 
 RogerthatPlugin.prototype.security = {
     createKeyPair : function(successCallback, errorCallback, algorithm, name, message, force, seed) {

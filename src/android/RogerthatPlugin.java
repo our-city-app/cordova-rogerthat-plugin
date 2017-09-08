@@ -32,6 +32,7 @@ import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.friends.Poker;
 import com.mobicage.rogerthat.plugins.friends.ServiceApiCallbackResult;
+import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemInfo;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
@@ -72,7 +73,9 @@ public class RogerthatPlugin extends CordovaPlugin {
     private static final String POKE = "poke://";
     private Poker<CordovaActionScreenActivity> mPoker;
 
-    protected final static String[] permissions = { Manifest.permission.CAMERA };
+    protected final static String[] permissions = {Manifest.permission.CAMERA};
+
+    private ServiceMenuItemInfo mMenuItem;
 
     private ActionScreenUtils.IntentCallback mIntentCallback = new ActionScreenUtils.IntentCallback() {
         @Override
@@ -118,14 +121,12 @@ public class RogerthatPlugin extends CordovaPlugin {
         if (!"log".equals(action)) {
             L.i("RogerthatPlugin.execute '" + action + "'");
         }
-        if (mActivity == null) {
-            mActivity = (CordovaActionScreenActivity) cordova.getActivity();
-        }
+        getActivity();
         mActivity.getMainService().postOnUIHandler(new SafeRunnable() {
             @Override
             protected void safeRun() throws Exception {
                 try {
-                    if(action == null){
+                    if (action == null) {
                         callbackContext.error("Cannot excute 'null' action");
                         return;
                     }
@@ -236,9 +237,7 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     public boolean onOverrideUrlLoading(String url) {
         L.i("Branding is loading url: " + url);
-        if (mActivity == null) {
-            mActivity = (CordovaActionScreenActivity) cordova.getActivity();
-        }
+        CordovaActionScreenActivity activity = getActivity();
         Uri uri = Uri.parse(url);
         String lowerCaseUrl = url.toLowerCase();
         if (lowerCaseUrl.startsWith(POKE)) {
@@ -248,7 +247,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         } else if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")) {
             CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
             CustomTabsIntent customTabsIntent = customTabsBuilder.build();
-            customTabsIntent.launchUrl(mActivity, uri);
+            customTabsIntent.launchUrl(activity, uri);
             return true;
         }
         return super.onOverrideUrlLoading(url);
@@ -266,8 +265,9 @@ public class RogerthatPlugin extends CordovaPlugin {
         callbackContext.error("User did not specify data to encode");
     }
 
-    private void setInfo() throws JSONException  {
-        Map<String, Object> info =  mActivity.getFriendsPlugin().getRogerthatUserAndServiceInfo(mActivity.getServiceEmail(), mActivity.getServiceFriend());
+    private void setInfo() throws JSONException {
+        Map<String, Object> info = mActivity.getFriendsPlugin().getRogerthatUserAndServiceInfo(
+                mActivity.getServiceEmail(), mActivity.getServiceFriend(), mMenuItem);
         sendCallbackUpdate("setInfo", new JSONObject(info));
     }
 
@@ -276,7 +276,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         final String message = TextUtils.optString(args, "m", null);
         if (errorMessage != null) {
             mActivity.getActionScreenUtils().logError(mActivity.getServiceEmail(), mActivity.getItemLabel(),
-                  mActivity.getItemCoords(), message);
+                    mActivity.getItemCoords(), message);
         } else {
             L.i("[BRANDING] " + message);
         }
@@ -368,7 +368,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             returnArgsMissing(callbackContext);
             return;
         }
-        final String messageKey= TextUtils.optString(args, "message_key", null);
+        final String messageKey = TextUtils.optString(args, "message_key", null);
         final Message message = mActivity.getMessagingPlugin().getStore().getMessageByKey(messageKey, true);
         if (message == null) {
             JSONObject obj = new JSONObject();
@@ -395,7 +395,7 @@ public class RogerthatPlugin extends CordovaPlugin {
                 JSONObject obj = new JSONObject();
                 populateResult(result, obj);
                 callbackContext.success(obj);
-            } catch(JSONException je) {
+            } catch (JSONException je) {
                 L.e("JSONException... This should never happen", je);
                 callbackContext.error("Could not process json...");
             }
@@ -414,7 +414,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             obj.put("code", code);
             obj.put("message", errorMessage);
             callbackContext.error(obj);
-        } catch(JSONException je) {
+        } catch (JSONException je) {
             L.e("JSONException... This should never happen", je);
             callbackContext.error("Could not process json...");
         }
@@ -538,7 +538,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         }
     }
 
-    private void hideKeyboard(final CallbackContext callbackContext)  {
+    private void hideKeyboard(final CallbackContext callbackContext) {
         mActivity.getActionScreenUtils().hideKeyboard(mActivity.getCurrentFocus().getWindowToken());
         callbackContext.success(new JSONObject());
     }
@@ -629,11 +629,9 @@ public class RogerthatPlugin extends CordovaPlugin {
     }
 
     private void poke(String tag) {
-        if (mActivity == null) {
-            mActivity = (CordovaActionScreenActivity) cordova.getActivity();
-        }
+        CordovaActionScreenActivity activity = getActivity();
         if (mPoker == null) {
-            mPoker = new Poker<>(mActivity, mActivity.getServiceEmail());
+            mPoker = new Poker<>(activity, activity.getServiceEmail());
         }
 
         mPoker.poke(tag, null);
@@ -681,4 +679,16 @@ public class RogerthatPlugin extends CordovaPlugin {
         }
         super.onActivityResult(requestCode, resultCode, intent);
     }
+
+    protected void pluginInitialize() {
+        mMenuItem = getActivity().getServiceMenuItem();
+    }
+
+    private CordovaActionScreenActivity getActivity() {
+        if (mActivity == null) {
+            mActivity = (CordovaActionScreenActivity) cordova.getActivity();
+        }
+        return mActivity;
+    }
+
 }

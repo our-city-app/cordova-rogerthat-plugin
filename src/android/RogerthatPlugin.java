@@ -244,7 +244,8 @@ public class RogerthatPlugin extends CordovaPlugin {
             String tag = url.substring(POKE.length());
             poke(tag);
             return true;
-        } else if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")) {
+        } else if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")
+                || lowerCaseUrl.startsWith("tel") || lowerCaseUrl.startsWith("sms") || lowerCaseUrl.startsWith("mailto")) {
             CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
             CustomTabsIntent customTabsIntent = customTabsBuilder.build();
             customTabsIntent.launchUrl(activity, uri);

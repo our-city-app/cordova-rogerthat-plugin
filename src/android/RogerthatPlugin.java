@@ -549,8 +549,9 @@ public class RogerthatPlugin extends CordovaPlugin {
             returnArgsMissing(callbackContext);
             return;
         }
-        final String userData = TextUtils.optString(args, "u", null);
-        mActivity.getFriendsPlugin().putUserData(mActivity.getServiceEmail(), userData);
+        final String data = TextUtils.optString(args, "u", null);
+        boolean smart = args.optBoolean("smart", false);
+        mActivity.getFriendsPlugin().putUserData(mActivity.getServiceEmail(), data, smart);
         callbackContext.success(new JSONObject());
     }
 

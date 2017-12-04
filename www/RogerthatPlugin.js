@@ -160,6 +160,21 @@ var utils = {
         }
         if (rogerthatPlugin.features.callback !== undefined)
             rogerthatPlugin.features.callback('beacons');
+        
+        rogerthatPlugin.user.put = function (data) {
+            var crp = {};
+            if (data === undefined) {
+                crp.u = rogerthatPlugin.user.data;
+            } else {
+                Object.keys(data).forEach(function(key) {
+                    rogerthatPlugin.user.data[key] = data[key];
+                });
+
+                crp.smart = true;
+                crp.u = data;
+            }
+            utils.exec(null, null, "user_put", [crp]);
+        };
     }
 };
 
@@ -312,9 +327,6 @@ RogerthatPlugin.prototype.ui = {
 };
 
 RogerthatPlugin.prototype.user = {
-    put : function () {
-        utils.exec(null, null, "user_put", [{"u": rogerthatPlugin.user.data}]);
-    }
 };
 
 RogerthatPlugin.prototype.util = {

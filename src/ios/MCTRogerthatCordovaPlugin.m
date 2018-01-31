@@ -187,6 +187,27 @@
                                        params:[self getRequestParams:command]];
 }
 
+- (void)news_count:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper countNews:[self defaultResultHandlerWithCommand:command]
+                    params:[self getRequestParams:command]];
+}
+
+- (void)news_get:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper getNews:[self defaultResultHandlerWithCommand:command]
+                  params:[self getRequestParams:command]];
+}
+
+- (void)news_list:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper listNews:[self defaultResultHandlerWithCommand:command]
+                   params:[self getRequestParams:command]];
+}
+
 - (void)security_createKeyPair:(CDVInvokedUrlCommand *)command
 {
     HERE();
@@ -427,6 +448,16 @@
     [self commandProcessed:[CDVInvokedUrlCommand commandWithCallbackId:requestId]
                 withResult:result
                  withError:error];
+}
+
+- (void)newsReceived:(NSArray *)ids
+{
+    [self sendCallback:@"newsReceived" withArguments:ids];
+}
+
+- (void)badgeUpdated:(NSDictionary *)params
+{
+    [self sendCallback:@"badgeUpdated" withArguments:params];
 }
 
 - (BOOL)shouldOverrideLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType

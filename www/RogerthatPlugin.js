@@ -30,7 +30,9 @@ var userCallbacks = {
     qrCodeScanned : _dummy,
     ready : _dummy,
     serviceDataUpdated : _dummy,
-    userDataUpdated : _dummy
+    userDataUpdated : _dummy,
+    newsReceived : _dummy,
+    badgeUpdated : _dummy
 };
 
 var utils = {
@@ -102,6 +104,12 @@ var utils = {
 
         } else if (result.callback === "apiResult") {
             apiUserCallbacks.resultReceived(result.args.method, result.args.result, result.args.error, result.args.tag);
+
+        } else if (result.callback === "newsReceived") {
+            userCallbacks.newsReceived(result.args);
+ 
+        } else if (result.callback === "badgeUpdated") {
+            userCallbacks.badgeUpdated(result.args);
 
         } else if (result.callback === "onBackendConnectivityChanged") {
             userCallbacks.onBackendConnectivityChanged(result.args);
@@ -261,6 +269,27 @@ RogerthatPlugin.prototype.message = {
 
 // Set via info call
 RogerthatPlugin.prototype.menuItem = null;
+
+RogerthatPlugin.prototype.news = {
+    count : function(successCallback, errorCallback, params) {
+        if (!params) {
+            params = {};
+        }
+        utils.exec(successCallback, errorCallback, "news_count", [params]);
+    },
+    get : function(successCallback, errorCallback, params) {
+        if (!params) {
+            params = {};
+        }
+        utils.exec(successCallback, errorCallback, "news_get", [params]);
+    },
+    list : function(successCallback, errorCallback, params) {
+        if (!params) {
+            params = {};
+        }
+        utils.exec(successCallback, errorCallback, "news_list", [params]);
+    }
+};
 
 RogerthatPlugin.prototype.security = {
     createKeyPair : function(successCallback, errorCallback, algorithm, name, message, force, seed) {

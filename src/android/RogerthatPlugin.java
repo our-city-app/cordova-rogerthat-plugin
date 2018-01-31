@@ -34,6 +34,7 @@ import com.mobicage.rogerthat.plugins.friends.Poker;
 import com.mobicage.rogerthat.plugins.friends.ServiceApiCallbackResult;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemInfo;
 import com.mobicage.rogerthat.plugins.messaging.Message;
+import com.mobicage.rogerthat.plugins.news.NewsItem;
 import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.ActionScreenUtils;
@@ -52,6 +53,7 @@ import org.json.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -102,6 +104,7 @@ public class RogerthatPlugin extends CordovaPlugin {
 
         @Override
         public void onBeaconOutOfReach(Map<String, Object> beacon) {
+
             sendCallbackUpdate("onBeaconOutOfReach", new JSONObject(beacon));
         }
 
@@ -113,6 +116,22 @@ public class RogerthatPlugin extends CordovaPlugin {
         @Override
         public void onBackendConnectivityChanged(boolean connected) {
             sendCallbackUpdate("onBackendConnectivityChanged", connected);
+        }
+
+        @Override
+        public void newsReceived(long[] ids) {
+            try {
+                JSONObject obj = new JSONObject();
+                obj.put("ids", ids);
+                sendCallbackUpdate("newsReceived", obj);
+            } catch (JSONException e) {
+                L.e("JSONException... This should never happen", e);
+            }
+        }
+
+        @Override
+        public void badgeUpdated(Map<String, Object> params) {
+            sendCallbackUpdate("badgeUpdated", new JSONObject(params));
         }
     };
 
@@ -167,6 +186,15 @@ public class RogerthatPlugin extends CordovaPlugin {
 
                     } else if (action.equals("message_open")) {
                         openMessage(callbackContext, args.optJSONObject(0));
+
+                    } else if (action.equals("news_count")) {
+                        countNews(callbackContext, args.optJSONObject(0));
+
+                    } else if (action.equals("news_get")) {
+                        getNews(callbackContext, args.optJSONObject(0));
+
+                    } else if (action.equals("news_list")) {
+                        listNews(callbackContext, args.optJSONObject(0));
 
                     } else if (action.equals("security_createKeyPair")) {
                         createKeyPair(callbackContext, args.optJSONObject(0));
@@ -379,6 +407,46 @@ public class RogerthatPlugin extends CordovaPlugin {
         }
         mActivity.getMessagingPlugin().showMessage(mActivity, message, false, null, false);
         callbackContext.success(new JSONObject());
+    }
+
+    private void countNews(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+        if (args == null) {
+            returnArgsMissing(callbackContext);
+            return;
+        }
+        long count = mActivity.getActionScreenUtils().countNews(args);
+        JSONObject obj = new JSONObject();
+        obj.put("count", count);
+        callbackContext.success(obj);
+    }
+
+    private void getNews(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+        if (args == null) {
+            returnArgsMissing(callbackContext);
+            return;
+        }
+        NewsItem item = mActivity.getActionScreenUtils().getNews(args);
+        JSONObject obj = new JSONObject();
+        obj.put("item", item == null ? null : item.toJSONMap());
+        callbackContext.success(obj);
+    }
+
+    private void listNews(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+        if (args == null) {
+            returnArgsMissing(callbackContext);
+            return;
+        }
+        Map<String, Object> result = mActivity.getActionScreenUtils().listNews(args);
+
+        JSONArray newsItems = new JSONArray();
+        for (NewsItem ni : (List<NewsItem>) result.get("items")) {
+            newsItems.put(ni.toJSONMap());
+        }
+
+        JSONObject obj = new JSONObject();
+        obj.put("cursor", result.get("cursor"));
+        obj.put("items", newsItems);
+        callbackContext.success(obj);
     }
 
     private abstract class SecurityCallback<T> implements MainService.SecurityCallback<T> {

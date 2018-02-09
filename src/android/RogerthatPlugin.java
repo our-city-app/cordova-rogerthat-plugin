@@ -305,7 +305,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         final String message = TextUtils.optString(args, "m", null);
         if (errorMessage != null) {
             mActivity.getActionScreenUtils().logError(mActivity.getServiceEmail(), mActivity.getItemLabel(),
-                    mActivity.getItemCoords(), message);
+                    mActivity.getItemCoords(), errorMessage);
         } else {
             L.i("[BRANDING] " + message);
         }

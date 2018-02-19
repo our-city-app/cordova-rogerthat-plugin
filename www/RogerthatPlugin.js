@@ -508,33 +508,26 @@ function getStackTrace(e) {
 /**
  * Extends the default console functions so it dispatches the logs to the app
  * This can can in turn dispatch it to the server if log forwarding is enabled.
+ * Only patches console.error for android because the rest is handled by CordovaWebChromeClient#onConsoleMessage
  */
 function patchConsole() {
-    var logFunction = console.log;
-    var errorFunction = console.error || console.log;
-    var warnFunction = console.warn || console.log;
-    var infoFunction = console.info || console.log;
-    var debugFunction = console.debug || console.log;
+    var methods = ['debug', 'info', 'log', 'warn', 'error'];
+    var newConsole = window.console;
 
     function logToApp(args) {
         var log;
-        try{
+        try {
             log = args.length === 1 ? JSON.stringify(args[0]) : JSON.stringify(args);
-        }catch(exception){
+        } catch (ignored) {
             log = args.length === 1 ? args[0] : args;
         }
         utils.exec(_dummy, _dummy, 'log', [{m: log}]);
     }
 
-    console.log = function () {
-        logFunction.apply(this, arguments);
-        logToApp(arguments);
-    };
-    console.error = function (e) {
-        errorFunction.apply(this, arguments);
+    function logErrorToApp(args) {
         var message = '';
-        for(var i = 0; i < arguments.length; i++){
-            var arg = arguments[i]
+        for (var i = 0; i < args.length; i++) {
+            var arg = args[i];
             if (arg instanceof Error) {
                 message += arg.name + ': ' + arg.message + '\n' + getStackTrace(arg);
             } else {
@@ -542,19 +535,26 @@ function patchConsole() {
             }
         }
         utils.exec(_dummy, _dummy, 'log', [{e: JSON.stringify(message)}]);
-    };
-    console.warn = function () {
-        warnFunction.apply(this, arguments);
-        logToApp(arguments);
-    };
-    console.info = function () {
-        infoFunction.apply(this, arguments);
-        logToApp(arguments);
-    };
-    console.debug = function () {
-        debugFunction.apply(this, arguments);
-        logToApp(arguments);
-    };
+    }
+
+
+    function intercept(method) {
+        var original = newConsole[method]
+        newConsole[method] = function () {
+            if (method === 'error') {
+                logErrorToApp(arguments);
+            } else {
+                logToApp(arguments);
+            }
+            original.apply(newConsole, arguments);
+        };
+    }
+
+    for (var i = 0; i < methods.length; i++) {
+        if (methods[i] === 'error' || RogerthatPlugin.prototype.system && RogerthatPlugin.prototype.system.os === 'ios') {
+            intercept(methods[i]);
+        }
+    }
 }
 
 var rogerthatPlugin = new RogerthatPlugin();

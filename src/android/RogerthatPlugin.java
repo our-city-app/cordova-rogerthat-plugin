@@ -20,6 +20,7 @@ package com.mobicage.rogerthat.cordova;
 
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -30,6 +31,7 @@ import com.google.zxing.client.android.CaptureActivity;
 import com.google.zxing.client.android.Intents;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.MainService;
+import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.Poker;
 import com.mobicage.rogerthat.plugins.friends.ServiceApiCallbackResult;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemInfo;
@@ -56,8 +58,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import static android.app.Activity.RESULT_OK;
 
 public class RogerthatPlugin extends CordovaPlugin {
 
@@ -174,6 +174,12 @@ public class RogerthatPlugin extends CordovaPlugin {
                         mApiResultHandlerSet = true;
                         mActivity.getActionScreenUtils().deliverAllApiResults();
                         callbackContext.success(new JSONObject());
+
+                    } else if (action.equals("app_exit")) {
+                        exitApp(callbackContext);
+
+                    } else if (action.equals("app_exitWithResult")) {
+                        exitAppWithResult(callbackContext, args.optJSONObject(0));
 
                     } else if (action.equals("camera_startScanningQrCode")) {
                         startScanningQrCode(callbackContext);
@@ -340,6 +346,22 @@ public class RogerthatPlugin extends CordovaPlugin {
             L.e("JSONException... This should never happen", e);
         }
         return true;
+    }
+
+    private void exitApp(final CallbackContext callbackContext) throws JSONException {
+        mActivity.finish();
+        callbackContext.success(new JSONObject());
+    }
+
+    private void exitAppWithResult(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+        final String result = TextUtils.optString(args, "result", null);
+        if (result != null) {
+            Intent resultIntent = new Intent(ActionScreenActivity.EXIT_APP);
+            resultIntent.putExtra(ActionScreenActivity.EXIT_APP_RESULT, result);
+            mActivity.setResult(Activity.RESULT_OK, resultIntent);
+        }
+        mActivity.finish();
+        callbackContext.success(new JSONObject());
     }
 
     private void startScanningQrCode(final CallbackContext callbackContext) throws JSONException {
@@ -712,7 +734,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         L.i("RogerthatPlugin.onActivityResult requestCode -> " + requestCode);
         if (requestCode == ScanTabActivity.ZXING_SCAN_RESULT) {
             mQRCodeScannerOpen = false;
-            if (resultCode == RESULT_OK) {
+            if (resultCode == Activity.RESULT_OK) {
                 L.i("onActivityResult ZXING_SCAN_RESULT");
                 mQRCodeScannerOpen = false;
                 final String rawScanResult = intent.getStringExtra("SCAN_RESULT");

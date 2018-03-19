@@ -8,7 +8,7 @@ exports.exitApp = function() {
             console.log("exitApp error", err);
         },
         'RogerthatPlugin',
-        'exitApp',
+        'app_exit',
         []
     );
 };

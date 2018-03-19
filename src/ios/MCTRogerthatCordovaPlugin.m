@@ -159,6 +159,20 @@
     [self commandProcessed:command];
 }
 
+- (void)app_exit:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.vc exitApp];
+    [self commandProcessed:command];
+}
+
+- (void)app_exitWithResult:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.vc exitAppWithResult:[self getRequestParams:command]];
+    [self commandProcessed:command];
+}
+
 - (void)camera_startScanningQrCode:(CDVInvokedUrlCommand *)command
 {
     HERE();
@@ -190,22 +204,22 @@
 - (void)news_count:(CDVInvokedUrlCommand *)command
 {
     HERE();
-    [self.helper countNews:[self defaultResultHandlerWithCommand:command]
-                    params:[self getRequestParams:command]];
+    [self.helper countNewsWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                     params:[self getRequestParams:command]];
 }
 
 - (void)news_get:(CDVInvokedUrlCommand *)command
 {
     HERE();
-    [self.helper getNews:[self defaultResultHandlerWithCommand:command]
-                  params:[self getRequestParams:command]];
+    [self.helper getNewsItemWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                       params:[self getRequestParams:command]];
 }
 
 - (void)news_list:(CDVInvokedUrlCommand *)command
 {
     HERE();
-    [self.helper listNews:[self defaultResultHandlerWithCommand:command]
-                   params:[self getRequestParams:command]];
+    [self.helper listNewsWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                    params:[self getRequestParams:command]];
 }
 
 - (void)security_createKeyPair:(CDVInvokedUrlCommand *)command
@@ -318,14 +332,6 @@
     [self.helper playAudioWithResultHandler:[self defaultResultHandlerWithCommand:command]
                                               params:[self getRequestParams:command]];
 }
-
-- (void)exitApp:(CDVInvokedUrlCommand *)command
-{
-    HERE();
-    [self.vc exitApp];
-    [self commandProcessed:command];
-}
-
 
 #pragma mark - RogerthatPlugin helper methods
 

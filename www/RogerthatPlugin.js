@@ -215,6 +215,15 @@ RogerthatPlugin.prototype.api = {
     }
 };
 
+RogerthatPlugin.prototype.app = {
+    exit : function() {
+        utils.exec(null, null, "app_exit", []);
+    },
+    exitWithResult : function(result) {
+        utils.exec(null, null, "app_exitWithResult", [{"result": result}]);
+    }
+};
+
 var callbacksRegister = utils.generateCallbacksRegister(userCallbacks);
 callbacksRegister.ready = function(callback) {
     userCallbacks.ready = function() {

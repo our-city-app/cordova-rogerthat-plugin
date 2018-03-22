@@ -250,6 +250,13 @@
                                    params:[self getRequestParams:command]];
 }
 
+- (void)security_listAddresses:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper listAddressesWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                         params:[self getRequestParams:command]];
+}
+
 - (void)security_getAddress:(CDVInvokedUrlCommand *)command
 {
     HERE();

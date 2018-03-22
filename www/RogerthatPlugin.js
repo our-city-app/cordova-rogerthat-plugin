@@ -323,6 +323,10 @@ RogerthatPlugin.prototype.security = {
                                                                          "key_name": name,
                                                                          "message": message}]);
     },
+    listAddresses: function(successCallback, errorCallback, algorithm, name) {
+        utils.exec(successCallback, errorCallback, "security_listAddresses", [{"key_algorithm": algorithm,
+                                                                               "key_name": name}]);
+    },
     getAddress: function(successCallback, errorCallback, algorithm, name, index, message) {
         utils.exec(successCallback, errorCallback, "security_getAddress", [{"key_algorithm": algorithm,
                                                                             "key_name": name,

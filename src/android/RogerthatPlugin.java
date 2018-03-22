@@ -214,6 +214,9 @@ public class RogerthatPlugin extends CordovaPlugin {
                     } else if (action.equals("security_getSeed")) {
                         getSeed(callbackContext, args.optJSONObject(0));
 
+                    } else if (action.equals("security_listAddresses")) {
+                        listAddresses(callbackContext, args.optJSONObject(0));
+
                     } else if (action.equals("security_getAddress")) {
                         getAddress(callbackContext, args.optJSONObject(0));
 
@@ -563,6 +566,17 @@ public class RogerthatPlugin extends CordovaPlugin {
         };
 
         mActivity.getActionScreenUtils().getSeed(args, sc);
+    }
+
+    private void listAddresses(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+        SecurityCallback<List<Map<String, String>>> sc = new SecurityCallback<List<Map<String, String>>>(callbackContext) {
+            @Override
+            public void populateResult(List<Map<String, String>> addresses, JSONObject obj) throws JSONException {
+                obj.put("addresses", addresses);
+            }
+        };
+
+        mActivity.getActionScreenUtils().listAddresses(args, sc);
     }
 
     private void getAddress(final CallbackContext callbackContext, final JSONObject args) throws JSONException {

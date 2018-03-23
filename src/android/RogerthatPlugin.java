@@ -697,9 +697,10 @@ public class RogerthatPlugin extends CordovaPlugin {
         }
         final String actionType = TextUtils.optString(args, "action_type", null);
         final String action = TextUtils.optString(args, "action", null);
-        final String title = TextUtils.optString(args, "title", null);
+        final String service = TextUtils.optString(args, "service", null);
+        final boolean collapse = args.optBoolean("collapse", false);
 
-        String errorMessage = mActivity.getActionScreenUtils().openActivity(actionType, action, title);
+        String errorMessage = mActivity.getActionScreenUtils().openActivity(actionType, action, title, service, collapse);
         if (errorMessage != null) {
             error(callbackContext, "unknown_error_occurred", errorMessage);
             return;

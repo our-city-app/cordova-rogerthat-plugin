@@ -163,6 +163,7 @@ public class RogerthatPlugin extends CordovaPlugin {
                         mCallbackContext.sendPluginResult(pluginResult);
 
                         setInfo();
+                        setBadges();
 
                     } else if (action.equals("log")) {
                         log(args.optJSONObject(0));
@@ -307,6 +308,15 @@ public class RogerthatPlugin extends CordovaPlugin {
         Map<String, Object> info = mActivity.getFriendsPlugin().getRogerthatUserAndServiceInfo(
                 mActivity.getServiceEmail(), mActivity.getServiceFriend(), mMenuItem);
         sendCallbackUpdate("setInfo", new JSONObject(info));
+    }
+
+    private void setBadges() {
+        for (Map.Entry<String, Long> entry : mActivity.getMainService().getBadges().entrySet()) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("key", entry.getKey());
+            params.put("count", entry.getValue());
+            mIntentCallback.badgeUpdated(params);
+        }
     }
 
     private void log(final JSONObject args) throws JSONException {

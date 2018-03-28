@@ -333,13 +333,17 @@ RogerthatPlugin.prototype.security = {
                                                                             "key_index": index,
                                                                             "message": message}]);
     },
-    sign : function (successCallback, errorCallback, algorithm, name, index, message, payload, forcePin) {
+    sign : function (successCallback, errorCallback, algorithm, name, index, message, payload, forcePin, hashPayload) {
+        if (hashPayload === undefined) {
+            hashPayload = true;
+        }
         utils.exec(successCallback, errorCallback, "security_sign", [{"key_algorithm": algorithm,
                                                                       "key_name": name,
                                                                       "key_index": index,
                                                                       "message": message,
                                                                       "payload": payload,
-                                                                      "force_pin": forcePin}]);
+                                                                      "force_pin": forcePin,
+                                                                      "hash_payload": hashPayload}]);
     },
     verify : function (successCallback, errorCallback, algorithm, name, index, payload, payloadSignature) {
         utils.exec(successCallback, errorCallback, "security_verify", [{"key_algorithm": algorithm,

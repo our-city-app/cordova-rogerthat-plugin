@@ -603,17 +603,17 @@ public class RogerthatPlugin extends CordovaPlugin {
     private void signPayload(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
         final String payload = TextUtils.optString(args, "payload", null);
 
-        SecurityCallback<byte[]> sc = new SecurityCallback<byte[]>(callbackContext) {
+        SecurityCallback<String> sc = new SecurityCallback<String>(callbackContext) {
             @Override
-            public void populateResult(byte[] result, JSONObject obj) throws JSONException {
+            public void populateResult(String result, JSONObject obj) throws JSONException {
             }
 
             @Override
-            public void onSuccess(byte[] payloadSignature) {
+            public void onSuccess(String payloadSignature) {
                 try {
                     JSONObject obj = new JSONObject();
                     obj.put("payload", payload);
-                    obj.put("payload_signature", Base64.encodeBytes(payloadSignature, Base64.DONT_BREAK_LINES));
+                    obj.put("payload_signature", payloadSignature);
                     callbackContext.success(obj);
                 } catch (Exception e) {
                     L.bug("signPayload onSuccess exception", e);

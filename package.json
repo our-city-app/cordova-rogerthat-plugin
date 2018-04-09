@@ -18,6 +18,7 @@
             "version": ">=5.0.0"
         }
     ],
+    "types": "www/index.d.ts",
     "author": "Mobicage",
     "license": "Apache-2.0"
 }

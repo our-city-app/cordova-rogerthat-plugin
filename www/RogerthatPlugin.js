@@ -387,7 +387,9 @@ RogerthatPlugin.prototype.util = {
             return;
         }
         if (params.action_type) {
-            params.action = sha256(params.action);
+            if (params.action_type === "click" || params.action_type === "action") {
+                params.action = sha256(params.action);
+            }
         }
         utils.exec(successCallback, errorCallback, "util_open", [params]);
     },

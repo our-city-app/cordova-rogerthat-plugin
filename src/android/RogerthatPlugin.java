@@ -40,7 +40,7 @@ import com.mobicage.rogerthat.plugins.news.NewsItem;
 import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.ActionScreenUtils;
-import com.mobicage.rogerthat.util.TextUtils;
+import com.mobicage.rogerthat.util.JsonUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rpc.config.CloudConstants;
@@ -320,8 +320,8 @@ public class RogerthatPlugin extends CordovaPlugin {
     }
 
     private void log(final JSONObject args) throws JSONException {
-        final String errorMessage = TextUtils.optString(args, "e", null);
-        final String message = TextUtils.optString(args, "m", null);
+        final String errorMessage = JsonUtils.optString(args, "e", null);
+        final String message = JsonUtils.optString(args, "m", null);
         if (errorMessage != null) {
             mActivity.getActionScreenUtils().logError(mActivity.getServiceEmail(), mActivity.getItemLabel(),
                     mActivity.getItemCoords(), errorMessage);
@@ -335,9 +335,9 @@ public class RogerthatPlugin extends CordovaPlugin {
             returnArgsMissing(callbackContext);
             return;
         }
-        final String method = TextUtils.optString(args, "method", null);
-        final String params = TextUtils.optString(args, "params", null);
-        final String tag = TextUtils.optString(args, "tag", null);
+        final String method = JsonUtils.optString(args, "method", null);
+        final String params = JsonUtils.optString(args, "params", null);
+        final String tag = JsonUtils.optString(args, "tag", null);
 
         mActivity.getFriendsPlugin().sendApiCall(mActivity.getServiceEmail(), mActivity.getItemTagHash(), method, params, tag);
         callbackContext.success(new JSONObject());
@@ -367,7 +367,7 @@ public class RogerthatPlugin extends CordovaPlugin {
     }
 
     private void exitAppWithResult(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        final String result = TextUtils.optString(args, "result", null);
+        final String result = JsonUtils.optString(args, "result", null);
         if (result != null) {
             Intent resultIntent = new Intent(ActionScreenActivity.EXIT_APP);
             resultIntent.putExtra(ActionScreenActivity.EXIT_APP_RESULT, result);
@@ -432,7 +432,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             returnArgsMissing(callbackContext);
             return;
         }
-        final String messageKey = TextUtils.optString(args, "message_key", null);
+        final String messageKey = JsonUtils.optString(args, "message_key", null);
         final Message message = mActivity.getMessagingPlugin().getStore().getMessageByKey(messageKey, true);
         if (message == null) {
             JSONObject obj = new JSONObject();
@@ -601,7 +601,7 @@ public class RogerthatPlugin extends CordovaPlugin {
     }
 
     private void signPayload(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        final String payload = TextUtils.optString(args, "payload", null);
+        final String payload = JsonUtils.optString(args, "payload", null);
 
         SecurityCallback<String> sc = new SecurityCallback<String>(callbackContext) {
             @Override
@@ -663,7 +663,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             returnArgsMissing(callbackContext);
             return;
         }
-        final String data = TextUtils.optString(args, "u", null);
+        final String data = JsonUtils.optString(args, "u", null);
         boolean smart = args.optBoolean("smart", false);
         mActivity.getFriendsPlugin().putUserData(mActivity.getServiceEmail(), data, smart);
         callbackContext.success(new JSONObject());
@@ -695,13 +695,12 @@ public class RogerthatPlugin extends CordovaPlugin {
             returnArgsMissing(callbackContext);
             return;
         }
-        final String actionType = TextUtils.optString(args, "action_type", null);
-        final String action = TextUtils.optString(args, "action", null);
-        final String title = TextUtils.optString(args, "title", null);
-        final String service = TextUtils.optString(args, "service", null);
-        final boolean collapse = args.optBoolean("collapse", false);
+        final String actionType = JsonUtils.optString(args, "action_type", null);
+        final String action = JsonUtils.optString(args, "action", null);
+        final String title = JsonUtils.optString(args, "title", null);
+        final String service = JsonUtils.optString(args, "service", null);
 
-        String errorMessage = mActivity.getActionScreenUtils().openActivity(actionType, action, title, service, collapse);
+        String errorMessage = mActivity.getActionScreenUtils().openActivity(actionType, action, title, service, JsonUtils.toMap(args));
         if (errorMessage != null) {
             error(callbackContext, "unknown_error_occurred", errorMessage);
             return;
@@ -714,7 +713,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             returnArgsMissing(callbackContext);
             return;
         }
-        final String url = TextUtils.optString(args, "url", null);
+        final String url = JsonUtils.optString(args, "url", null);
         String fileOnDisk = "file://" + mActivity.getBrandingResult().dir.getAbsolutePath() + "/" + url;
         mActivity.getActionScreenUtils().playAudio(fileOnDisk);
         callbackContext.success(new JSONObject());

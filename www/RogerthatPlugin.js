@@ -138,7 +138,7 @@ var utils = {
     setRogerthatData : function(info) {
         Object.keys(info).forEach(function(key) {
             if(info[key]) {
-                rogerthatPlugin[key] = Object.assign({}, info[key]);
+                rogerthatPlugin[key] = info[key];
             }
         });
 

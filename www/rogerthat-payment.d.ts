@@ -204,6 +204,52 @@ export interface PayWidgetData {
   message_key: string;
 }
 
+export interface CreateTransactionBaseResult extends PendingPaymentUpdate {
+  provider_id: PaymentProviderId;
+  success: boolean;
+}
+
+export interface CreateTransactionResultInternal {
+  params: string;
+  transaction_id: string;
+}
+
+export interface CreateTransactionResult {
+  params: CreateTransactionResultType;
+  transaction_id: string;
+}
+
+export interface PayconiqCreateTransactionResult extends CreateTransactionBaseResult {
+  payconic_transaction_id: string;
+  provider_id: 'payconic';
+  payconic_transaction_url: string;
+}
+
+export type CreateTransactionResultType = CreateTransactionBaseResult | PayconiqCreateTransactionResult;
+
+export const enum RogerthatPaymentErrorCode {
+  UNKNOWN = 'unknown',
+  PROVIDER_NOT_FOUND = 'provider_not_found',
+  CURRENCY_UNKNOWN = 'currency_unknown',
+  PERMISSION_DENIED = 'permission_denied',
+  TRANSACTION_NOT_FOUND = 'transaction_not_found',
+  TRANSACTION_NOT_INITIATED = 'transaction_not_initiated',
+  TRANSACTION_ALREADY_INITIATED = 'transaction_already_initiated',
+  TRANSACTION_FINISHED = 'transaction_finished',
+  ACCOUNT_ALREADY_EXISTS = 'account_already_exists',
+  DUPLICATE_WALLET = 'duplicate_wallet',
+  INVALID_IBAN = 'invalid_iban',
+  INVALID_VERIFICATION_CODE = 'invalid_verification_code',
+  CANNOT_VERIFY_WALLET_TYPE = 'cannot_verify_wallet_type',
+  INSUFFICIENT_FUNDS = 'insufficient_funds',
+}
+
+export interface RogerthatPaymentError<T = any> {
+  code: RogerthatPaymentErrorCode;
+  data: T;
+  message: string;
+}
+
 export class RogerthatPayments {
   apps: {
     payconiq: RogerthatPaymentApp;
@@ -218,7 +264,13 @@ export class RogerthatPayments {
   };
   cancelPayment: (successCallback: () => void,
                   errorCallback: (error: RogerthatError) => void,
-                  transactionId: string) => void
+                  transactionId: string) => void;
+  // result.params is json parseable to CreateTransactionResultType
+  createTransaction: (successCallback: (result: CreateTransactionResultInternal) => void,
+                      errorCallback: (error: RogerthatPaymentError<null | string>) => void,
+                      updateCallback: (result: PendingPaymentUpdate) => void,
+                      providerId: PaymentProviderId,
+                      params: string) => void;
   getPendingPaymentDetails: (successCallback: (result: PendingPayment) => void,
                              errorCallback: (error: RogerthatError) => void,
                              updateCallback: (result: PendingPaymentUpdate) => void,

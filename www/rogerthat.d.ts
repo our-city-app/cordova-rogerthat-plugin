@@ -34,7 +34,7 @@ export interface RogerthatSystem {
   appId: string; // 'rogerthat'
 }
 
-export enum BeaconProximity {
+export const enum BeaconProximity {
   UNKNOWN = 0,
   IMMEDIATE = 1,
   NEAR = 2,
@@ -62,7 +62,7 @@ export interface RogerthatMessage {
 }
 
 
-export enum NewsItemType {
+export const enum NewsItemType {
   /**
    * application/service to person
    */
@@ -284,7 +284,7 @@ export interface RogerthatSecurity {
            payload_signature: string) => void;
 }
 
-export enum FeatureSupported {
+export const enum FeatureSupported {
   CHECKING = 0,
   SUPPORTED = 1,
   NON_SUPPORTED = 2,

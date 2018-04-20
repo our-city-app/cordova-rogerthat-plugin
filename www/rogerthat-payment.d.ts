@@ -193,8 +193,10 @@ export interface PaymentMethod {
   currency: string;
   amount: number;
   precision: number;
+  target: string;
 }
 
+/** @deprecated */
 export interface PayWidgetData {
   t: 2;
   result_type: string;
@@ -202,6 +204,31 @@ export interface PayWidgetData {
   memo: string;
   target: string;
   message_key: string;
+}
+
+export const enum PayContextType {
+  PAY = 'pay'
+}
+
+export interface PayContext {
+  type: PayContextType;
+  data: PayWidgetContextData;
+}
+
+export interface PayMethod {
+  amount: number;
+  currency: string;
+  precision: number;
+  target: string;
+}
+
+export interface PayWidgetContextData {
+  test_mode: boolean;
+  message_key: string;
+  target: string;
+  method: PayMethod;
+  memo: string;
+  provider: PaymentProvider;
 }
 
 export interface CreateTransactionBaseResult extends PendingPaymentUpdate {

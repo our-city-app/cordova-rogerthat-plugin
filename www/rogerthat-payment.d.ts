@@ -206,14 +206,22 @@ export interface PayWidgetData {
   message_key: string;
 }
 
-export const enum PayContextType {
-  PAY = 'pay'
+export const enum RogerthatContextType {
+  PAY_WIDGET = 'pay',
+  CREATE_PAYMENT_REQUEST = 'create-payment-request',
 }
 
-export interface PayContext {
-  type: PayContextType;
+export interface PayWidgetContext {
+  type: RogerthatContextType.PAY_WIDGET;
   data: PayWidgetContextData;
 }
+
+export interface CreatePaymentRequestContext {
+  type: RogerthatContextType.CREATE_PAYMENT_REQUEST;
+  data: CreatePaymentRequestData;
+}
+
+export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext;
 
 export interface PayMethod {
   amount: number;
@@ -229,6 +237,10 @@ export interface PayWidgetContextData {
   method: PayMethod;
   memo: string;
   provider: PaymentProvider;
+}
+
+export interface CreatePaymentRequestData {
+
 }
 
 export interface CreateTransactionBaseResult extends PendingPaymentUpdate {

@@ -226,9 +226,9 @@ export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext;
 /**
  * Return type for a payment request
  */
-export interface MessageEmbeddedApp<ContextT=any, ResultT=any> {
-  context: ContextT;
-  result: ResultT;
+export interface MessageEmbeddedApp {
+  context: string;
+  result?: string;
   image_url?: string;
   title: string;
   description: string;

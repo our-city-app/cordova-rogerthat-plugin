@@ -206,9 +206,20 @@ export interface PayWidgetData {
   message_key: string;
 }
 
+// Content of the 'context' property of MessageEmbeddedApp in case of a payment
+export interface PaymentRequestData {
+  to: string;
+  amount: number;
+  precision: number;
+  currency: string;
+  test_mode: boolean;
+  memo: string;
+}
+
 export const enum RogerthatContextType {
   PAY_WIDGET = 'pay',
   CREATE_PAYMENT_REQUEST = 'create-payment-request',
+  PAYMENT_REQUEST = 'payment-request',
 }
 
 export interface PayWidgetContext {
@@ -218,7 +229,12 @@ export interface PayWidgetContext {
 
 export interface CreatePaymentRequestContext {
   type: RogerthatContextType.CREATE_PAYMENT_REQUEST;
-  data: CreatePaymentRequestData;
+  data: PaymentRequestData;
+}
+
+export interface PaymentRequestContext {
+  type: RogerthatContextType.PAYMENT_REQUEST;
+  data: MessageEmbeddedApp;
 }
 
 export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext;
@@ -248,10 +264,6 @@ export interface PayWidgetContextData {
   method: PayMethod;
   memo: string;
   provider: PaymentProvider;
-}
-
-export interface CreatePaymentRequestData {
-
 }
 
 export interface CreateTransactionBaseResult extends PendingPaymentUpdate {

@@ -98,17 +98,6 @@ public class RogerthatPlugin extends CordovaPlugin {
         }
 
         @Override
-        public void onBeaconInReach(Map<String, Object> beacon) {
-            sendCallbackUpdate("onBeaconInReach", new JSONObject(beacon));
-        }
-
-        @Override
-        public void onBeaconOutOfReach(Map<String, Object> beacon) {
-
-            sendCallbackUpdate("onBeaconOutOfReach", new JSONObject(beacon));
-        }
-
-        @Override
         public void qrCodeScanned(Map<String, Object> result) {
             sendCallbackUpdate("qrCodeScanned", new JSONObject(result));
         }
@@ -226,9 +215,6 @@ public class RogerthatPlugin extends CordovaPlugin {
 
                     } else if (action.equals("security_verify")) {
                         verifySignedPayload(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("service_getBeaconsInReach")) {
-                        getBeaconsInReach(callbackContext);
 
                     } else if (action.equals("system_onBackendConnectivityChanged")) {
                         onBackendConnectivityChanged(callbackContext);
@@ -634,12 +620,6 @@ public class RogerthatPlugin extends CordovaPlugin {
         };
 
         mActivity.getActionScreenUtils().verifySignedPayload(args, sc);
-    }
-
-    private void getBeaconsInReach(final CallbackContext callbackContext) throws JSONException {
-        JSONObject obj = new JSONObject();
-        obj.put("beacons", new JSONArray(mActivity.getActionScreenUtils().getBeaconsInReach()));
-        callbackContext.success(obj);
     }
 
     private void onBackendConnectivityChanged(final CallbackContext callbackContext) throws JSONException {

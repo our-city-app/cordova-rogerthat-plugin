@@ -25,8 +25,6 @@ var apiUserCallbacks = {
 
 var userCallbacks = {
     onBackendConnectivityChanged : _dummy,
-    onBeaconInReach : _dummy,
-    onBeaconOutOfReach : _dummy,
     qrCodeScanned : _dummy,
     ready : _dummy,
     serviceDataUpdated : _dummy,
@@ -107,18 +105,12 @@ var utils = {
 
         } else if (result.callback === "newsReceived") {
             userCallbacks.newsReceived(result.args);
- 
+
         } else if (result.callback === "badgeUpdated") {
             userCallbacks.badgeUpdated(result.args);
 
         } else if (result.callback === "onBackendConnectivityChanged") {
             userCallbacks.onBackendConnectivityChanged(result.args);
-
-        } else if (result.callback === "onBeaconInReach") {
-            userCallbacks.onBeaconInReach(result.args);
-
-        } else if (result.callback === "onBeaconOutOfReach") {
-            userCallbacks.onBeaconOutOfReach(result.args);
 
         } else if (result.callback === "qrCodeScanned") {
             userCallbacks.qrCodeScanned(result.args);
@@ -146,29 +138,8 @@ var utils = {
             rogerthatPlugin.system.os = "unknown";
             rogerthatPlugin.system.version = "unknown";
             rogerthatPlugin.system.appVersion = "unknown";
-            rogerthatPlugin.features.beacons = FEATURE_NOT_SUPPORTED;
-        } else {
-            if (rogerthatPlugin.system.os == "ios" && rogerthatPlugin.system.version !== undefined
-                && rogerthatPlugin.system.appVersion !== undefined) {
-                var version = rogerthatPlugin.system.version.split(".");
-                if (parseInt(version[0]) >= 7) {
-                    rogerthatPlugin.features.beacons = FEATURE_SUPPORTED;
-                } else {
-                    rogerthatPlugin.features.beacons = FEATURE_NOT_SUPPORTED;
-                }
-            } else if (rogerthatPlugin.system.os == "android" && rogerthatPlugin.system.version !== undefined) {
-                if (parseInt(rogerthatPlugin.system.version) >= 18) {
-                    rogerthatPlugin.features.beacons = FEATURE_SUPPORTED;
-                } else {
-                    rogerthatPlugin.features.beacons = FEATURE_NOT_SUPPORTED;
-                }
-            } else {
-                rogerthatPlugin.features.beacons = FEATURE_NOT_SUPPORTED;
-            }
         }
-        if (rogerthatPlugin.features.callback !== undefined)
-            rogerthatPlugin.features.callback('beacons');
-        
+
         rogerthatPlugin.user.put = function (data) {
             var crp = {};
             if (data === undefined) {
@@ -266,7 +237,6 @@ RogerthatPlugin.prototype.features = {
     FEATURE_NOT_SUPPORTED: FEATURE_NOT_SUPPORTED,
     base64URI : FEATURE_CHECKING,
     backgroundSize : FEATURE_CHECKING,
-    beacons : FEATURE_CHECKING,
     callback : undefined
 };
 
@@ -354,11 +324,7 @@ RogerthatPlugin.prototype.security = {
     }
 };
 
-RogerthatPlugin.prototype.service = {
-    getBeaconsInReach : function (successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "service_getBeaconsInReach", []);
-    }
-};
+RogerthatPlugin.prototype.service = {};
 
 RogerthatPlugin.prototype.system = {
     onBackendConnectivityChanged : function (successCallback, errorCallback) {

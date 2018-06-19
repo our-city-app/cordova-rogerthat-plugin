@@ -34,33 +34,16 @@ export interface RogerthatSystem {
   appId: string; // 'rogerthat'
 }
 
-export const enum BeaconProximity {
-  UNKNOWN = 0,
-  IMMEDIATE = 1,
-  NEAR = 2,
-  FAR = 3
-}
-
-export interface Beacon {
-  uuid: string;
-  major: string;
-  minor: string;
-  tag: string;
-  proximity: BeaconProximity;
-}
-
 export interface RogerthatService {
   name: string;
   account: string;
   data: any;
-  getBeaconInReach: (successCallback: (result: Beacon[]) => void, errorCallback: (result: any) => void) => void;
 }
 
 export interface RogerthatMessage {
   open: (messageKey: string, successCallback: () => void,
          errorCallback: (error: RogerthatMessageOpenError) => void) => void;
 }
-
 
 export const enum NewsItemType {
   /**
@@ -293,8 +276,7 @@ export const enum FeatureSupported {
 export interface RogerthatFeatures {
   base64URI: FeatureSupported;
   backgroundSize: FeatureSupported;
-  beacons: FeatureSupported;
-  callback: (feature: 'base64URI' | 'backgroundSize' | 'beacons') => void;
+  callback: (feature: 'base64URI' | 'backgroundSize') => void;
 }
 
 export interface RogerthatUI {
@@ -358,14 +340,6 @@ export interface RogerthatCallbacks {
    * The device its Internet connectivity has changed.
    */
   onBackendConnectivityChanged: (callback: (connectionStatus: InternetConnectionStatus) => void) => void;
-  /**
-   * The app detected a beacon.
-   */
-  onBeaconInReach: (callback: (beacon: Beacon) => void) => void;
-  /**
-   * The user went out of reach of a beacon.
-   */
-  onBeaconOutOfReach: (callback: (beacon: Beacon) => void) => void;
   /**
    * A QR code has been scanned as result of rogerthat.camera.startScanningQrCode
    * This method is called twice. If the smartphone is connected to the Internet,

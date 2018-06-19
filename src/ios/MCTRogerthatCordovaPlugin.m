@@ -16,7 +16,6 @@
  * @@license_version:1.3@@
  */
 
-#import "MCTBeaconProximity.h"
 #import "MCTComponentFramework.h"
 #import "MCTCordovaScreenBrandingVC.h"
 #import "MCTMessageHelper.h"
@@ -280,12 +279,6 @@
 
 }
 
-- (void)service_getBeaconsInReach:(CDVInvokedUrlCommand *)command
-{
-    HERE();
-    [self.helper beaconsInReachWithResultHandler:[self defaultResultHandlerWithCommand:command]];
-}
-
 - (void)system_onBackendConnectivityChanged:(CDVInvokedUrlCommand *)command
 {
     HERE();
@@ -424,18 +417,6 @@
 {
     T_UI();
     [self sendCallback:@"serviceDataUpdated" withArguments:serviceData];
-}
-
-- (void)beaconInReach:(NSDictionary *)beacon
-{
-    T_UI();
-    [self sendCallback:@"onBeaconInReach" withArguments:beacon];
-}
-
-- (void)beaconOutOfReach:(NSDictionary *)beacon
-{
-    T_UI();
-    [self sendCallback:@"onBeaconOutOfReach" withArguments:beacon];
 }
 
 - (void)qrCodeScanned:(NSDictionary *)result

@@ -233,7 +233,8 @@ export interface RogerthatSecurity {
                   keyName: string,
                   message: string | null,
                   force: boolean,
-                  seed: string) => void;
+                  seed: string,
+                  arbitraryData: string | null) => void;
   getAddress: (successCallback: (result: CryptoAddress) => void,
                errorCallback: (error: RogerthatError) => void,
                algorithm: SupportedAlgorithms,

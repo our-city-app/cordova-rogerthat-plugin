@@ -321,6 +321,9 @@ RogerthatPlugin.prototype.security = {
                                                                         "key_index": index,
                                                                         "payload": payload,
                                                                         "payload_signature": payloadSignature}]);
+    },
+    listKeyPairs: function(successCallback, errorCallback){
+      utils.exec(successCallback, errorCallback, "security_listKeyPairs", []);
     }
 };
 

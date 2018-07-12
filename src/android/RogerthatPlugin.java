@@ -216,6 +216,9 @@ public class RogerthatPlugin extends CordovaPlugin {
                     } else if (action.equals("security_verify")) {
                         verifySignedPayload(callbackContext, args.optJSONObject(0));
 
+                    } else if (action.equals("security_list_keypairs")) {
+                        listKeyPairs(callbackContext, args.optJSONObject(0));
+
                     } else if (action.equals("system_onBackendConnectivityChanged")) {
                         onBackendConnectivityChanged(callbackContext);
 
@@ -620,6 +623,17 @@ public class RogerthatPlugin extends CordovaPlugin {
         };
 
         mActivity.getActionScreenUtils().verifySignedPayload(args, sc);
+    }
+
+    private void listKeyPairs(final CallbackContext callbackContext, final JSONObject args) throws JSONException{
+      SecurityCallback<Boolean> sc = new SecurityCallback<Boolean>(callbackContext) {
+        @Override
+        public void populateResult(List<Map<String, String>> keyPairs, JSONObject obj) throws JSONException {
+          obj.put("keyPairs", keyPairs);
+        }
+      };
+
+      mActivity.getActionScreenUtils().listKeyPairs(args, sc);
     }
 
     private void onBackendConnectivityChanged(final CallbackContext callbackContext) throws JSONException {

@@ -216,6 +216,16 @@ export interface VerifyResult {
 
 export type SupportedAlgorithms = 'ed25519';
 
+export interface KeyPair {
+  algorithm: SupportedAlgorithms;
+  key_name: string;
+  arbitrary_data: string | null;
+}
+
+export interface KeyPairList {
+  keyPairs: KeyPair[];
+}
+
 export interface RogerthatSecurity {
   createKeyPair: (successCallback: (result: PublicKey) => void,
                   errorCallback: (error: RogerthatError) => void,
@@ -265,6 +275,9 @@ export interface RogerthatSecurity {
            index: number,
            payload: string,
            payload_signature: string) => void;
+ listKeyPairs: (successCallback: (result: KeyPairList) => void,
+                errorCallback: (error: RogerthatError) => void) => void;
+
 }
 
 export const enum FeatureSupported {

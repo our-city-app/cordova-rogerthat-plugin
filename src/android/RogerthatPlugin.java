@@ -626,7 +626,7 @@ public class RogerthatPlugin extends CordovaPlugin {
     }
 
     private void listKeyPairs(final CallbackContext callbackContext, final JSONObject args) throws JSONException{
-      SecurityCallback<Boolean> sc = new SecurityCallback<Boolean>(callbackContext) {
+      SecurityCallback<List<Map<String, String>>> sc = new SecurityCallback<List<Map<String, String>>>(callbackContext) {
         @Override
         public void populateResult(List<Map<String, String>> keyPairs, JSONObject obj) throws JSONException {
           obj.put("keyPairs", keyPairs);

@@ -218,7 +218,7 @@ export type SupportedAlgorithms = 'ed25519';
 
 export interface KeyPair {
   algorithm: SupportedAlgorithms;
-  key_name: string;
+  name: string;
   arbitrary_data: string | null;
 }
 

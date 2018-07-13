@@ -1,12 +1,7 @@
 /**
  * See http://www.rogerthat.net/developers/javascript-api for more info
  */
-import {
-  RogerthatError,
-  RogerthatMessageOpenError,
-  StartScanningQrCodeError,
-  StopScanningQrCodeError,
-} from './rogerthat-errors';
+import { RogerthatError, RogerthatMessageOpenError, StartScanningQrCodeError, StopScanningQrCodeError } from './rogerthat-errors';
 import { RogerthatPayments } from './rogerthat-payment';
 
 export * from './rogerthat-errors';
@@ -148,6 +143,11 @@ export interface PublicKey {
   public_key: string;
 }
 
+export interface CreateKeyPairResult {
+  public_key: string;
+  seed: string;
+}
+
 export interface HasKeyPairResult {
   exists: boolean;
 }
@@ -227,7 +227,7 @@ export interface KeyPairList {
 }
 
 export interface RogerthatSecurity {
-  createKeyPair: (successCallback: (result: PublicKey) => void,
+  createKeyPair: (successCallback: (result: CreateKeyPairResult) => void,
                   errorCallback: (error: RogerthatError) => void,
                   algorithm: SupportedAlgorithms,
                   keyName: string,

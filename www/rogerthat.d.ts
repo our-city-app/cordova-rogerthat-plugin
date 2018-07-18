@@ -1,12 +1,7 @@
 /**
  * See http://www.rogerthat.net/developers/javascript-api for more info
  */
-import {
-  RogerthatError,
-  RogerthatMessageOpenError,
-  StartScanningQrCodeError,
-  StopScanningQrCodeError,
-} from './rogerthat-errors';
+import { RogerthatError, RogerthatMessageOpenError, StartScanningQrCodeError, StopScanningQrCodeError } from './rogerthat-errors';
 import { RogerthatPayments } from './rogerthat-payment';
 
 export * from './rogerthat-errors';
@@ -148,6 +143,11 @@ export interface PublicKey {
   public_key: string;
 }
 
+export interface CreateKeyPairResult {
+  public_key: string;
+  seed: string;
+}
+
 export interface HasKeyPairResult {
   exists: boolean;
 }
@@ -216,14 +216,25 @@ export interface VerifyResult {
 
 export type SupportedAlgorithms = 'ed25519';
 
+export interface KeyPair {
+  algorithm: SupportedAlgorithms;
+  name: string;
+  arbitrary_data: string | null;
+}
+
+export interface KeyPairList {
+  keyPairs: KeyPair[];
+}
+
 export interface RogerthatSecurity {
-  createKeyPair: (successCallback: (result: PublicKey) => void,
+  createKeyPair: (successCallback: (result: CreateKeyPairResult) => void,
                   errorCallback: (error: RogerthatError) => void,
                   algorithm: SupportedAlgorithms,
                   keyName: string,
                   message: string | null,
                   force: boolean,
-                  seed: string) => void;
+                  seed: string | null,
+                  arbitraryData: string | null) => void;
   getAddress: (successCallback: (result: CryptoAddress) => void,
                errorCallback: (error: RogerthatError) => void,
                algorithm: SupportedAlgorithms,
@@ -265,6 +276,9 @@ export interface RogerthatSecurity {
            index: number,
            payload: string,
            payload_signature: string) => void;
+ listKeyPairs: (successCallback: (result: KeyPairList) => void,
+                errorCallback: (error: RogerthatError) => void) => void;
+
 }
 
 export const enum FeatureSupported {

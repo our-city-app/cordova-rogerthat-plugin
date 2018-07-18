@@ -26,7 +26,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
-
 import com.google.zxing.client.android.CaptureActivity;
 import com.google.zxing.client.android.Intents;
 import com.mobicage.rogerth.at.R;
@@ -44,11 +43,9 @@ import com.mobicage.rogerthat.util.JsonUtils;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rpc.config.CloudConstants;
-
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
-import org.jivesoftware.smack.util.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -215,6 +212,9 @@ public class RogerthatPlugin extends CordovaPlugin {
 
                     } else if (action.equals("security_verify")) {
                         verifySignedPayload(callbackContext, args.optJSONObject(0));
+
+                    } else if (action.equals("security_listKeyPairs")) {
+                        listKeyPairs(callbackContext, args.optJSONObject(0));
 
                     } else if (action.equals("system_onBackendConnectivityChanged")) {
                         onBackendConnectivityChanged(callbackContext);
@@ -620,6 +620,25 @@ public class RogerthatPlugin extends CordovaPlugin {
         };
 
         mActivity.getActionScreenUtils().verifySignedPayload(args, sc);
+    }
+
+    private void listKeyPairs(final CallbackContext callbackContext, final JSONObject args) {
+        SecurityCallback<List<Map<String, String>>> sc = new SecurityCallback<List<Map<String, String>>>(callbackContext) {
+            @Override
+            public void populateResult(List<Map<String, String>> keyPairs, JSONObject obj) throws JSONException {
+                JSONArray array = new JSONArray();
+                for (Map<String, String> pair : keyPairs) {
+                    JSONObject jsonPair = new JSONObject();
+                    for (String key : pair.keySet()) {
+                        jsonPair.put(key, pair.get(key));
+                    }
+                    array.put(jsonPair);
+                }
+                obj.put("keyPairs", array);
+            }
+        };
+
+        mActivity.getActionScreenUtils().listKeyPairs(args, sc);
     }
 
     private void onBackendConnectivityChanged(final CallbackContext callbackContext) throws JSONException {

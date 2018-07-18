@@ -271,12 +271,13 @@ RogerthatPlugin.prototype.news = {
 };
 
 RogerthatPlugin.prototype.security = {
-    createKeyPair : function(successCallback, errorCallback, algorithm, name, message, force, seed) {
+    createKeyPair : function(successCallback, errorCallback, algorithm, name, message, force, seed, arbitraryData) {
         utils.exec(successCallback, errorCallback, "security_createKeyPair", [{"key_algorithm": algorithm,
                                                                                "key_name": name,
                                                                                "message": message,
                                                                                "force": force,
-                                                                               "seed": seed}]);
+                                                                               "seed": seed,
+                                                                               "arbitrary_data": arbitraryData}]);
     },
     hasKeyPair: function(successCallback, errorCallback, algorithm, name, index) {
         utils.exec(successCallback, errorCallback, "security_hasKeyPair", [{"key_algorithm": algorithm,
@@ -321,6 +322,9 @@ RogerthatPlugin.prototype.security = {
                                                                         "key_index": index,
                                                                         "payload": payload,
                                                                         "payload_signature": payloadSignature}]);
+    },
+    listKeyPairs: function(successCallback, errorCallback){
+      utils.exec(successCallback, errorCallback, "security_listKeyPairs", []);
     }
 };
 

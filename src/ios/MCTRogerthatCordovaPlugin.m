@@ -279,6 +279,14 @@
 
 }
 
+- (void)security_listKeyPairs:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper verifyWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                  params:[self getRequestParams:command]];
+
+}
+
 - (void)system_onBackendConnectivityChanged:(CDVInvokedUrlCommand *)command
 {
     HERE();

@@ -282,8 +282,8 @@
 - (void)security_listKeyPairs:(CDVInvokedUrlCommand *)command
 {
     HERE();
-    [self.helper verifyWithResultHandler:[self defaultResultHandlerWithCommand:command]
-                                  params:[self getRequestParams:command]];
+    [self.helper listKeyPairsWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                        params:[self getRequestParams:command]];
 
 }
 

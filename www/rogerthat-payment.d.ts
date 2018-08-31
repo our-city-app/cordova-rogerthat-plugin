@@ -237,8 +237,6 @@ export interface PaymentRequestContext {
   data: MessageEmbeddedApp;
 }
 
-export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext;
-
 /**
  * Return type for a payment request
  */

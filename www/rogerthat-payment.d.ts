@@ -55,7 +55,7 @@ export type ColorSchemes = 'light' | 'primary' | 'secondary' | 'danger' | 'dark'
 export type PaymentProviderId = 'paycash' | 'threefold' | 'payconiq';
 
 export class PaymentProvider {
-  id: string;
+  id: PaymentProviderId;
   name: string;
   logo_url: string;
   version: number;

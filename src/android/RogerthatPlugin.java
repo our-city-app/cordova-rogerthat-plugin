@@ -700,8 +700,10 @@ public class RogerthatPlugin extends CordovaPlugin {
         final String action = JsonUtils.optString(args, "action", null);
         final String title = JsonUtils.optString(args, "title", null);
         final String service = JsonUtils.optString(args, "service", null);
+        final JSONObject activityParams = args.optJSONObject("params");
 
-        String errorMessage = mActivity.getActionScreenUtils().openActivity(actionType, action, title, service, JsonUtils.toMap(args));
+        String errorMessage = mActivity.getActionScreenUtils().openActivity(actionType, action, title, service,
+                activityParams == null ? null : JsonUtils.toMap(activityParams));
         if (errorMessage != null) {
             error(callbackContext, "unknown_error_occurred", errorMessage);
             return;

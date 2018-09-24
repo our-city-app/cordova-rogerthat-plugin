@@ -2,7 +2,7 @@
  * See http://www.rogerthat.net/developers/javascript-api for more info
  */
 import { RogerthatError, RogerthatMessageOpenError, StartScanningQrCodeError, StopScanningQrCodeError } from './rogerthat-errors';
-import { RogerthatPayments } from './rogerthat-payment';
+import { CreatePaymentRequestContext, PaymentRequestContext, PayWidgetContext, RogerthatPayments } from './rogerthat-payment';
 
 export * from './rogerthat-errors';
 export * from './rogerthat-payment';
@@ -396,12 +396,14 @@ export interface RogerthatApp {
   exitWithResult: (result: string) => void;
 }
 
+export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext | PaymentRequestContext;
+
 export class Rogerthat {
   api: RogerthatApi;
   app: RogerthatApp;
   callbacks: RogerthatCallbacks;
   camera: RogerthatCamera;
-  context: (successCallback: (result: any) => void,
+  context: (successCallback: (result: { context: RogerthatContext | null }) => void,
             errorCallback: (error: RogerthatError) => void) => void;
   features: RogerthatFeatures;
   /**

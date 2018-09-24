@@ -55,7 +55,7 @@ export type ColorSchemes = 'light' | 'primary' | 'secondary' | 'danger' | 'dark'
 export type PaymentProviderId = 'paycash' | 'threefold' | 'payconiq';
 
 export class PaymentProvider {
-  id: string;
+  id: PaymentProviderId;
   name: string;
   logo_url: string;
   version: number;
@@ -206,13 +206,46 @@ export interface PayWidgetData {
   message_key: string;
 }
 
-export const enum PayContextType {
-  PAY = 'pay'
+// Content of the 'context' property of MessageEmbeddedApp in case of a payment
+export interface PaymentRequestData {
+  to: string;
+  amount: number;
+  precision: number;
+  currency: string;
+  test_mode: boolean;
+  memo: string;
 }
 
-export interface PayContext {
-  type: PayContextType;
+export const enum RogerthatContextType {
+  PAY_WIDGET = 'pay',
+  CREATE_PAYMENT_REQUEST = 'create-payment-request',
+  PAYMENT_REQUEST = 'payment-request',
+}
+
+export interface PayWidgetContext {
+  type: RogerthatContextType.PAY_WIDGET;
   data: PayWidgetContextData;
+}
+
+export interface CreatePaymentRequestContext {
+  type: RogerthatContextType.CREATE_PAYMENT_REQUEST;
+  data: null;
+}
+
+export interface PaymentRequestContext {
+  type: RogerthatContextType.PAYMENT_REQUEST;
+  data: MessageEmbeddedApp;
+}
+
+/**
+ * Return type for a payment request
+ */
+export interface MessageEmbeddedApp {
+  context: string;
+  result?: string;
+  image_url?: string;
+  title: string;
+  description: string;
 }
 
 export interface PayMethod {

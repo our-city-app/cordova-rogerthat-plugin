@@ -345,7 +345,7 @@ export class RogerthatPayments {
                        algorithm: SupportedAlgorithms,
                        name: string,
                        index: number,
-                       signature_data: string) => void;
+                       transaction: string) => void;
   /**
    * Lists payment providers. If the `all` parameter is true, all available payment providers are returned.
    * Otherwise, only the payment providers that the user is connected with are returned.

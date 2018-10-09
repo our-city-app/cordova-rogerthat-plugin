@@ -10,6 +10,7 @@ export * from './rogerthat-payment';
 
 export interface SignatureData {
   data: string;
+  transaction: string;
 }
 
 export interface RogerthatUserInfo {

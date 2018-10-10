@@ -229,7 +229,7 @@ export interface PayWidgetContext {
 
 export interface CreatePaymentRequestContext {
   type: RogerthatContextType.CREATE_PAYMENT_REQUEST;
-  data: null;
+  data: PaymentRequestData;
 }
 
 export interface PaymentRequestContext {

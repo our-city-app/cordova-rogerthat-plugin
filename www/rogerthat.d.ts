@@ -11,6 +11,7 @@ export * from './rogerthat-payment';
 export interface SignatureData {
   data: string;
   transaction: string;
+  transactionHash: string;
 }
 
 export interface RogerthatUserInfo {

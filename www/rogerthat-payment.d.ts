@@ -281,7 +281,6 @@ export interface CreateTransactionResult {
 
 export interface PayconiqCreateTransactionResult extends CreateTransactionBaseResult {
   payconic_transaction_id: string;
-  provider_id: 'payconic';
   payconic_transaction_url: string;
 }
 

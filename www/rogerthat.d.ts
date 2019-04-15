@@ -2,7 +2,7 @@
  * See http://www.rogerthat.net/developers/javascript-api for more info
  */
 import { RogerthatError, RogerthatMessageOpenError, StartScanningQrCodeError, StopScanningQrCodeError } from './rogerthat-errors';
-import { CreatePaymentRequestContext, PaymentRequestContext, PayWidgetContext, RogerthatPayments } from './rogerthat-payment';
+import { MessageEmbeddedApp, PaymentRequestData, PayWidgetContextData, RogerthatPayments } from './rogerthat-payment';
 
 export * from './rogerthat-errors';
 export * from './rogerthat-payment';
@@ -398,7 +398,35 @@ export interface RogerthatApp {
   exitWithResult: (result: string) => void;
 }
 
-export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext | PaymentRequestContext;
+
+export const enum RogerthatContextType {
+  PAY_WIDGET = 'pay',
+  CREATE_PAYMENT_REQUEST = 'create-payment-request',
+  PAYMENT_REQUEST = 'payment-request',
+  QR_SCANNED = 'qr-scanned',
+}
+
+export interface PayWidgetContext {
+  type: RogerthatContextType.PAY_WIDGET;
+  data: PayWidgetContextData;
+}
+
+export interface CreatePaymentRequestContext {
+  type: RogerthatContextType.CREATE_PAYMENT_REQUEST;
+  data: PaymentRequestData;
+}
+
+export interface PaymentRequestContext {
+  type: RogerthatContextType.PAYMENT_REQUEST;
+  data: MessageEmbeddedApp;
+}
+
+export interface QrScannedContext {
+  type: RogerthatContextType.QR_SCANNED;
+  content: string;
+}
+
+export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext | PaymentRequestContext | QrScannedContext;
 
 export class Rogerthat {
   api: RogerthatApi;

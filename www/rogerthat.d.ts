@@ -423,7 +423,7 @@ export interface PaymentRequestContext {
 
 export interface QrScannedContext {
   type: RogerthatContextType.QR_SCANNED;
-  content: string;
+  data: { content: string };
 }
 
 export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext | PaymentRequestContext | QrScannedContext;

@@ -404,6 +404,7 @@ export const enum RogerthatContextType {
   CREATE_PAYMENT_REQUEST = 'create-payment-request',
   PAYMENT_REQUEST = 'payment-request',
   QR_SCANNED = 'qr-scanned',
+  URL = 'url',
 }
 
 export interface PayWidgetContext {
@@ -426,7 +427,15 @@ export interface QrScannedContext {
   data: { content: string };
 }
 
-export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext | PaymentRequestContext | QrScannedContext;
+/**
+ * Embedded app opened via clicking an url in the browser (aka a deep link)
+ */
+export interface UrlContext {
+  type: RogerthatContextType.URL;
+  data: { content: string };
+}
+
+export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext | PaymentRequestContext | QrScannedContext | UrlContext;
 
 export class Rogerthat {
   api: RogerthatApi;

@@ -216,27 +216,6 @@ export interface PaymentRequestData {
   memo: string;
 }
 
-export const enum RogerthatContextType {
-  PAY_WIDGET = 'pay',
-  CREATE_PAYMENT_REQUEST = 'create-payment-request',
-  PAYMENT_REQUEST = 'payment-request',
-}
-
-export interface PayWidgetContext {
-  type: RogerthatContextType.PAY_WIDGET;
-  data: PayWidgetContextData;
-}
-
-export interface CreatePaymentRequestContext {
-  type: RogerthatContextType.CREATE_PAYMENT_REQUEST;
-  data: PaymentRequestData;
-}
-
-export interface PaymentRequestContext {
-  type: RogerthatContextType.PAYMENT_REQUEST;
-  data: MessageEmbeddedApp;
-}
-
 /**
  * Return type for a payment request
  */

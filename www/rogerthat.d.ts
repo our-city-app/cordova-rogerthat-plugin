@@ -20,6 +20,8 @@ export interface RogerthatUserInfo {
   data: any;
   language: string;
   name: string;
+  firstName: string;
+  lastName: string;
   put: (data: any) => void;
 }
 

@@ -2,16 +2,27 @@
  * See http://www.rogerthat.net/developers/javascript-api for more info
  */
 import { RogerthatError, RogerthatMessageOpenError, StartScanningQrCodeError, StopScanningQrCodeError } from './rogerthat-errors';
-import { MessageEmbeddedApp, PaymentRequestData, PayWidgetContextData, RogerthatPayments } from './rogerthat-payment';
+import { PaymentRequestData, PayWidgetContextData, RogerthatPayments } from './rogerthat-payment';
+import {
+    GetNewsGroupServicesRequestTO,
+    GetNewsGroupServicesResponseTO,
+    GetNewsGroupsRequestTO,
+    GetNewsGroupsResponseTO,
+    GetNewsStreamItemsRequestTO,
+    GetNewsStreamItemsResponseTO,
+    MessageEmbeddedApp,
+    NewsSenderTO,
+} from './types';
 
 export * from './rogerthat-errors';
 export * from './rogerthat-payment';
+export * from './types';
 
 
 export interface SignatureData {
-  data: string;
-  transaction: string;
-  transactionHash: string;
+    data: string;
+    transaction: string;
+    transactionHash: string;
 }
 
 export interface RogerthatUserInfo {
@@ -41,12 +52,6 @@ export interface RogerthatSystem {
   }
 }
 
-export interface RogerthatService {
-  name: string;
-  account: string;
-  data: any;
-}
-
 export interface RogerthatMessage {
   open: (messageKey: string, successCallback: () => void,
          errorCallback: (error: RogerthatMessageOpenError) => void) => void;
@@ -67,25 +72,19 @@ export interface NewsActionButton {
   id: string;
 }
 
-export interface NewsSender {
-  avatar_id: number;
-  email: string;
-  name: string;
-}
-
 export interface NewsItem {
-  buttons: NewsActionButton[];
-  sender: NewsSender;
-  broadcast_type: string;
-  flags: number;
-  id: number;
-  image_url: string;
-  message: string;
-  qr_code_caption: string;
-  qr_code_content: string;
-  reach: number;
-  sort_priority: number;
-  sort_timestamp: number;
+    buttons: NewsActionButton[];
+    sender: NewsSenderTO;
+    broadcast_type: string;
+    flags: number;
+    id: number;
+    image_url: string;
+    message: string;
+    qr_code_caption: string;
+    qr_code_content: string;
+    reach: number;
+    sort_priority: number;
+    sort_timestamp: number;
   timestamp: number;
   title: string;
   type: NewsItemType;
@@ -115,27 +114,6 @@ export interface ListNewsItemsResult {
   items: NewsItem[];
   cursor: string;
 }
-
-export interface RogerthatNews {
-  /**
-   * Count news items
-   */
-  count: (successCallback: (result: CountNewsItemsResult) => void,
-          errorCallback: (result: RogerthatError) => void) => void;
-  /**
-   * Get the details of a news item.
-   */
-  get: (successCallback: (result: NewsItem) => void,
-        errorCallback: (result: RogerthatError) => void,
-        params: { news_id: number }) => void;
-  /**
-   *  List news items for all or 1 service.
-   */
-  list: (successCallback: (result: ListNewsItemsResult) => void,
-         errorCallback: (result: RogerthatError) => void,
-         params: ListNewsItemsParams) => void;
-}
-
 
 export type CameraType = 'front' | 'back';
 
@@ -450,27 +428,35 @@ export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext | 
 export class Rogerthat {
   api: RogerthatApi;
   app: RogerthatApp;
-  callbacks: RogerthatCallbacks;
-  camera: RogerthatCamera;
-  context: (successCallback: (result: { context: RogerthatContext | null }) => void,
-            errorCallback: (error: RogerthatError) => void) => void;
-  features: RogerthatFeatures;
-  /**
-   * The menu item that was pressed to open the html app.
-   */
-  menuItem: RogerthatMenuItem;
-  message: RogerthatMessage;
-  news: RogerthatNews;
-  service: RogerthatService;
-  security: RogerthatSecurity;
-  system: RogerthatSystem;
-  ui: RogerthatUI;
-  user: RogerthatUserInfo;
-  util: RogerthatUtil;
-  /**
-   * Only available if rogerthat-payments plugin is available in the app
-   */
-  payments: RogerthatPayments;
+    callbacks: RogerthatCallbacks;
+    camera: RogerthatCamera;
+    context: (successCallback: (result: { context: RogerthatContext | null }) => void,
+              errorCallback: (error: RogerthatError) => void) => void;
+    features: RogerthatFeatures;
+    /**
+     * The menu item that was pressed to open the html app.
+     */
+    menuItem: RogerthatMenuItem;
+    message: RogerthatMessage;
+    news: {
+        getNewsGroups: (request: GetNewsGroupsRequestTO) => Promise<GetNewsGroupsResponseTO>;
+        getNewsStreamItems: (request: GetNewsStreamItemsRequestTO) => Promise<GetNewsStreamItemsResponseTO>;
+        getNewsGroupServices: (request: GetNewsGroupServicesRequestTO) => Promise<GetNewsGroupServicesResponseTO>;
+    };
+    service: {
+        name: string;
+        account: string;
+        data: any;
+    };
+    security: RogerthatSecurity;
+    system: RogerthatSystem;
+    ui: RogerthatUI;
+    user: RogerthatUserInfo;
+    util: RogerthatUtil;
+    /**
+     * Only available if rogerthat-payments plugin is available in the app
+     */
+    payments: RogerthatPayments;
 }
 
 declare global {

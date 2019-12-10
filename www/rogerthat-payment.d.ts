@@ -1,5 +1,5 @@
 // todo Everything payments-related should be in the rogerthat-payments-plugin but I don't know how
-import { CryptoTransaction, RogerthatPaymentApp, SignatureData, SupportedAlgorithms, UserDetails } from './rogerthat';
+import { CryptoTransaction, PaymentMethod, SignatureData, SupportedAlgorithms, UserDetails } from './rogerthat';
 import { RogerthatError } from './rogerthat-errors';
 
 export interface RogerthatPaymentApp {
@@ -188,14 +188,6 @@ export interface AssetsUpdatedCallbackResult {
   assets: PaymentProviderAsset[];
 }
 
-export interface PaymentMethod {
-  provider_id: PaymentProviderId;
-  currency: string;
-  amount: number;
-  precision: number;
-  target: string;
-}
-
 /** @deprecated */
 export interface PayWidgetData {
   t: 2;
@@ -215,18 +207,6 @@ export interface PaymentRequestData {
   test_mode: boolean;
   memo: string;
 }
-
-/**
- * Return type for a payment request
- */
-export interface MessageEmbeddedApp {
-  context: string;
-  result?: string;
-  image_url?: string;
-  title: string;
-  description: string;
-}
-
 export interface PayMethod {
   amount: number;
   currency: string;

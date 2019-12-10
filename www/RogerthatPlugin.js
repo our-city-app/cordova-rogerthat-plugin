@@ -158,8 +158,44 @@ var utils = {
 };
 
 function RogerthatPlugin() {
-    utils.logFunctionName("constructor");
     patchConsole();
+
+    this.news = {
+        // TODO cleanup obsolete news functions
+        count: function (successCallback, errorCallback, params) {
+            if (!params) {
+                params = {};
+            }
+            utils.exec(successCallback, errorCallback, "news_count", [params]);
+        },
+        get: function (successCallback, errorCallback, params) {
+            if (!params) {
+                params = {};
+            }
+            utils.exec(successCallback, errorCallback, "news_get", [params]);
+        },
+        list: function (successCallback, errorCallback, params) {
+            if (!params) {
+                params = {};
+            }
+            utils.exec(successCallback, errorCallback, "news_list", [params]);
+        },
+        getNewsGroups: function (request) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(resolve, reject, 'news.getNewsGroups', [request]);
+            });
+        },
+        getNewsStreamItems: function (request) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(resolve, reject, 'news.getNewsStreamItems', [request]);
+            });
+        },
+        getNewsGroupServices: function (request) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(resolve, reject, 'news.getNewsGroupServices', [request]);
+            });
+        }
+    };
 }
 
 var apiCallbacksRegister = utils.generateCallbacksRegister(apiUserCallbacks);
@@ -248,27 +284,6 @@ RogerthatPlugin.prototype.message = {
 
 // Set via info call
 RogerthatPlugin.prototype.menuItem = null;
-
-RogerthatPlugin.prototype.news = {
-    count : function(successCallback, errorCallback, params) {
-        if (!params) {
-            params = {};
-        }
-        utils.exec(successCallback, errorCallback, "news_count", [params]);
-    },
-    get : function(successCallback, errorCallback, params) {
-        if (!params) {
-            params = {};
-        }
-        utils.exec(successCallback, errorCallback, "news_get", [params]);
-    },
-    list : function(successCallback, errorCallback, params) {
-        if (!params) {
-            params = {};
-        }
-        utils.exec(successCallback, errorCallback, "news_list", [params]);
-    }
-};
 
 RogerthatPlugin.prototype.security = {
     createKeyPair : function(successCallback, errorCallback, algorithm, name, message, force, seed, arbitraryData) {

@@ -23,7 +23,10 @@ package com.mobicage.rogerthat.cordova;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import androidx.browser.customtabs.CustomTabsIntent;
@@ -38,13 +41,22 @@ import com.mobicage.rogerthat.plugins.friends.ServiceApiCallbackResult;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemInfo;
 import com.mobicage.rogerthat.plugins.messaging.Message;
 import com.mobicage.rogerthat.plugins.news.NewsItem;
+import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
 import com.mobicage.rogerthat.util.ActionScreenUtils;
 import com.mobicage.rogerthat.util.JsonUtils;
+import com.mobicage.rogerthat.util.RequestStore;
 import com.mobicage.rogerthat.util.logging.L;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
+import com.mobicage.rpc.IJSONable;
+import com.mobicage.rpc.IncompleteMessageException;
+import com.mobicage.rpc.IntentResponseHandler;
 import com.mobicage.rpc.config.CloudConstants;
+import com.mobicage.to.news.GetNewsGroupServicesRequestTO;
+import com.mobicage.to.news.GetNewsGroupsRequestTO;
+import com.mobicage.to.news.GetNewsStreamItemsRequestTO;
+import com.mobicage.to.news.GetNewsStreamItemsResponseTO;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
@@ -53,10 +65,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.JSONValue;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+
 
 public class RogerthatPlugin extends CordovaPlugin {
 
@@ -78,6 +88,8 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     private ServiceMenuItemInfo mMenuItem;
 
+    private BroadcastReceiver mBroadcastReceiver;
+    private Map<String, CallbackContext> callbackMap = new HashMap<>();
     private ActionScreenUtils.IntentCallback mIntentCallback = new ActionScreenUtils.IntentCallback() {
         @Override
         public boolean apiResult(ServiceApiCallbackResult result) {
@@ -124,132 +136,172 @@ public class RogerthatPlugin extends CordovaPlugin {
     };
 
     @Override
-    public boolean execute(final String action, final JSONArray args, final CallbackContext callbackContext) {
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
         if (!"log".equals(action)) {
             L.i("RogerthatPlugin.execute '" + action + "'");
         }
-        getActivity();
-        mActivity.getMainService().postOnUIHandler(new SafeRunnable() {
-            @Override
-            protected void safeRun() throws Exception {
-                try {
-                    if (action == null) {
-                        callbackContext.error("Cannot excute 'null' action");
-                        return;
-                    }
-                    if (action.equals("start")) {
-                        if (mCallbackContext != null) {
-                            callbackContext.error("RogerthatPlugin already running.");
-                            return;
-                        }
-                        mCallbackContext = callbackContext;
-
-                        mActivity.getActionScreenUtils().start(mIntentCallback);
-
-                        PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
-                        pluginResult.setKeepCallback(true);
-                        mCallbackContext.sendPluginResult(pluginResult);
-
-                        setInfo();
-                        setBadges();
-
-                    } else if (action.equals("log")) {
-                        log(args.optJSONObject(0));
-                        callbackContext.success(new JSONObject());
-                    } else if (action.equals("api_call")) {
-                        sendApiCall(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("api_resultHandlerConfigured")) {
-                        mApiResultHandlerSet = true;
-                        mActivity.getActionScreenUtils().deliverAllApiResults();
-                        callbackContext.success(new JSONObject());
-
-                    } else if (action.equals("app_exit")) {
-                        exitApp(callbackContext);
-
-                    } else if (action.equals("app_exitWithResult")) {
-                        exitAppWithResult(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("camera_startScanningQrCode")) {
-                        startScanningQrCode(callbackContext);
-
-                    } else if (action.equals("camera_stopScanningQrCode")) {
-                        stopScanningQrCode(callbackContext);
-
-                    } else if (action.equals("context")) {
-                        getContext(callbackContext);
-
-                    } else if (action.equals("message_open")) {
-                        openMessage(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("news_count")) {
-                        countNews(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("news_get")) {
-                        getNews(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("news_list")) {
-                        listNews(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("security_createKeyPair")) {
-                        createKeyPair(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("security_hasKeyPair")) {
-                        hasKeyPair(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("security_getPublicKey")) {
-                        getPublicKey(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("security_getSeed")) {
-                        getSeed(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("security_listAddresses")) {
-                        listAddresses(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("security_getAddress")) {
-                        getAddress(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("security_sign")) {
-                        signPayload(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("security_verify")) {
-                        verifySignedPayload(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("security_listKeyPairs")) {
-                        listKeyPairs(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("system_onBackendConnectivityChanged")) {
-                        onBackendConnectivityChanged(callbackContext);
-
-                    } else if (action.equals("ui_hideKeyboard")) {
-                        hideKeyboard(callbackContext);
-
-                    } else if (action.equals("user_put")) {
-                        putUserData(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("util_embeddedAppTranslations")) {
-                        embeddedAppTranslations(callbackContext);
-
-                    } else if (action.equals("util_isConnectedToInternet")) {
-                        isConnectedToInternet(callbackContext);
-
-                    } else if (action.equals("util_open")) {
-                        openActivity(callbackContext, args.optJSONObject(0));
-
-                    } else if (action.equals("util_playAudio")) {
-                        playAudio(callbackContext, args.optJSONObject(0));
-
-                    } else {
-                        L.e("RogerthatPlugin.execute did not match '" + action + "'");
-                        callbackContext.error("RogerthatPlugin doesn't know how to excecute this action.");
-                    }
-                } catch (JSONException e) {
-                    L.e("JSONException... This should never happen", e);
-                    callbackContext.error("Could not process json...");
+        cordova.getActivity().runOnUiThread(() -> {
+            try {
+                if (action == null) {
+                    callbackContext.error("Cannot execute 'null' action");
+                    return;
                 }
+                processAction(action, callbackContext, args.optJSONObject(0));
+            } catch (Exception e) {
+                L.bug(e);
+                callbackContext.error(e.getMessage());
             }
         });
         return true;
+    }
+
+    private void processAction(String action, CallbackContext callbackContext, JSONObject args) throws JSONException, IncompleteMessageException {
+        if (args == null) {
+            args = new JSONObject();
+        }
+        switch (processAction(action)) {
+            case "start":
+                if (mCallbackContext != null) {
+                    callbackContext.error("RogerthatPlugin already running.");
+                    return;
+                }
+                mCallbackContext = callbackContext;
+
+                mActivity.getActionScreenUtils().start(mIntentCallback);
+
+                PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
+                pluginResult.setKeepCallback(true);
+                mCallbackContext.sendPluginResult(pluginResult);
+
+                setInfo();
+                setBadges();
+
+                break;
+            case "log":
+                log(args);
+                callbackContext.success(new JSONObject());
+                break;
+            case "api_call":
+                sendApiCall(callbackContext, args);
+
+                break;
+            case "api_resultHandlerConfigured":
+                mApiResultHandlerSet = true;
+                mActivity.getActionScreenUtils().deliverAllApiResults();
+                callbackContext.success(new JSONObject());
+
+                break;
+            case "app_exit":
+                exitApp(callbackContext);
+
+                break;
+            case "app_exitWithResult":
+                exitAppWithResult(callbackContext, args);
+                break;
+            case "camera_startScanningQrCode":
+                startScanningQrCode(callbackContext);
+                break;
+            case "camera_stopScanningQrCode":
+                stopScanningQrCode(callbackContext);
+
+                break;
+            case "context":
+                getContext(callbackContext);
+                break;
+            case "message_open":
+                openMessage(callbackContext, args);
+                break;
+            // TODO: remove old news calls
+            case "news_count":
+                countNews(callbackContext, args);
+                break;
+            case "news_get":
+                getNews(callbackContext, args);
+                break;
+            case "news_list":
+                listNews(callbackContext, args);
+                break;
+            case "security_createKeyPair":
+                createKeyPair(callbackContext, args);
+                break;
+            case "security_hasKeyPair":
+                hasKeyPair(callbackContext, args);
+                break;
+            case "security_getPublicKey":
+                getPublicKey(callbackContext, args);
+                break;
+            case "security_getSeed":
+                getSeed(callbackContext, args);
+                break;
+            case "security_listAddresses":
+                listAddresses(callbackContext, args);
+                break;
+            case "security_getAddress":
+                getAddress(callbackContext, args);
+                break;
+            case "security_sign":
+                signPayload(callbackContext, args);
+                break;
+            case "security_verify":
+                verifySignedPayload(callbackContext, args);
+                break;
+            case "security_listKeyPairs":
+                listKeyPairs(callbackContext, args);
+                break;
+            case "system_onBackendConnectivityChanged":
+                onBackendConnectivityChanged(callbackContext);
+                break;
+            case "ui_hideKeyboard":
+                hideKeyboard(callbackContext);
+                break;
+            case "user_put":
+                putUserData(callbackContext, args);
+                break;
+            case "util_embeddedAppTranslations":
+                embeddedAppTranslations(callbackContext);
+                break;
+            case "util_isConnectedToInternet":
+                isConnectedToInternet(callbackContext);
+                break;
+            case "util_open":
+                openActivity(callbackContext, args);
+                break;
+            case "util_playAudio":
+                playAudio(callbackContext, args);
+                break;
+            case "news.getNewsGroups":
+                getNewsGroups(callbackContext, new GetNewsGroupsRequestTO(JsonUtils.toMap(args)));
+                break;
+            case "news.getNewsStreamItems":
+                getNewsStreamItems(callbackContext, new GetNewsStreamItemsRequestTO(JsonUtils.toMap(args)));
+                break;
+            case "news.getNewsGroupServices":
+                getNewsGroupServices(callbackContext, new GetNewsGroupServicesRequestTO(JsonUtils.toMap(args)));
+                break;
+            default:
+                L.e("RogerthatPlugin.execute did not match '" + action + "'");
+                callbackContext.error("RogerthatPlugin doesn't know how to execute this action.");
+                break;
+        }
+    }
+
+    private String processAction(String action) {
+        return action;
+    }
+
+    private void getNewsGroups(CallbackContext callbackContext, GetNewsGroupsRequestTO request) {
+        callbackMap.put(mActivity.getNewsPlugin().getNewsGroups(), callbackContext);
+    }
+
+    private void getNewsStreamItems(CallbackContext callbackContext, GetNewsStreamItemsRequestTO request) {
+        String requestId = UUID.randomUUID().toString();
+        IntentResponseHandler<GetNewsStreamItemsResponseTO> handler = new IntentResponseHandler<>(NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS, NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED, requestId);
+        callbackMap.put(requestId, callbackContext);
+        com.mobicage.api.news.Rpc.getNewsStreamItems(handler, request, true);
+    }
+
+    private void getNewsGroupServices(CallbackContext callbackContext, GetNewsGroupServicesRequestTO request) {
+        callbackMap.put(mActivity.getNewsPlugin().getNewsGroupServices(request), callbackContext);
     }
 
     public Boolean shouldAllowRequest(String url) {
@@ -286,6 +338,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             mActivity.getActionScreenUtils().stopBacklogListener();
         }
         mActivity.getActionScreenUtils().stop();
+        mActivity.unregisterReceiver(mBroadcastReceiver);
     }
 
     private void returnArgsMissing(final CallbackContext callbackContext) {
@@ -802,6 +855,51 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     protected void pluginInitialize() {
         mMenuItem = getActivity().getServiceMenuItem();
+        mBroadcastReceiver = getBroadcastReceiver();
+        mActivity.registerReceiver(mBroadcastReceiver, getIntentFilter());
+    }
+
+    private IntentFilter getIntentFilter() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(NewsPlugin.GET_NEWS_GROUPS_SUCCESS);
+        filter.addAction(NewsPlugin.GET_NEWS_GROUPS_FAILED);
+        filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS);
+        filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED);
+        filter.addAction(NewsPlugin.GET_NEWS_GROUP_SERVICES_SUCCESS);
+        filter.addAction(NewsPlugin.GET_NEWS_GROUP_SERVICES_FAILED);
+        return filter;
+    }
+
+    private BroadcastReceiver getBroadcastReceiver() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                String requestId = intent.getStringExtra(IntentResponseHandler.REQUEST_ID);
+                if (action == null || requestId == null) {
+                    return;
+                }
+                IJSONable response = RequestStore.getResponse(requestId);
+                CallbackContext callbackContext = callbackMap.get(requestId);
+                if (response == null || callbackContext == null) {
+                    return;
+                }
+                switch (action) {
+                    case NewsPlugin.GET_NEWS_GROUPS_SUCCESS:
+                    case NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS:
+                    case NewsPlugin.GET_NEWS_GROUP_SERVICES_SUCCESS:
+                        callbackContext.success(new JSONObject(response.toJSONMap()));
+                        break;
+                    case NewsPlugin.GET_NEWS_GROUPS_FAILED:
+                    case NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED:
+                    case NewsPlugin.GET_NEWS_GROUP_SERVICES_FAILED:
+                        Exception err = (Exception) intent.getSerializableExtra(IntentResponseHandler.ERROR);
+                        L.e(err);
+                        error(callbackContext, "unknown", mActivity.getString(R.string.unknown_error_occurred));
+                        break;
+                }
+            }
+        };
     }
 
     private CordovaActionScreenActivity getActivity() {

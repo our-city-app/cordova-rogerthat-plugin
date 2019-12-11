@@ -251,16 +251,16 @@ export interface AppNewsItemTO {
   timestamp: number;
   title: string | null;
   type: number;
-  users_that_rogered: string | null;
+  users_that_rogered: string[];
   version: number;
 }
 
 export interface AppPaymentProviderTO {
-  asset_types: string | null;
+  asset_types: string[];
   background_color: string | null;
   black_white_logo: string | null;
   button_color: string | null;
-  currencies: string | null;
+  currencies: string[];
   description: string | null;
   embedded_app_id: string | null;
   enabled: boolean;
@@ -318,11 +318,11 @@ export interface AutoCompleteFormTO {
 }
 
 export interface AutoCompleteTO {
-  choices: string | null;
+  choices: string[];
   keyboard_type: string | null;
   max_chars: number;
   place_holder: string | null;
-  suggestions: string | null;
+  suggestions: string[];
   value: string | null;
 }
 
@@ -376,7 +376,7 @@ export interface CancelPaymentResponseTO {
 }
 
 export interface ChangeMembersOfConversationRequestTO {
-  emails: string | null;
+  emails: string[];
   parent_message_key: string | null;
   type: string | null;
 }
@@ -567,7 +567,7 @@ export interface DeleteGroupResponseTO {
 }
 
 export interface DeleteProfileAddressesRequestTO {
-  uids: string | null;
+  uids: string[];
 }
 
 export interface DeleteProfileAddressesResponseTO {
@@ -601,8 +601,8 @@ export interface EmbeddedAppTO {
   name: string | null;
   serving_url: string | null;
   title: string | null;
-  types: string | null;
-  url_regexes: string | null;
+  types: string[];
+  url_regexes: string[];
   version: number;
 }
 
@@ -659,11 +659,11 @@ export interface FindFriendResponseTO {
 }
 
 export interface FindRogerthatUsersViaEmailRequestTO {
-  email_addresses: string | null;
+  email_addresses: string[];
 }
 
 export interface FindRogerthatUsersViaEmailResponseTO {
-  matched_addresses: string | null;
+  matched_addresses: string[];
 }
 
 export interface FindRogerthatUsersViaFacebookRequestTO {
@@ -706,7 +706,7 @@ export interface FindServiceResponseTO {
 }
 
 export interface FloatListWidgetResultTO {
-  values: number;
+  values: number[];
 }
 
 export interface FloatWidgetResultTO {
@@ -859,7 +859,7 @@ export interface FriendTO {
   sharesLocation: boolean;
   type: number;
   userData: string | null;
-  versions: number;
+  versions: number[];
 }
 
 export interface GPSLocationFormMessageTO {
@@ -962,7 +962,7 @@ export interface GetConversationMemberMatchesRequestTO {
 }
 
 export interface GetConversationMemberMatchesResponseTO {
-  emails: string | null;
+  emails: string[];
 }
 
 export interface GetConversationMembersRequestTO {
@@ -1003,8 +1003,8 @@ export interface GetEmbeddedAppResponseTO {
   name: string | null;
   serving_url: string | null;
   title: string | null;
-  types: string | null;
-  url_regexes: string | null;
+  types: string[];
+  url_regexes: string[];
   version: number;
 }
 
@@ -1033,7 +1033,7 @@ export interface GetFriendEmailsRequestTO {
 }
 
 export interface GetFriendEmailsResponseTO {
-  emails: string | null;
+  emails: string[];
   friend_set_version: number;
   generation: number;
 }
@@ -1042,7 +1042,7 @@ export interface GetFriendInvitationSecretsRequestTO {
 }
 
 export interface GetFriendInvitationSecretsResponseTO {
-  secrets: string | null;
+  secrets: string[];
 }
 
 export interface GetFriendLocationRequestTO {
@@ -1128,7 +1128,7 @@ export interface GetJobsCriteriaResponseTO {
   job_domains: JobKeyLabelTO[];
   location: JobCriteriaLocationTO | null;
   notifications: JobCriteriaNotificationsTO | null;
-  keywords: string | null;
+  keywords: string[];
 }
 
 export interface GetJobsRequestTO {
@@ -1159,7 +1159,7 @@ export interface GetLocationResponseTO {
 }
 
 export interface GetMapItemDetailsRequestTO {
-  ids: string | null;
+  ids: string[];
   tag: string | null;
 }
 
@@ -1199,7 +1199,7 @@ export interface GetMapResponseTO {
 }
 
 export interface GetMenuIconRequestTO {
-  coords: number;
+  coords: number[];
   service: string | null;
   size: number;
 }
@@ -1230,7 +1230,7 @@ export interface GetNewsGroupsResponseTO {
 }
 
 export interface GetNewsItemsRequestTO {
-  ids: number;
+  ids: number[];
 }
 
 export interface GetNewsItemsResponseTO {
@@ -1256,7 +1256,7 @@ export interface GetNewsStreamFilterTO {
 export interface GetNewsStreamItemsRequestTO {
   filter: GetNewsStreamFilterTO | null;
   cursor: string | null;
-  news_ids: number;
+  news_ids: number[];
 }
 
 export interface GetNewsStreamItemsResponseTO {
@@ -1358,13 +1358,13 @@ export interface GetServiceActionInfoResponseTO {
   profileData: string | null;
   qualifiedIdentifier: string | null;
   staticFlow: string | null;
-  staticFlowBrandings: string | null;
+  staticFlowBrandings: string[];
   staticFlowHash: string | null;
   type: number;
 }
 
 export interface GetStaticFlowRequestTO {
-  coords: number;
+  coords: number[];
   service: string | null;
   staticFlowHash: string | null;
 }
@@ -1415,7 +1415,7 @@ export interface GetUserLinkResponseTO {
 export interface GroupTO {
   avatar_hash: string | null;
   guid: string | null;
-  members: string | null;
+  members: string[];
   name: string | null;
 }
 
@@ -1425,7 +1425,7 @@ export interface HeartBeatRequestTO {
   buildFingerPrint: string | null;
   deviceId: string | null;
   deviceModelName: string | null;
-  embeddedApps: string | null;
+  embeddedApps: string[];
   flushBackLog: boolean;
   localeCountry: string | null;
   localeLanguage: string | null;
@@ -1567,7 +1567,7 @@ export interface ListStreetsRequestTO {
 }
 
 export interface ListStreetsResponseTO {
-  items: string | null;
+  items: string[];
 }
 
 export interface ListZipCodesRequestTO {
@@ -1719,7 +1719,7 @@ export interface MapVoteOptionTO {
 }
 
 export interface MarkMessagesAsReadRequestTO {
-  message_keys: string | null;
+  message_keys: string[];
   parent_message_key: string | null;
 }
 
@@ -1792,7 +1792,7 @@ export interface MessageFlowFinishedResponseTO {
 export interface MessageFlowMemberResultRequestTO {
   run: JsMessageFlowMemberRunTO | null;
   email_admins: boolean;
-  emails: string | null;
+  emails: string[];
   end_id: string | null;
   flush_id: string | null;
   message_flow_name: string | null;
@@ -1852,7 +1852,7 @@ export interface MultiSelectFormTO {
 
 export interface MultiSelectTO {
   choices: ChoiceTO[];
-  values: string | null;
+  values: string[];
 }
 
 export interface MyDigiPassAddress {
@@ -2018,7 +2018,7 @@ export interface NewJobNotificationResponseTO {
 }
 
 export interface NewJobsRequestTO {
-  activity_types: string | null;
+  activity_types: string[];
   creation_time: number;
 }
 
@@ -2510,7 +2510,7 @@ export interface PolygonTO {
 }
 
 export interface PostalAddressTO {
-  address_lines: string | null;
+  address_lines: string[];
   country: string | null;
   locality: string | null;
   post_office_box_number: string | null;
@@ -2521,7 +2521,7 @@ export interface PostalAddressTO {
 
 export interface PressMenuIconRequestTO {
   context: string | null;
-  coords: number;
+  coords: number[];
   generation: number;
   hashed_tag: string | null;
   message_flow_run_id: string | null;
@@ -2560,7 +2560,7 @@ export interface PushNotificationSettingsTO {
 export interface PutGroupRequestTO {
   avatar: string | null;
   guid: string | null;
-  members: string | null;
+  members: string[];
   name: string | null;
 }
 
@@ -2674,9 +2674,9 @@ export interface SaveJobInterestsResponseTO {
 export interface SaveJobsCriteriaRequestTO {
   location: JobCriteriaLocationTO | null;
   notifications: JobCriteriaNotificationsTO | null;
-  contract_types: string | null;
-  job_domains: string | null;
-  keywords: string | null;
+  contract_types: string[];
+  job_domains: string[];
+  keywords: string[];
 }
 
 export interface SaveJobsCriteriaResponseTO {
@@ -2706,7 +2706,7 @@ export interface SaveMapNotificationsResponseTO {
 }
 
 export interface SaveNewsGroupFiltersRequestTO {
-  enabled_filters: string | null;
+  enabled_filters: string[];
   group_id: string | null;
 }
 
@@ -2724,7 +2724,7 @@ export interface SaveNewsGroupServicesResponseTO {
 }
 
 export interface SaveNewsStatisticsRequestTO {
-  news_ids: number;
+  news_ids: number[];
   type: string | null;
 }
 
@@ -2758,7 +2758,7 @@ export interface SendMessageRequestTO {
   embedded_app: MessageEmbeddedApp | null;
   flags: number;
   key: string | null;
-  members: string | null;
+  members: string[];
   message: string | null;
   parent_key: string | null;
   priority: number;
@@ -2781,7 +2781,7 @@ export interface ServiceMenuItemTO {
   form: FormVersionTO | null;
   link: ServiceMenuItemLinkTO | null;
   action: number;
-  coords: number;
+  coords: number[];
   embeddedApp: string | null;
   fallThrough: boolean;
   hashedTag: string | null;
@@ -2790,7 +2790,7 @@ export interface ServiceMenuItemTO {
   iconName: string | null;
   label: string | null;
   requiresWifi: boolean;
-  roles: number;
+  roles: number[];
   runInBackground: boolean;
   screenBranding: string | null;
   staticFlowHash: string | null;
@@ -2810,7 +2810,7 @@ export interface ServiceMenuTO {
   shareImageUrl: string | null;
   shareLabel: string | null;
   shareLinkUrl: string | null;
-  staticFlowBrandings: string | null;
+  staticFlowBrandings: string[];
 }
 
 export interface SetMobilePhoneNumberRequestTO {
@@ -2830,17 +2830,17 @@ export interface SetSecureInfoResponseTO {
 
 export interface SettingsTO {
   consent: ConsentSettingsTO | null;
-  backgroundFetchTimestamps: number;
+  backgroundFetchTimestamps: number[];
   geoLocationSamplingIntervalBattery: number;
   geoLocationSamplingIntervalCharging: number;
   geoLocationTracking: boolean;
   geoLocationTrackingDays: number;
-  geoLocationTrackingTimeslot: number;
+  geoLocationTrackingTimeslot: number[];
   operatingVersion: number;
   recordGeoLocationWithPhoneCalls: boolean;
   recordPhoneCalls: boolean;
   recordPhoneCallsDays: number;
-  recordPhoneCallsTimeslot: number;
+  recordPhoneCallsTimeslot: number[];
   useGPSBattery: boolean;
   useGPSCharging: boolean;
   version: number;
@@ -3005,7 +3005,7 @@ export interface SingleSliderTO {
 
 export interface StartChatRequestTO {
   avatar: string | null;
-  emails: string | null;
+  emails: string[];
   key: string | null;
   topic: string | null;
 }
@@ -3016,8 +3016,8 @@ export interface StartChatResponseTO {
 }
 
 export interface StartFlowRequestTO {
-  attachments_to_dwnl: string | null;
-  brandings_to_dwnl: string | null;
+  attachments_to_dwnl: string[];
+  brandings_to_dwnl: string[];
   flow_params: string | null;
   message_flow_run_id: string | null;
   parent_message_key: string | null;
@@ -3399,7 +3399,7 @@ export interface TransferCompletedResponseTO {
 }
 
 export interface UnicodeListWidgetResultTO {
-  values: string | null;
+  values: string[];
 }
 
 export interface UnicodeWidgetResultTO {
@@ -3491,8 +3491,8 @@ export interface UpdateEmbeddedAppRequestTO {
   name: string | null;
   serving_url: string | null;
   title: string | null;
-  types: string | null;
-  url_regexes: string | null;
+  types: string[];
+  url_regexes: string[];
   version: number;
 }
 
@@ -3539,7 +3539,7 @@ export interface UpdateFriendSelectFormResponseTO {
 
 export interface UpdateFriendSetRequestTO {
   added_friend: FriendTO | null;
-  friends: string | null;
+  friends: string[];
   version: number;
 }
 
@@ -3696,18 +3696,18 @@ export interface UpdatePaymentAssetResponseTO {
 
 export interface UpdatePaymentAssetsRequestTO {
   assets: PaymentProviderAssetTO[];
-  provider_ids: string | null;
+  provider_ids: string[];
 }
 
 export interface UpdatePaymentAssetsResponseTO {
 }
 
 export interface UpdatePaymentProviderRequestTO {
-  asset_types: string | null;
+  asset_types: string[];
   background_color: string | null;
   black_white_logo: string | null;
   button_color: string | null;
-  currencies: string | null;
+  currencies: string[];
   description: string | null;
   embedded_app_id: string | null;
   enabled: boolean;
@@ -3724,7 +3724,7 @@ export interface UpdatePaymentProviderResponseTO {
 
 export interface UpdatePaymentProvidersRequestTO {
   payment_providers: AppPaymentProviderTO[];
-  provider_ids: string | null;
+  provider_ids: string[];
 }
 
 export interface UpdatePaymentProvidersResponseTO {
@@ -3865,11 +3865,11 @@ export interface UpdateTextLineFormResponseTO {
 export interface UpdateUserDataRequestTO {
   app_data: string | null;
   data: string | null;
-  keys: string | null;
+  keys: string[];
   service: string | null;
   type: string | null;
   user_data: string | null;
-  values: string | null;
+  values: string[];
 }
 
 export interface UpdateUserDataResponseTO {
@@ -3960,7 +3960,7 @@ export interface DatetimeComponentValueTO {
 export interface FileComponentTO {
   validators: FormValidatorTO[];
   description: string | null;
-  file_types: string | null;
+  file_types: string[];
   id: string | null;
   sensitive: boolean;
   title: string | null;
@@ -4150,7 +4150,7 @@ export interface MultiSelectComponentTO {
 }
 
 export interface MultiSelectComponentValueTO {
-  values: string | null;
+  values: string[];
   id: string | null;
   readonly type: FormComponentType.MULTI_SELECT
 }

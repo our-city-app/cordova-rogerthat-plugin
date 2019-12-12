@@ -4,14 +4,14 @@
 import { RogerthatError, RogerthatMessageOpenError, StartScanningQrCodeError, StopScanningQrCodeError } from './rogerthat-errors';
 import { PaymentRequestData, PayWidgetContextData, RogerthatPayments } from './rogerthat-payment';
 import {
-    GetNewsGroupServicesRequestTO,
-    GetNewsGroupServicesResponseTO,
-    GetNewsGroupsRequestTO,
-    GetNewsGroupsResponseTO,
-    GetNewsStreamItemsRequestTO,
-    GetNewsStreamItemsResponseTO,
-    MessageEmbeddedApp,
-    NewsSenderTO,
+  GetNewsGroupServicesRequestTO,
+  GetNewsGroupServicesResponseTO,
+  GetNewsGroupsRequestTO,
+  GetNewsGroupsResponseTO,
+  GetNewsStreamItemsRequestTO,
+  GetNewsStreamItemsResponseTO,
+  MessageEmbeddedApp,
+  NewsSenderTO,
 } from './types';
 
 export * from './rogerthat-errors';
@@ -33,7 +33,7 @@ export interface RogerthatUserInfo {
   name: string;
   firstName: string;
   lastName: string;
-  put: (data: any) => void;
+  put: (data: any) => Promise<void>;
 }
 
 export interface RogerthatSystem {
@@ -53,8 +53,9 @@ export interface RogerthatSystem {
 }
 
 export interface RogerthatMessage {
-  open: (messageKey: string, successCallback: () => void,
-         errorCallback: (error: RogerthatMessageOpenError) => void) => void;
+  open: (messageKey: string,
+         successCallback?: () => void,
+         errorCallback?: (error: RogerthatMessageOpenError) => void) => Promise<void>;
 }
 
 export const enum NewsItemType {
@@ -119,11 +120,11 @@ export type CameraType = 'front' | 'back';
 
 export interface RogerthatCamera {
   startScanningQrCode: (cameraType: CameraType,
-                        successCallback: () => void,
-                        errorCallback: (error: StartScanningQrCodeError) => void) => void;
+                        successCallback?: () => void,
+                        errorCallback?: (error: StartScanningQrCodeError) => void) => Promise<void>;
   stopScanningQrCode: (cameraType: CameraType,
-                       successCallback: () => void,
-                       errorCallback: (error: StopScanningQrCodeError) => void) => void;
+                       successCallback?: () => void,
+                       errorCallback?: (error: StopScanningQrCodeError) => void) => Promise<void>;
 }
 
 export interface PublicKey {
@@ -284,7 +285,7 @@ export interface RogerthatFeatures {
 }
 
 export interface RogerthatUI {
-  hideKeyboard: () => void; // Android only
+  hideKeyboard: () => Promise<void>; // Android only
 }
 
 export interface InternetConnectionStatus {
@@ -296,21 +297,29 @@ interface Translations {
   /**
    * Example: { 'name': {'nl': 'Naam', 'en': 'Name'} }
    */
-  [key: string]: { [key: string]: string };
+  [ key: string ]: { [ key: string ]: string };
+}
+
+export interface OpenParams {
+  action_type?: string | null;
+  action: string;
+  title?: string | null;
+  service?: string | null;
+  params?: { [ key: string ]: any };
 }
 
 export interface RogerthatUtil {
   _translateHTML: () => void;
   _translations: { defaultLanguage: string; values: Translations };
-  embeddedAppTranslations: (successCallback: (translations: { translations: any }) => void,
-                            errorCallback: (error: RogerthatError) => void) => void;
-  isConnectedToInternet: (callback: (connectionStatus: InternetConnectionStatus) => void) => void;
-  open: (params: any, successCallback: () => void, errorCallback: () => void) => void;
+  embeddedAppTranslations: (successCallback?: (translations: { translations: any }) => void,
+                            errorCallback?: (error: RogerthatError) => void) => Promise<{ translations: any }>;
+  isConnectedToInternet: (callback?: (connectionStatus: InternetConnectionStatus) => void) => Promise<InternetConnectionStatus>
+  open: (params: OpenParams, successCallback?: () => void, errorCallback?: () => void) => Promise<void>;
 
   /**
    * Play a sound file which is located in the branding zip
    */
-  playAudio: (path: string, callback: () => void) => void;
+  playAudio: (path: string, successCallback?: () => void, errorCallback?: () => void) => Promise<void>;
   translate: (key: string, parameters: any) => string;
   /**
    * Generate a random UUID
@@ -370,7 +379,7 @@ export interface RogerthatApiCallbacks {
 }
 
 export interface RogerthatApi {
-  call: (method: string, data: string | null, tag: string) => void;
+  call: (method: string, data: string | null, tag: string) => Promise<void>;
   callbacks: RogerthatApiCallbacks;
 }
 
@@ -428,20 +437,20 @@ export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext | 
 export class Rogerthat {
   api: RogerthatApi;
   app: RogerthatApp;
-    callbacks: RogerthatCallbacks;
-    camera: RogerthatCamera;
-    context: (successCallback: (result: { context: RogerthatContext | null }) => void,
-              errorCallback: (error: RogerthatError) => void) => void;
-    features: RogerthatFeatures;
-    /**
-     * The menu item that was pressed to open the html app.
-     */
-    menuItem: RogerthatMenuItem;
-    message: RogerthatMessage;
-    news: {
-        getNewsGroups: (request: GetNewsGroupsRequestTO) => Promise<GetNewsGroupsResponseTO>;
-        getNewsStreamItems: (request: GetNewsStreamItemsRequestTO) => Promise<GetNewsStreamItemsResponseTO>;
-        getNewsGroupServices: (request: GetNewsGroupServicesRequestTO) => Promise<GetNewsGroupServicesResponseTO>;
+  callbacks: RogerthatCallbacks;
+  camera: RogerthatCamera;
+  context: (successCallback?: (result: { context: RogerthatContext | null }) => void,
+            errorCallback?: (error: RogerthatError) => void) => Promise<{ context: RogerthatContext | null }>;
+  features: RogerthatFeatures;
+  /**
+   * The menu item that was pressed to open the html app.
+   */
+  menuItem: RogerthatMenuItem;
+  message: RogerthatMessage;
+  news: {
+    getNewsGroups: (request: GetNewsGroupsRequestTO) => Promise<GetNewsGroupsResponseTO>;
+    getNewsStreamItems: (request: GetNewsStreamItemsRequestTO) => Promise<GetNewsStreamItemsResponseTO>;
+    getNewsGroupServices: (request: GetNewsGroupServicesRequestTO) => Promise<GetNewsGroupServicesResponseTO>;
     };
     service: {
         name: string;

@@ -65,8 +65,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.JSONValue;
 
-import java.util.*;
-
 
 public class RogerthatPlugin extends CordovaPlugin {
 
@@ -879,9 +877,13 @@ public class RogerthatPlugin extends CordovaPlugin {
                 if (action == null || requestId == null) {
                     return;
                 }
-                IJSONable response = RequestStore.getResponse(requestId);
                 CallbackContext callbackContext = callbackMap.get(requestId);
-                if (response == null || callbackContext == null) {
+                if (callbackContext == null) {
+                    // Some other activity may have executed this, ignore
+                    return;
+                }
+                IJSONable response = RequestStore.getResponse(requestId);
+                if (response == null) {
                     return;
                 }
                 switch (action) {

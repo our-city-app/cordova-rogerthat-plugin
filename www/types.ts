@@ -1,30 +1,11 @@
-export type MapAnnouncementTO = 
-  TextAnnouncementTO;
-
-export type NewFlowMessageTO = 
-  MessageTO
-  | FormMessageTO;
-
-export type MapGeometryTO = 
-  MultiLineStringGeometryTO
-  | LineStringGeometryTO
-  | PolygonGeometryTO
-  | MultiPolygonGeometryTO;
-
-export type MapSectionTO = 
-  GeometrySectionTO
-  | TextSectionTO
-  | VoteSectionTO;
-
-export type Step = 
-  MessageFlowStepTO
-  | FormFlowStepTO;
-
-export type NextActionTO = 
-  NextActionURLTO
-  | NextActionSectionTO
-  | NextActionSubmitTO
-  | NextActionDefaultTO;
+export type FormComponentTO = 
+  FileComponentTO
+  | TextInputComponentTO
+  | MultiSelectComponentTO
+  | DatetimeComponentTO
+  | ParagraphComponentTO
+  | LocationComponentTO
+  | SingleSelectComponentTO;
 
 export type FormComponentValueTO = 
   SingleSelectComponentValueTO
@@ -44,18 +25,43 @@ export type FormValidatorTO =
   | RequiredValidatorTO
   | MinDateValidatorTO;
 
-export type FormComponentTO = 
-  FileComponentTO
-  | TextInputComponentTO
-  | MultiSelectComponentTO
-  | DatetimeComponentTO
-  | ParagraphComponentTO
-  | LocationComponentTO
-  | SingleSelectComponentTO;
+export type MapAnnouncementTO = 
+  TextAnnouncementTO;
+
+export type MapGeometryTO = 
+  MultiLineStringGeometryTO
+  | LineStringGeometryTO
+  | PolygonGeometryTO
+  | MultiPolygonGeometryTO;
+
+export type MapSectionTO = 
+  GeometrySectionTO
+  | TextSectionTO
+  | VoteSectionTO;
+
+export type NewFlowMessageTO = 
+  MessageTO
+  | FormMessageTO;
+
+export type NextActionTO = 
+  NextActionURLTO
+  | NextActionSectionTO
+  | NextActionSubmitTO
+  | NextActionDefaultTO;
+
+export type Step = 
+  MessageFlowStepTO
+  | FormFlowStepTO;
 
 
-export enum MapAnnouncementType {
-  TEXT = 'text',
+export enum FormComponentType {
+  TEXT_INPUT = 'text_input',
+  FILE = 'file',
+  MULTI_SELECT = 'multi_select',
+  DATETIME = 'datetime',
+  PARAGRAPH = 'paragraph',
+  LOCATION = 'location',
+  SINGLE_SELECT = 'single_select',
 }
 
 export enum FormValidatorType {
@@ -69,9 +75,8 @@ export enum FormValidatorType {
   MINDATE = 'mindate',
 }
 
-export enum MessageType {
-  MESSAGE = 'message_step',
-  FORM = 'form_step',
+export enum MapAnnouncementType {
+  TEXT = 'text',
 }
 
 export enum MapGeometryType {
@@ -87,26 +92,21 @@ export enum MapSectionType {
   VOTE = 'vote',
 }
 
-export enum NextActionType {
-  URL = 'url',
-  SECTION = 'section',
-  SUBMIT = 'submit',
-  NEXT = 'next',
-}
-
-export enum FormComponentType {
-  TEXT_INPUT = 'text_input',
-  FILE = 'file',
-  MULTI_SELECT = 'multi_select',
-  DATETIME = 'datetime',
-  PARAGRAPH = 'paragraph',
-  LOCATION = 'location',
-  SINGLE_SELECT = 'single_select',
+export enum MessageType {
+  MESSAGE = 'message_step',
+  FORM = 'form_step',
 }
 
 export enum NewMessageType {
   FORM_MESSAGE = 2,
   MESSAGE = 1,
+}
+
+export enum NextActionType {
+  URL = 'url',
+  SECTION = 'section',
+  SUBMIT = 'submit',
+  NEXT = 'next',
 }
 
 
@@ -552,6 +552,26 @@ export interface DateSelectTO {
   unit: string | null;
 }
 
+export interface DatetimeComponentTO {
+  validators: FormValidatorTO[];
+  description: string | null;
+  format: string | null;
+  id: string | null;
+  sensitive: boolean;
+  title: string | null;
+  readonly type: FormComponentType.DATETIME
+}
+
+export interface DatetimeComponentValueTO {
+  day: number;
+  hour: number;
+  minute: number;
+  month: number;
+  year: number;
+  id: string | null;
+  readonly type: FormComponentType.DATETIME
+}
+
 export interface DeleteConversationRequestTO {
   parent_message_key: string | null;
 }
@@ -640,6 +660,24 @@ export interface FacebookRogerthatProfileMatchTO {
   rtId: string | null;
 }
 
+export interface FileComponentTO {
+  validators: FormValidatorTO[];
+  description: string | null;
+  file_types: string[];
+  id: string | null;
+  sensitive: boolean;
+  title: string | null;
+  readonly type: FormComponentType.FILE
+}
+
+export interface FileComponentValueTO {
+  file_type: string | null;
+  name: string | null;
+  value: string | null;
+  id: string | null;
+  readonly type: FormComponentType.FILE
+}
+
 export interface FindFriendItemTO {
   avatar_url: string | null;
   email: string | null;
@@ -721,6 +759,45 @@ export interface FlowStartedRequestTO {
 }
 
 export interface FlowStartedResponseTO {
+}
+
+export interface FormFlowStepTO {
+  form_result: FormResult | null;
+  acknowledged_timestamp: number;
+  answer_id: string | null;
+  button: string | null;
+  display_value: string | null;
+  form_type: string | null;
+  message: string | null;
+  message_flow_id: string | null;
+  received_timestamp: number;
+  step_id: string | null;
+  readonly step_type: MessageType.FORM
+}
+
+export interface FormMessageTO {
+  attachments: AttachmentTO[];
+  form: FormTO | null;
+  member: MemberStatusTO | null;
+  alert_flags: number;
+  branding: string | null;
+  broadcast_type: string | null;
+  context: string | null;
+  default_priority: number;
+  default_sticky: boolean;
+  flags: number;
+  key: string | null;
+  message: string | null;
+  parent_key: string | null;
+  priority: number;
+  sender: string | null;
+  threadTimestamp: number;
+  thread_avatar_hash: string | null;
+  thread_background_color: string | null;
+  thread_size: number;
+  thread_text_color: string | null;
+  timestamp: number;
+  readonly message_type: NewMessageType.FORM_MESSAGE
 }
 
 export interface FormResult {
@@ -919,6 +996,13 @@ export interface GeoPointWithTimestampTO {
   latitude: number;
   longitude: number;
   timestamp: number;
+}
+
+export interface GeometrySectionTO {
+  geometry: MapGeometryTO[];
+  description: string | null;
+  title: string | null;
+  readonly type: MapSectionType.GEOMETRY
 }
 
 export interface GetAppAssetRequestTO {
@@ -1249,6 +1333,7 @@ export interface GetNewsResponseTO {
 
 export interface GetNewsStreamFilterTO {
   group_id: string | null;
+  group_type: string | null;
   search_string: string | null;
   service_identity_email: string | null;
 }
@@ -1262,6 +1347,7 @@ export interface GetNewsStreamItemsRequestTO {
 export interface GetNewsStreamItemsResponseTO {
   items: NewsStreamItemTO[];
   cursor: string | null;
+  group_id: string | null;
 }
 
 export interface GetPaymentAssetsRequestTO {
@@ -1562,6 +1648,12 @@ export interface JsMessageFlowMemberRunTO {
   service_action: string | null;
 }
 
+export interface LineStringGeometryTO {
+  line: CoordsListTO | null;
+  color: string | null;
+  readonly type: MapGeometryType.LINE_STRING
+}
+
 export interface ListStreetsRequestTO {
   zip_code: string | null;
 }
@@ -1575,6 +1667,23 @@ export interface ListZipCodesRequestTO {
 
 export interface ListZipCodesResponseTO {
   items: ZipCodeTO[];
+}
+
+export interface LocationComponentTO {
+  validators: FormValidatorTO[];
+  description: string | null;
+  id: string | null;
+  sensitive: boolean;
+  title: string | null;
+  readonly type: FormComponentType.LOCATION
+}
+
+export interface LocationComponentValueTO {
+  address: PostalAddressTO | null;
+  latitude: number;
+  longitude: number;
+  id: string | null;
+  readonly type: FormComponentType.LOCATION
 }
 
 export interface LocationRecordTO {
@@ -1726,6 +1835,28 @@ export interface MarkMessagesAsReadRequestTO {
 export interface MarkMessagesAsReadResponseTO {
 }
 
+export interface MaxDateValidatorTO {
+  day: number;
+  error_message: string | null;
+  hour: number;
+  minute: number;
+  month: number;
+  year: number;
+  readonly type: FormValidatorType.MAXDATE
+}
+
+export interface MaxLengthValidatorTO {
+  error_message: string | null;
+  value: number;
+  readonly type: FormValidatorType.MAXLENGTH
+}
+
+export interface MaxValidatorTO {
+  error_message: string | null;
+  value: number;
+  readonly type: FormValidatorType.MAX
+}
+
 export interface MediaTO {
   content: string | null;
   height: number;
@@ -1803,6 +1934,17 @@ export interface MessageFlowMemberResultRequestTO {
 export interface MessageFlowMemberResultResponseTO {
 }
 
+export interface MessageFlowStepTO {
+  acknowledged_timestamp: number;
+  answer_id: string | null;
+  button: string | null;
+  message: string | null;
+  message_flow_id: string | null;
+  received_timestamp: number;
+  step_id: string | null;
+  readonly step_type: MessageType.MESSAGE
+}
+
 export interface MessageLockedRequestTO {
   members: MemberStatusTO[];
   dirty_behavior: number;
@@ -1811,6 +1953,84 @@ export interface MessageLockedRequestTO {
 }
 
 export interface MessageLockedResponseTO {
+}
+
+export interface MessageTO {
+  attachments: AttachmentTO[];
+  buttons: ButtonTO[];
+  embedded_app: MessageEmbeddedApp | null;
+  members: MemberStatusTO[];
+  alert_flags: number;
+  branding: string | null;
+  broadcast_type: string | null;
+  context: string | null;
+  default_priority: number;
+  default_sticky: boolean;
+  dismiss_button_ui_flags: number;
+  flags: number;
+  key: string | null;
+  message: string | null;
+  parent_key: string | null;
+  priority: number;
+  sender: string | null;
+  threadTimestamp: number;
+  thread_avatar_hash: string | null;
+  thread_background_color: string | null;
+  thread_size: number;
+  thread_text_color: string | null;
+  timeout: number;
+  timestamp: number;
+  readonly message_type: NewMessageType.MESSAGE
+}
+
+export interface MinDateValidatorTO {
+  day: number;
+  error_message: string | null;
+  hour: number;
+  minute: number;
+  month: number;
+  year: number;
+  readonly type: FormValidatorType.MINDATE
+}
+
+export interface MinLengthValidatorTO {
+  error_message: string | null;
+  value: number;
+  readonly type: FormValidatorType.MINLENGTH
+}
+
+export interface MinValidatorTO {
+  error_message: string | null;
+  value: number;
+  readonly type: FormValidatorType.MIN
+}
+
+export interface MultiLineStringGeometryTO {
+  lines: CoordsListTO[];
+  color: string | null;
+  readonly type: MapGeometryType.MULTI_LINE_STRING
+}
+
+export interface MultiPolygonGeometryTO {
+  polygons: PolygonTO[];
+  color: string | null;
+  readonly type: MapGeometryType.MULTI_POLYGON
+}
+
+export interface MultiSelectComponentTO {
+  choices: ValueTO[];
+  validators: FormValidatorTO[];
+  description: string | null;
+  id: string | null;
+  sensitive: boolean;
+  title: string | null;
+  readonly type: FormComponentType.MULTI_SELECT
+}
+
+export interface MultiSelectComponentValueTO {
+  values: string[];
+  id: string | null;
+  readonly type: FormComponentType.MULTI_SELECT
 }
 
 export interface MultiSelectFormMessageTO {
@@ -2202,6 +2422,24 @@ export interface NewsStreamItemTO {
   type: number;
 }
 
+export interface NextActionDefaultTO {
+  readonly type: NextActionType.NEXT
+}
+
+export interface NextActionSectionTO {
+  section: string | null;
+  readonly type: NextActionType.SECTION
+}
+
+export interface NextActionSubmitTO {
+  readonly type: NextActionType.SUBMIT
+}
+
+export interface NextActionURLTO {
+  url: string | null;
+  readonly type: NextActionType.URL
+}
+
 export interface OauthFormMessageTO {
   attachments: AttachmentTO[];
   form: OauthFormTO | null;
@@ -2306,6 +2544,12 @@ export interface OpenIdWidgetResultTO {
   name: string | null;
   phone_number: string | null;
   phone_number_verified: boolean;
+}
+
+export interface ParagraphComponentTO {
+  description: string | null;
+  title: string | null;
+  readonly type: FormComponentType.PARAGRAPH
 }
 
 export interface PayFormMessageTO {
@@ -2505,6 +2749,12 @@ export interface PokeServiceRequestTO {
 export interface PokeServiceResponseTO {
 }
 
+export interface PolygonGeometryTO {
+  rings: CoordsListTO[];
+  color: string | null;
+  readonly type: MapGeometryType.POLYGON
+}
+
 export interface PolygonTO {
   rings: CoordsListTO[];
 }
@@ -2646,6 +2896,12 @@ export interface ReceivePaymentResponseTO {
   success: boolean;
 }
 
+export interface RegexValidatorTO {
+  error_message: string | null;
+  value: string | null;
+  readonly type: FormValidatorType.REGEX
+}
+
 export interface ReportObjectionableContentRequestTO {
   object: string | null;
   reason: string | null;
@@ -2661,6 +2917,11 @@ export interface RequestShareLocationRequestTO {
 }
 
 export interface RequestShareLocationResponseTO {
+}
+
+export interface RequiredValidatorTO {
+  error_message: string | null;
+  readonly type: FormValidatorType.REQUIRED
 }
 
 export interface SaveJobInterestsRequestTO {
@@ -2913,6 +3174,22 @@ export interface SignWidgetResultTO {
   public_key: PublicKeyTO | null;
   payload_signature: string | null;
   total_signature: string | null;
+}
+
+export interface SingleSelectComponentTO {
+  choices: ValueTO[];
+  validators: FormValidatorTO[];
+  description: string | null;
+  id: string | null;
+  sensitive: boolean;
+  title: string | null;
+  readonly type: FormComponentType.SINGLE_SELECT
+}
+
+export interface SingleSelectComponentValueTO {
+  value: string | null;
+  id: string | null;
+  readonly type: FormComponentType.SINGLE_SELECT
 }
 
 export interface SingleSelectFormMessageTO {
@@ -3279,6 +3556,12 @@ export interface TestFormRequestTO {
 export interface TestFormResponseTO {
 }
 
+export interface TextAnnouncementTO {
+  description: string | null;
+  title: string | null;
+  readonly type: MapAnnouncementType.TEXT
+}
+
 export interface TextBlockFormMessageTO {
   attachments: AttachmentTO[];
   form: TextBlockFormTO | null;
@@ -3323,6 +3606,24 @@ export interface TextBlockTO {
   value: string | null;
 }
 
+export interface TextInputComponentTO {
+  validators: FormValidatorTO[];
+  description: string | null;
+  id: string | null;
+  keyboard_type: string | null;
+  multiline: boolean;
+  placeholder: string | null;
+  sensitive: boolean;
+  title: string | null;
+  readonly type: FormComponentType.TEXT_INPUT
+}
+
+export interface TextInputComponentValueTO {
+  value: string | null;
+  id: string | null;
+  readonly type: FormComponentType.TEXT_INPUT
+}
+
 export interface TextLineFormMessageTO {
   attachments: AttachmentTO[];
   form: TextLineFormTO | null;
@@ -3365,6 +3666,12 @@ export interface TextLineTO {
   max_chars: number;
   place_holder: string | null;
   value: string | null;
+}
+
+export interface TextSectionTO {
+  description: string | null;
+  title: string | null;
+  readonly type: MapSectionType.TEXT
 }
 
 export interface Thumbnail {
@@ -3926,6 +4233,12 @@ export interface VerifyPaymentAssetResponseTO {
   success: boolean;
 }
 
+export interface VoteSectionTO {
+  options: MapVoteOptionTO[];
+  id: string | null;
+  readonly type: MapSectionType.VOTE
+}
+
 export interface Widget {
 }
 
@@ -3935,315 +4248,4 @@ export interface WidgetResult {
 export interface ZipCodeTO {
   name: string | null;
   zip_code: string | null;
-}
-
-export interface DatetimeComponentTO {
-  validators: FormValidatorTO[];
-  description: string | null;
-  format: string | null;
-  id: string | null;
-  sensitive: boolean;
-  title: string | null;
-  readonly type: FormComponentType.DATETIME
-}
-
-export interface DatetimeComponentValueTO {
-  day: number;
-  hour: number;
-  minute: number;
-  month: number;
-  year: number;
-  id: string | null;
-  readonly type: FormComponentType.DATETIME
-}
-
-export interface FileComponentTO {
-  validators: FormValidatorTO[];
-  description: string | null;
-  file_types: string[];
-  id: string | null;
-  sensitive: boolean;
-  title: string | null;
-  readonly type: FormComponentType.FILE
-}
-
-export interface FileComponentValueTO {
-  file_type: string | null;
-  name: string | null;
-  value: string | null;
-  id: string | null;
-  readonly type: FormComponentType.FILE
-}
-
-export interface FormFlowStepTO {
-  form_result: FormResult | null;
-  acknowledged_timestamp: number;
-  answer_id: string | null;
-  button: string | null;
-  display_value: string | null;
-  form_type: string | null;
-  message: string | null;
-  message_flow_id: string | null;
-  received_timestamp: number;
-  step_id: string | null;
-  readonly step_type: MessageType.FORM
-}
-
-export interface FormMessageTO {
-  attachments: AttachmentTO[];
-  form: FormTO | null;
-  member: MemberStatusTO | null;
-  alert_flags: number;
-  branding: string | null;
-  broadcast_type: string | null;
-  context: string | null;
-  default_priority: number;
-  default_sticky: boolean;
-  flags: number;
-  key: string | null;
-  message: string | null;
-  parent_key: string | null;
-  priority: number;
-  sender: string | null;
-  threadTimestamp: number;
-  thread_avatar_hash: string | null;
-  thread_background_color: string | null;
-  thread_size: number;
-  thread_text_color: string | null;
-  timestamp: number;
-  readonly message_type: NewMessageType.FORM_MESSAGE
-}
-
-export interface GeometrySectionTO {
-  geometry: MapGeometryTO[];
-  description: string | null;
-  title: string | null;
-  readonly type: MapSectionType.GEOMETRY
-}
-
-export interface LineStringGeometryTO {
-  line: CoordsListTO | null;
-  color: string | null;
-  readonly type: MapGeometryType.LINE_STRING
-}
-
-export interface LocationComponentTO {
-  validators: FormValidatorTO[];
-  description: string | null;
-  id: string | null;
-  sensitive: boolean;
-  title: string | null;
-  readonly type: FormComponentType.LOCATION
-}
-
-export interface LocationComponentValueTO {
-  address: PostalAddressTO | null;
-  latitude: number;
-  longitude: number;
-  id: string | null;
-  readonly type: FormComponentType.LOCATION
-}
-
-export interface MaxDateValidatorTO {
-  day: number;
-  error_message: string | null;
-  hour: number;
-  minute: number;
-  month: number;
-  year: number;
-  readonly type: FormValidatorType.MAXDATE
-}
-
-export interface MaxLengthValidatorTO {
-  error_message: string | null;
-  value: number;
-  readonly type: FormValidatorType.MAXLENGTH
-}
-
-export interface MaxValidatorTO {
-  error_message: string | null;
-  value: number;
-  readonly type: FormValidatorType.MAX
-}
-
-export interface MessageFlowStepTO {
-  acknowledged_timestamp: number;
-  answer_id: string | null;
-  button: string | null;
-  message: string | null;
-  message_flow_id: string | null;
-  received_timestamp: number;
-  step_id: string | null;
-  readonly step_type: MessageType.MESSAGE
-}
-
-export interface MessageTO {
-  attachments: AttachmentTO[];
-  buttons: ButtonTO[];
-  embedded_app: MessageEmbeddedApp | null;
-  members: MemberStatusTO[];
-  alert_flags: number;
-  branding: string | null;
-  broadcast_type: string | null;
-  context: string | null;
-  default_priority: number;
-  default_sticky: boolean;
-  dismiss_button_ui_flags: number;
-  flags: number;
-  key: string | null;
-  message: string | null;
-  parent_key: string | null;
-  priority: number;
-  sender: string | null;
-  threadTimestamp: number;
-  thread_avatar_hash: string | null;
-  thread_background_color: string | null;
-  thread_size: number;
-  thread_text_color: string | null;
-  timeout: number;
-  timestamp: number;
-  readonly message_type: NewMessageType.MESSAGE
-}
-
-export interface MinDateValidatorTO {
-  day: number;
-  error_message: string | null;
-  hour: number;
-  minute: number;
-  month: number;
-  year: number;
-  readonly type: FormValidatorType.MINDATE
-}
-
-export interface MinLengthValidatorTO {
-  error_message: string | null;
-  value: number;
-  readonly type: FormValidatorType.MINLENGTH
-}
-
-export interface MinValidatorTO {
-  error_message: string | null;
-  value: number;
-  readonly type: FormValidatorType.MIN
-}
-
-export interface MultiLineStringGeometryTO {
-  lines: CoordsListTO[];
-  color: string | null;
-  readonly type: MapGeometryType.MULTI_LINE_STRING
-}
-
-export interface MultiPolygonGeometryTO {
-  polygons: PolygonTO[];
-  color: string | null;
-  readonly type: MapGeometryType.MULTI_POLYGON
-}
-
-export interface MultiSelectComponentTO {
-  choices: ValueTO[];
-  validators: FormValidatorTO[];
-  description: string | null;
-  id: string | null;
-  sensitive: boolean;
-  title: string | null;
-  readonly type: FormComponentType.MULTI_SELECT
-}
-
-export interface MultiSelectComponentValueTO {
-  values: string[];
-  id: string | null;
-  readonly type: FormComponentType.MULTI_SELECT
-}
-
-export interface NextActionDefaultTO {
-  readonly type: NextActionType.NEXT
-}
-
-export interface NextActionSectionTO {
-  section: string | null;
-  readonly type: NextActionType.SECTION
-}
-
-export interface NextActionSubmitTO {
-  readonly type: NextActionType.SUBMIT
-}
-
-export interface NextActionURLTO {
-  url: string | null;
-  readonly type: NextActionType.URL
-}
-
-export interface ParagraphComponentTO {
-  description: string | null;
-  title: string | null;
-  readonly type: FormComponentType.PARAGRAPH
-}
-
-export interface PolygonGeometryTO {
-  rings: CoordsListTO[];
-  color: string | null;
-  readonly type: MapGeometryType.POLYGON
-}
-
-export interface RegexValidatorTO {
-  error_message: string | null;
-  value: string | null;
-  readonly type: FormValidatorType.REGEX
-}
-
-export interface RequiredValidatorTO {
-  error_message: string | null;
-  readonly type: FormValidatorType.REQUIRED
-}
-
-export interface SingleSelectComponentTO {
-  choices: ValueTO[];
-  validators: FormValidatorTO[];
-  description: string | null;
-  id: string | null;
-  sensitive: boolean;
-  title: string | null;
-  readonly type: FormComponentType.SINGLE_SELECT
-}
-
-export interface SingleSelectComponentValueTO {
-  value: string | null;
-  id: string | null;
-  readonly type: FormComponentType.SINGLE_SELECT
-}
-
-export interface TextAnnouncementTO {
-  description: string | null;
-  title: string | null;
-  readonly type: MapAnnouncementType.TEXT
-}
-
-export interface TextInputComponentTO {
-  validators: FormValidatorTO[];
-  description: string | null;
-  id: string | null;
-  keyboard_type: string | null;
-  multiline: boolean;
-  placeholder: string | null;
-  sensitive: boolean;
-  title: string | null;
-  readonly type: FormComponentType.TEXT_INPUT
-}
-
-export interface TextInputComponentValueTO {
-  value: string | null;
-  id: string | null;
-  readonly type: FormComponentType.TEXT_INPUT
-}
-
-export interface TextSectionTO {
-  description: string | null;
-  title: string | null;
-  readonly type: MapSectionType.TEXT
-}
-
-export interface VoteSectionTO {
-  options: MapVoteOptionTO[];
-  id: string | null;
-  readonly type: MapSectionType.VOTE
 }

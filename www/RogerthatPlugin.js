@@ -183,6 +183,11 @@ function RogerthatPlugin() {
             }
             utils.exec(successCallback, errorCallback, "news_list", [params]);
         },
+        getNewsGroup: function (request) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(resolve, reject, 'news.getNewsGroup', [request]);
+            });
+        },
         getNewsGroups: function (request) {
             return new Promise(function (resolve, reject) {
                 utils.exec(resolve, reject, 'news.getNewsGroups', [request]);

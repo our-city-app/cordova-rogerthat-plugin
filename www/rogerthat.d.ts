@@ -4,6 +4,8 @@
 import { RogerthatError, RogerthatMessageOpenError, StartScanningQrCodeError, StopScanningQrCodeError } from './rogerthat-errors';
 import { PaymentRequestData, PayWidgetContextData, RogerthatPayments } from './rogerthat-payment';
 import {
+  GetNewsGroupRequestTO,
+  GetNewsGroupResponseTO,
   GetNewsGroupServicesRequestTO,
   GetNewsGroupServicesResponseTO,
   GetNewsGroupsRequestTO,
@@ -448,10 +450,11 @@ export class Rogerthat {
   menuItem: RogerthatMenuItem;
   message: RogerthatMessage;
   news: {
+    getNewsGroup: (request: GetNewsGroupRequestTO) => Promise<GetNewsGroupResponseTO>;
     getNewsGroups: (request: GetNewsGroupsRequestTO) => Promise<GetNewsGroupsResponseTO>;
     getNewsStreamItems: (request: GetNewsStreamItemsRequestTO) => Promise<GetNewsStreamItemsResponseTO>;
     getNewsGroupServices: (request: GetNewsGroupServicesRequestTO) => Promise<GetNewsGroupServicesResponseTO>;
-    };
+  };
     service: {
         name: string;
         account: string;

@@ -1293,6 +1293,14 @@ export interface GetMenuIconResponseTO {
   iconHash: string | null;
 }
 
+export interface GetNewsGroupRequestTO {
+  group_id: string | null;
+}
+
+export interface GetNewsGroupResponseTO {
+  group: NewsGroupTO | null;
+}
+
 export interface GetNewsGroupServicesRequestTO {
   cursor: string | null;
   group_id: string | null;

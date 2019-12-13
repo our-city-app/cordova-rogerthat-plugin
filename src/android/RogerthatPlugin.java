@@ -53,10 +53,7 @@ import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.IntentResponseHandler;
 import com.mobicage.rpc.config.CloudConstants;
-import com.mobicage.to.news.GetNewsGroupServicesRequestTO;
-import com.mobicage.to.news.GetNewsGroupsRequestTO;
-import com.mobicage.to.news.GetNewsStreamItemsRequestTO;
-import com.mobicage.to.news.GetNewsStreamItemsResponseTO;
+import com.mobicage.to.news.*;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
@@ -267,6 +264,9 @@ public class RogerthatPlugin extends CordovaPlugin {
             case "util_playAudio":
                 playAudio(callbackContext, args);
                 break;
+            case "news.getNewsGroup":
+                getNewsGroup(callbackContext, new GetNewsGroupRequestTO(JsonUtils.toMap(args)));
+                break;
             case "news.getNewsGroups":
                 getNewsGroups(callbackContext, new GetNewsGroupsRequestTO(JsonUtils.toMap(args)));
                 break;
@@ -285,6 +285,10 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     private String processAction(String action) {
         return action;
+    }
+
+    private void getNewsGroup(CallbackContext callbackContext, GetNewsGroupRequestTO request) {
+        callbackMap.put(mActivity.getNewsPlugin().getNewsGroup(request), callbackContext);
     }
 
     private void getNewsGroups(CallbackContext callbackContext, GetNewsGroupsRequestTO request) {
@@ -859,6 +863,8 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     private IntentFilter getIntentFilter() {
         IntentFilter filter = new IntentFilter();
+        filter.addAction(NewsPlugin.GET_NEWS_GROUP_SUCCESS);
+        filter.addAction(NewsPlugin.GET_NEWS_GROUP_FAILED);
         filter.addAction(NewsPlugin.GET_NEWS_GROUPS_SUCCESS);
         filter.addAction(NewsPlugin.GET_NEWS_GROUPS_FAILED);
         filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS);
@@ -887,11 +893,13 @@ public class RogerthatPlugin extends CordovaPlugin {
                     return;
                 }
                 switch (action) {
+                    case NewsPlugin.GET_NEWS_GROUP_SUCCESS:
                     case NewsPlugin.GET_NEWS_GROUPS_SUCCESS:
                     case NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS:
                     case NewsPlugin.GET_NEWS_GROUP_SERVICES_SUCCESS:
                         callbackContext.success(new JSONObject(response.toJSONMap()));
                         break;
+                    case NewsPlugin.GET_NEWS_GROUP_FAILED:
                     case NewsPlugin.GET_NEWS_GROUPS_FAILED:
                     case NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED:
                     case NewsPlugin.GET_NEWS_GROUP_SERVICES_FAILED:

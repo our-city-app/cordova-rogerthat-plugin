@@ -1,7 +1,7 @@
 /**
  * See http://www.rogerthat.net/developers/javascript-api for more info
  */
-import { RogerthatError, RogerthatMessageOpenError, StartScanningQrCodeError, StopScanningQrCodeError } from './rogerthat-errors';
+import { RogerthatError } from './rogerthat-errors';
 import { PaymentRequestData, PayWidgetContextData, RogerthatPayments } from './rogerthat-payment';
 import {
   GetNewsGroupRequestTO,
@@ -22,9 +22,9 @@ export * from './types';
 
 
 export interface SignatureData {
-    data: string;
-    transaction: string;
-    transactionHash: string;
+  data: string;
+  transaction: string;
+  transactionHash: string;
 }
 
 export interface RogerthatUserInfo {
@@ -55,9 +55,8 @@ export interface RogerthatSystem {
 }
 
 export interface RogerthatMessage {
-  open: (messageKey: string,
-         successCallback?: () => void,
-         errorCallback?: (error: RogerthatMessageOpenError) => void) => Promise<void>;
+  // Returned error may be of type RogerthatMessageOpenError
+  open: (messageKey: string) => Promise<void>;
 }
 
 export const enum NewsItemType {
@@ -76,18 +75,18 @@ export interface NewsActionButton {
 }
 
 export interface NewsItem {
-    buttons: NewsActionButton[];
-    sender: NewsSenderTO;
-    broadcast_type: string;
-    flags: number;
-    id: number;
-    image_url: string;
-    message: string;
-    qr_code_caption: string;
-    qr_code_content: string;
-    reach: number;
-    sort_priority: number;
-    sort_timestamp: number;
+  buttons: NewsActionButton[];
+  sender: NewsSenderTO;
+  broadcast_type: string;
+  flags: number;
+  id: number;
+  image_url: string;
+  message: string;
+  qr_code_caption: string;
+  qr_code_content: string;
+  reach: number;
+  sort_priority: number;
+  sort_timestamp: number;
   timestamp: number;
   title: string;
   type: NewsItemType;
@@ -121,12 +120,10 @@ export interface ListNewsItemsResult {
 export type CameraType = 'front' | 'back';
 
 export interface RogerthatCamera {
-  startScanningQrCode: (cameraType: CameraType,
-                        successCallback?: () => void,
-                        errorCallback?: (error: StartScanningQrCodeError) => void) => Promise<void>;
-  stopScanningQrCode: (cameraType: CameraType,
-                       successCallback?: () => void,
-                       errorCallback?: (error: StopScanningQrCodeError) => void) => Promise<void>;
+  // Returned error may be of type StartScanningQrCodeError
+  startScanningQrCode: (cameraType: CameraType) => Promise<void>;
+  // Returned error may be of type StopScanningQrCodeError
+  stopScanningQrCode: (cameraType: CameraType) => Promise<void>;
 }
 
 export interface PublicKey {
@@ -269,8 +266,8 @@ export interface RogerthatSecurity {
            index: number,
            payload: string,
            payload_signature: string) => void;
- listKeyPairs: (successCallback: (result: KeyPairList) => void,
-                errorCallback: (error: RogerthatError) => void) => void;
+  listKeyPairs: (successCallback: (result: KeyPairList) => void,
+                 errorCallback: (error: RogerthatError) => void) => void;
 
 }
 
@@ -313,15 +310,14 @@ export interface OpenParams {
 export interface RogerthatUtil {
   _translateHTML: () => void;
   _translations: { defaultLanguage: string; values: Translations };
-  embeddedAppTranslations: (successCallback?: (translations: { translations: any }) => void,
-                            errorCallback?: (error: RogerthatError) => void) => Promise<{ translations: any }>;
-  isConnectedToInternet: (callback?: (connectionStatus: InternetConnectionStatus) => void) => Promise<InternetConnectionStatus>
-  open: (params: OpenParams, successCallback?: () => void, errorCallback?: () => void) => Promise<void>;
+  embeddedAppTranslations: () => Promise<{ translations: any }>;
+  isConnectedToInternet: () => Promise<InternetConnectionStatus>
+  open: (params: OpenParams) => Promise<void>;
 
   /**
    * Play a sound file which is located in the branding zip
    */
-  playAudio: (path: string, successCallback?: () => void, errorCallback?: () => void) => Promise<void>;
+  playAudio: (path: string) => Promise<void>;
   translate: (key: string, parameters: any) => string;
   /**
    * Generate a random UUID
@@ -441,8 +437,7 @@ export class Rogerthat {
   app: RogerthatApp;
   callbacks: RogerthatCallbacks;
   camera: RogerthatCamera;
-  context: (successCallback?: (result: { context: RogerthatContext | null }) => void,
-            errorCallback?: (error: RogerthatError) => void) => Promise<{ context: RogerthatContext | null }>;
+  context: () => Promise<{ context: RogerthatContext | null }>;
   features: RogerthatFeatures;
   /**
    * The menu item that was pressed to open the html app.
@@ -455,20 +450,20 @@ export class Rogerthat {
     getNewsStreamItems: (request: GetNewsStreamItemsRequestTO) => Promise<GetNewsStreamItemsResponseTO>;
     getNewsGroupServices: (request: GetNewsGroupServicesRequestTO) => Promise<GetNewsGroupServicesResponseTO>;
   };
-    service: {
-        name: string;
-        account: string;
-        data: any;
-    };
-    security: RogerthatSecurity;
-    system: RogerthatSystem;
-    ui: RogerthatUI;
-    user: RogerthatUserInfo;
-    util: RogerthatUtil;
-    /**
-     * Only available if rogerthat-payments plugin is available in the app
-     */
-    payments: RogerthatPayments;
+  service: {
+    name: string;
+    account: string;
+    data: any;
+  };
+  security: RogerthatSecurity;
+  system: RogerthatSystem;
+  ui: RogerthatUI;
+  user: RogerthatUserInfo;
+  util: RogerthatUtil;
+  /**
+   * Only available if rogerthat-payments plugin is available in the app
+   */
+  payments: RogerthatPayments;
 }
 
 declare global {

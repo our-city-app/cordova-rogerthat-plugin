@@ -44,14 +44,15 @@ export interface RogerthatSystem {
   appVersion: string; // '2.0.2000.I'
   appName: string; // 'Rogerthat'
   appId: string; // 'rogerthat'
-  // Older builds don't support this
-  colors?: {
+  colors: {
     accent: string;
     primary: string;
     primaryDark: string;
     text: string;
     textInverse: string;
-  }
+  };
+  debug: boolean;
+  baseUrl: string;
 }
 
 export interface RogerthatMessage {

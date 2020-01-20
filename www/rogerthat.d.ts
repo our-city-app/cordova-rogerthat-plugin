@@ -30,7 +30,7 @@ export interface SignatureData {
 export interface RogerthatUserInfo {
   account: string;
   avatarUrl: string;
-  data: any;
+  data: { [ key: string ]: any };
   language: string;
   name: string;
   firstName: string;
@@ -53,6 +53,7 @@ export interface RogerthatSystem {
   };
   debug: boolean;
   baseUrl: string;
+  mainService: string;
 }
 
 export interface RogerthatMessage {

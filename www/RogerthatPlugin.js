@@ -198,11 +198,6 @@ function RogerthatPlugin() {
                 utils.exec(resolve, reject, 'news.getNewsStreamItems', [request]);
             });
         },
-        getNewsGroupServices: function (request) {
-            return new Promise(function (resolve, reject) {
-                utils.exec(resolve, reject, 'news.getNewsGroupServices', [request]);
-            });
-        }
     };
 }
 

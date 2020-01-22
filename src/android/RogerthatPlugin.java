@@ -228,13 +228,13 @@ public class RogerthatPlugin extends CordovaPlugin {
             case "news_list":
                 listNews(callbackContext, args);
                 break;
-            case "news.getNewsGroup":
+            case "news_getNewsGroup":
                 getNewsGroup(callbackContext, new GetNewsGroupRequestTO(JsonUtils.toMap(args)));
                 break;
-            case "news.getNewsGroups":
+            case "news_getNewsGroups":
                 getNewsGroups(callbackContext, new GetNewsGroupsRequestTO(JsonUtils.toMap(args)));
                 break;
-            case "news.getNewsStreamItems":
+            case "news_getNewsStreamItems":
                 getNewsStreamItems(callbackContext, new GetNewsStreamItemsRequestTO(JsonUtils.toMap(args)));
                 break;
             case "security_createKeyPair":

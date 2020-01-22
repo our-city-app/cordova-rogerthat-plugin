@@ -185,17 +185,17 @@ function RogerthatPlugin() {
         },
         getNewsGroup: function (request) {
             return new Promise(function (resolve, reject) {
-                utils.exec(resolve, reject, 'news.getNewsGroup', [request]);
+                utils.exec(resolve, reject, "news_getNewsGroup", [request]);
             });
         },
         getNewsGroups: function (request) {
             return new Promise(function (resolve, reject) {
-                utils.exec(resolve, reject, 'news.getNewsGroups', [request]);
+                utils.exec(resolve, reject, "news_getNewsGroups", [request]);
             });
         },
         getNewsStreamItems: function (request) {
             return new Promise(function (resolve, reject) {
-                utils.exec(resolve, reject, 'news.getNewsStreamItems', [request]);
+                utils.exec(resolve, reject, "news_getNewsStreamItems", [request]);
             });
         },
     };

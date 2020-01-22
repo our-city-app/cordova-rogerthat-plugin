@@ -468,7 +468,7 @@
     [self sendCallback:@"onBackendConnectivityChanged" withArguments:@(connected)];
 }
 
-- (void)onSecurityResultWithRequestId:(NSString *)requestId result:(NSDictionary *)result error:(NSDictionary *)error
+- (void)onJSResultWithRequestId:(NSString *)requestId result:(NSDictionary *)result error:(NSDictionary *)error
 {
     [self commandProcessed:[CDVInvokedUrlCommand commandWithCallbackId:requestId]
                 withResult:result

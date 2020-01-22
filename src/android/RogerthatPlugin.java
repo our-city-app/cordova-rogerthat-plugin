@@ -53,7 +53,6 @@ import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.IntentResponseHandler;
 import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.news.GetNewsGroupRequestTO;
-import com.mobicage.to.news.GetNewsGroupServicesRequestTO;
 import com.mobicage.to.news.GetNewsGroupsRequestTO;
 import com.mobicage.to.news.GetNewsStreamItemsRequestTO;
 import com.mobicage.to.news.GetNewsStreamItemsResponseTO;
@@ -229,6 +228,15 @@ public class RogerthatPlugin extends CordovaPlugin {
             case "news_list":
                 listNews(callbackContext, args);
                 break;
+            case "news.getNewsGroup":
+                getNewsGroup(callbackContext, new GetNewsGroupRequestTO(JsonUtils.toMap(args)));
+                break;
+            case "news.getNewsGroups":
+                getNewsGroups(callbackContext, new GetNewsGroupsRequestTO(JsonUtils.toMap(args)));
+                break;
+            case "news.getNewsStreamItems":
+                getNewsStreamItems(callbackContext, new GetNewsStreamItemsRequestTO(JsonUtils.toMap(args)));
+                break;
             case "security_createKeyPair":
                 createKeyPair(callbackContext, args);
                 break;
@@ -277,18 +285,6 @@ public class RogerthatPlugin extends CordovaPlugin {
             case "util_playAudio":
                 playAudio(callbackContext, args);
                 break;
-            case "news.getNewsGroup":
-                getNewsGroup(callbackContext, new GetNewsGroupRequestTO(JsonUtils.toMap(args)));
-                break;
-            case "news.getNewsGroups":
-                getNewsGroups(callbackContext, new GetNewsGroupsRequestTO(JsonUtils.toMap(args)));
-                break;
-            case "news.getNewsStreamItems":
-                getNewsStreamItems(callbackContext, new GetNewsStreamItemsRequestTO(JsonUtils.toMap(args)));
-                break;
-            case "news.getNewsGroupServices":
-                getNewsGroupServices(callbackContext, new GetNewsGroupServicesRequestTO(JsonUtils.toMap(args)));
-                break;
             default:
                 L.e("RogerthatPlugin.execute did not match '" + action + "'");
                 callbackContext.error("RogerthatPlugin doesn't know how to execute this action.");
@@ -315,10 +311,6 @@ public class RogerthatPlugin extends CordovaPlugin {
         com.mobicage.api.news.Rpc.getNewsStreamItems(handler, request, true);
     }
 
-    private void getNewsGroupServices(CallbackContext callbackContext, GetNewsGroupServicesRequestTO request) {
-        callbackMap.put(mActivity.getNewsPlugin().getNewsGroupServices(request), callbackContext);
-    }
-
     public Boolean shouldAllowRequest(String url) {
         final String lowerCaseUrl = url.toLowerCase();
         if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")) {
@@ -338,7 +330,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             poke(tag);
             return true;
         } else if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")
-            || lowerCaseUrl.startsWith("tel") || lowerCaseUrl.startsWith("sms") || lowerCaseUrl.startsWith("mailto")) {
+                || lowerCaseUrl.startsWith("tel") || lowerCaseUrl.startsWith("sms") || lowerCaseUrl.startsWith("mailto")) {
             CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
             CustomTabsIntent customTabsIntent = customTabsBuilder.build();
             customTabsIntent.launchUrl(activity, uri);
@@ -362,7 +354,7 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     private void setInfo() throws JSONException {
         Map<String, Object> info = mActivity.getFriendsPlugin().getRogerthatUserAndServiceInfo(
-            mActivity.getServiceEmail(), mActivity.getServiceFriend(), mMenuItem);
+                mActivity.getServiceEmail(), mActivity.getServiceFriend(), mMenuItem);
         sendCallbackUpdate("setInfo", new JSONObject(info));
     }
 
@@ -380,7 +372,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         final String message = JsonUtils.optString(args, "m", null);
         if (errorMessage != null) {
             mActivity.getActionScreenUtils().logError(mActivity.getServiceEmail(), mActivity.getItemLabel(),
-                mActivity.getItemCoords(), errorMessage);
+                    mActivity.getItemCoords(), errorMessage);
         } else {
             L.i("[BRANDING] " + message);
         }
@@ -451,11 +443,11 @@ public class RogerthatPlugin extends CordovaPlugin {
                 @Override
                 protected void safeRun() throws Exception {
                     error(callbackContext, "camera_permission_was_not_granted",
-                        mActivity.getString(R.string.camera_permission_was_not_granted));
+                            mActivity.getString(R.string.camera_permission_was_not_granted));
                 }
             };
             if (mActivity.askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
-                continueRunnable, cancelRunnable))
+                    continueRunnable, cancelRunnable))
                 return;
         }
 
@@ -771,7 +763,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         final JSONObject activityParams = args.optJSONObject("params");
 
         String errorMessage = mActivity.getActionScreenUtils().openActivity(actionType, action, title, service,
-            activityParams == null ? null : JsonUtils.toMap(activityParams));
+                activityParams == null ? null : JsonUtils.toMap(activityParams));
         if (errorMessage != null) {
             error(callbackContext, "unknown_error_occurred", errorMessage);
             return;
@@ -840,7 +832,7 @@ public class RogerthatPlugin extends CordovaPlugin {
                         JSONObject result = new JSONObject();
                         result.put("content", rawScanResult);
                         if (rawScanResult.toLowerCase(Locale.US).startsWith("http://")
-                            || rawScanResult.toLowerCase(Locale.US).startsWith("https://")) {
+                                || rawScanResult.toLowerCase(Locale.US).startsWith("https://")) {
                             if (mScanCommunication == null) {
                                 mScanCommunication = new ScanCommunication(mActivity.getMainService());
                             }
@@ -882,8 +874,6 @@ public class RogerthatPlugin extends CordovaPlugin {
         filter.addAction(NewsPlugin.GET_NEWS_GROUPS_FAILED);
         filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS);
         filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED);
-        filter.addAction(NewsPlugin.GET_NEWS_GROUP_SERVICES_SUCCESS);
-        filter.addAction(NewsPlugin.GET_NEWS_GROUP_SERVICES_FAILED);
         return filter;
     }
 
@@ -909,13 +899,11 @@ public class RogerthatPlugin extends CordovaPlugin {
                     case NewsPlugin.GET_NEWS_GROUP_SUCCESS:
                     case NewsPlugin.GET_NEWS_GROUPS_SUCCESS:
                     case NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS:
-                    case NewsPlugin.GET_NEWS_GROUP_SERVICES_SUCCESS:
                         callbackContext.success(new JSONObject(response.toJSONMap()));
                         break;
                     case NewsPlugin.GET_NEWS_GROUP_FAILED:
                     case NewsPlugin.GET_NEWS_GROUPS_FAILED:
                     case NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED:
-                    case NewsPlugin.GET_NEWS_GROUP_SERVICES_FAILED:
                         Exception err = (Exception) intent.getSerializableExtra(IntentResponseHandler.ERROR);
                         L.e(err);
                         error(callbackContext, "unknown", mActivity.getString(R.string.unknown_error_occurred));

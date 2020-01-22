@@ -29,8 +29,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.core.content.ContextCompat;
+
 import com.google.zxing.client.android.CaptureActivity;
 import com.google.zxing.client.android.Intents;
 import com.mobicage.rogerth.at.R;
@@ -53,7 +52,12 @@ import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.IntentResponseHandler;
 import com.mobicage.rpc.config.CloudConstants;
-import com.mobicage.to.news.*;
+import com.mobicage.to.news.GetNewsGroupRequestTO;
+import com.mobicage.to.news.GetNewsGroupServicesRequestTO;
+import com.mobicage.to.news.GetNewsGroupsRequestTO;
+import com.mobicage.to.news.GetNewsStreamItemsRequestTO;
+import com.mobicage.to.news.GetNewsStreamItemsResponseTO;
+
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
@@ -61,6 +65,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.JSONValue;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.core.content.ContextCompat;
 
 
 public class RogerthatPlugin extends CordovaPlugin {
@@ -325,7 +338,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             poke(tag);
             return true;
         } else if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")
-                || lowerCaseUrl.startsWith("tel") || lowerCaseUrl.startsWith("sms") || lowerCaseUrl.startsWith("mailto")) {
+            || lowerCaseUrl.startsWith("tel") || lowerCaseUrl.startsWith("sms") || lowerCaseUrl.startsWith("mailto")) {
             CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
             CustomTabsIntent customTabsIntent = customTabsBuilder.build();
             customTabsIntent.launchUrl(activity, uri);
@@ -349,7 +362,7 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     private void setInfo() throws JSONException {
         Map<String, Object> info = mActivity.getFriendsPlugin().getRogerthatUserAndServiceInfo(
-                mActivity.getServiceEmail(), mActivity.getServiceFriend(), mMenuItem);
+            mActivity.getServiceEmail(), mActivity.getServiceFriend(), mMenuItem);
         sendCallbackUpdate("setInfo", new JSONObject(info));
     }
 
@@ -367,7 +380,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         final String message = JsonUtils.optString(args, "m", null);
         if (errorMessage != null) {
             mActivity.getActionScreenUtils().logError(mActivity.getServiceEmail(), mActivity.getItemLabel(),
-                    mActivity.getItemCoords(), errorMessage);
+                mActivity.getItemCoords(), errorMessage);
         } else {
             L.i("[BRANDING] " + message);
         }
@@ -438,11 +451,11 @@ public class RogerthatPlugin extends CordovaPlugin {
                 @Override
                 protected void safeRun() throws Exception {
                     error(callbackContext, "camera_permission_was_not_granted",
-                            mActivity.getString(R.string.camera_permission_was_not_granted));
+                        mActivity.getString(R.string.camera_permission_was_not_granted));
                 }
             };
             if (mActivity.askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
-                    continueRunnable, cancelRunnable))
+                continueRunnable, cancelRunnable))
                 return;
         }
 
@@ -758,7 +771,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         final JSONObject activityParams = args.optJSONObject("params");
 
         String errorMessage = mActivity.getActionScreenUtils().openActivity(actionType, action, title, service,
-                activityParams == null ? null : JsonUtils.toMap(activityParams));
+            activityParams == null ? null : JsonUtils.toMap(activityParams));
         if (errorMessage != null) {
             error(callbackContext, "unknown_error_occurred", errorMessage);
             return;
@@ -827,7 +840,7 @@ public class RogerthatPlugin extends CordovaPlugin {
                         JSONObject result = new JSONObject();
                         result.put("content", rawScanResult);
                         if (rawScanResult.toLowerCase(Locale.US).startsWith("http://")
-                                || rawScanResult.toLowerCase(Locale.US).startsWith("https://")) {
+                            || rawScanResult.toLowerCase(Locale.US).startsWith("https://")) {
                             if (mScanCommunication == null) {
                                 mScanCommunication = new ScanCommunication(mActivity.getMainService());
                             }

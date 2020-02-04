@@ -16,32 +16,33 @@ var PROXIMITY_FAR = 3;
 var ready = false;
 var apiResultReceivedCallbackSet = false;
 
-var _dummy = function() {
+var _dummy = function () {
 };
 
 var apiUserCallbacks = {
-    resultReceived : _dummy
+    resultReceived: _dummy
 };
 
 var userCallbacks = {
-    onBackendConnectivityChanged : _dummy,
-    qrCodeScanned : _dummy,
-    ready : _dummy,
-    serviceDataUpdated : _dummy,
-    userDataUpdated : _dummy,
-    newsReceived : _dummy,
-    badgeUpdated : _dummy
+    onBackendConnectivityChanged: _dummy,
+    qrCodeScanned: _dummy,
+    ready: _dummy,
+    serviceDataUpdated: _dummy,
+    userDataUpdated: _dummy,
+    newsReceived: _dummy,
+    badgeUpdated: _dummy
 };
 
 var utils = {
-    backgroundSize : (function() {
-        var thisBody = document.documentElement || document.body, thisStyle = thisBody.style, support = thisStyle.backgroundSize !== undefined;
+    backgroundSize: (function () {
+        var thisBody = document.documentElement || document.body, thisStyle = thisBody.style,
+            support = thisStyle.backgroundSize !== undefined;
 
         return support;
     })(),
-    checkCapabilities : function() {
+    checkCapabilities: function () {
         // Test base64 url support
-        var callbackBase64URI = function() {
+        var callbackBase64URI = function () {
             rogerthatPlugin.features.base64URI = this.width == 1 && this.height == 1 ? FEATURE_SUPPORTED : FEATURE_NOT_SUPPORTED;
             if (rogerthatPlugin.features.callback !== undefined)
                 rogerthatPlugin.features.callback('base64URI');
@@ -56,25 +57,25 @@ var utils = {
         if (rogerthatPlugin.features.callback !== undefined)
             rogerthatPlugin.features.callback('backgroundSize');
     },
-    exec : function (success, fail, action, args) {
+    exec: function (success, fail, action, args) {
         if (action !== 'log') {
             utils.logFunctionName("utils.exec -> " + action);
         }
         exec(utils.getSuccessCallback(success, action), utils.getErrorCallback(fail, action), "RogerthatPlugin", action, args);
     },
-    generateCallbacksRegister : function(callbacks) {
+    generateCallbacksRegister: function (callbacks) {
         var callbacksRegister = {};
-        Object.keys(callbacks).forEach(function(key) {
-            callbacksRegister[key] = function(callback) {
+        Object.keys(callbacks).forEach(function (key) {
+            callbacksRegister[key] = function (callback) {
                 callbacks[key] = callback;
             };
         });
         return callbacksRegister;
     },
-    logFunctionName : function (functionName) {
+    logFunctionName: function (functionName) {
         console.log("RogerthatPlugin." + functionName);
     },
-    getErrorCallback : function (ecb, functionName) {
+    getErrorCallback: function (ecb, functionName) {
         if (typeof ecb === 'function') {
             return ecb;
         } else {
@@ -83,7 +84,7 @@ var utils = {
             };
         }
     },
-    getSuccessCallback : function (scb, functionName) {
+    getSuccessCallback: function (scb, functionName) {
         if (typeof scb === 'function') {
             return scb;
         } else {
@@ -92,7 +93,7 @@ var utils = {
             };
         }
     },
-    processCallbackResult : function (result) {
+    processCallbackResult: function (result) {
         utils.logFunctionName("processCallbackResult <- " + result.callback);
         if (result.callback === "setInfo") {
             ready = true;
@@ -127,9 +128,9 @@ var utils = {
             utils.logFunctionName("processCallbackResult was unhandled");
         }
     },
-    setRogerthatData : function(info) {
-        Object.keys(info).forEach(function(key) {
-            if(info[key]) {
+    setRogerthatData: function (info) {
+        Object.keys(info).forEach(function (key) {
+            if (info[key]) {
                 rogerthatPlugin[key] = info[key];
             }
         });
@@ -145,25 +146,63 @@ var utils = {
             if (data === undefined) {
                 crp.u = rogerthatPlugin.user.data;
             } else {
-                Object.keys(data).forEach(function(key) {
+                Object.keys(data).forEach(function (key) {
                     rogerthatPlugin.user.data[key] = data[key];
                 });
 
                 crp.smart = true;
                 crp.u = data;
             }
-            utils.exec(null, null, "user_put", [crp]);
+            return new Promise(function (resolve, reject) {
+                utils.exec(resolve, reject, "user_put", [crp]);
+            });
         };
     }
 };
 
 function RogerthatPlugin() {
-    utils.logFunctionName("constructor");
     patchConsole();
+
+    this.news = {
+        // TODO cleanup obsolete news functions
+        count: function (successCallback, errorCallback, params) {
+            if (!params) {
+                params = {};
+            }
+            utils.exec(successCallback, errorCallback, "news_count", [params]);
+        },
+        get: function (successCallback, errorCallback, params) {
+            if (!params) {
+                params = {};
+            }
+            utils.exec(successCallback, errorCallback, "news_get", [params]);
+        },
+        list: function (successCallback, errorCallback, params) {
+            if (!params) {
+                params = {};
+            }
+            utils.exec(successCallback, errorCallback, "news_list", [params]);
+        },
+        getNewsGroup: function (request) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(resolve, reject, "news_getNewsGroup", [request]);
+            });
+        },
+        getNewsGroups: function (request) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(resolve, reject, "news_getNewsGroups", [request]);
+            });
+        },
+        getNewsStreamItems: function (request) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(resolve, reject, "news_getNewsStreamItems", [request]);
+            });
+        },
+    };
 }
 
 var apiCallbacksRegister = utils.generateCallbacksRegister(apiUserCallbacks);
-apiCallbacksRegister.resultReceived = function(callback) {
+apiCallbacksRegister.resultReceived = function (callback) {
     // Can only be set once
     if (apiResultReceivedCallbackSet) {
         console.log("Can only set resultReceived callback once.");
@@ -179,25 +218,26 @@ apiCallbacksRegister.resultReceived = function(callback) {
 
 RogerthatPlugin.prototype.api = {
     callbacks: apiCallbacksRegister,
-    call : function(method, params, tag) {
-        utils.exec(null, null, "api_call", [{"method": method,
-                                             "params": params,
-                                             "tag": tag}]);
+    call: function (method, params, tag) {
+        return new Promise(function (resolve, reject) {
+            utils.exec(resolve, reject, "api_call", [{method: method, params: params, tag: tag}]);
+        });
+
     }
 };
 
 RogerthatPlugin.prototype.app = {
-    exit : function() {
+    exit: function () {
         utils.exec(null, null, "app_exit", []);
     },
-    exitWithResult : function(result) {
+    exitWithResult: function (result) {
         utils.exec(null, null, "app_exitWithResult", [{"result": result}]);
     }
 };
 
 var callbacksRegister = utils.generateCallbacksRegister(userCallbacks);
-callbacksRegister.ready = function(callback) {
-    userCallbacks.ready = function() {
+callbacksRegister.ready = function (callback) {
+    userCallbacks.ready = function () {
         callback();
     };
     if (ready) {
@@ -217,156 +257,177 @@ RogerthatPlugin.prototype.VERSION = MAJOR_VERSION + "." + MINOR_VERSION + "." + 
 RogerthatPlugin.prototype.callbacks = callbacksRegister;
 
 RogerthatPlugin.prototype.camera = {
-    FRONT : "front",
-    BACK : "back",
-    startScanningQrCode : function (cameraType, successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "camera_startScanningQrCode", []);
+    FRONT: "front",
+    BACK: "back",
+    startScanningQrCode: function (cameraType, successCallback, errorCallback) {
+        return new Promise(function (resolve, reject) {
+            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "camera_startScanningQrCode", []);
+        });
     },
-    stopScanningQrCode : function (cameraType, successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "camera_stopScanningQrCode", []);
+    stopScanningQrCode: function (cameraType, successCallback, errorCallback) {
+        return new Promise(function (resolve, reject) {
+            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "camera_stopScanningQrCode", []);
+        });
     }
 };
 
 RogerthatPlugin.prototype.context = function (successCallback, errorCallback) {
-    utils.exec(successCallback, errorCallback, "context", []);
+    return new Promise(function (resolve, reject) {
+        utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "context", []);
+    });
 };
 
 RogerthatPlugin.prototype.features = {
     FEATURE_CHECKING: FEATURE_CHECKING,
     FEATURE_SUPPORTED: FEATURE_SUPPORTED,
     FEATURE_NOT_SUPPORTED: FEATURE_NOT_SUPPORTED,
-    base64URI : FEATURE_CHECKING,
-    backgroundSize : FEATURE_CHECKING,
-    callback : undefined
+    base64URI: FEATURE_CHECKING,
+    backgroundSize: FEATURE_CHECKING,
+    callback: undefined
 };
 
 RogerthatPlugin.prototype.message = {
-    open : function(messageKey, successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "message_open", [{"message_key": messageKey}]);
+    open: function (messageKey, successCallback, errorCallback) {
+        return new Promise(function (resolve, reject) {
+            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "message_open", [{"message_key": messageKey}]);
+        });
     }
 };
 
 // Set via info call
 RogerthatPlugin.prototype.menuItem = null;
 
-RogerthatPlugin.prototype.news = {
-    count : function(successCallback, errorCallback, params) {
-        if (!params) {
-            params = {};
-        }
-        utils.exec(successCallback, errorCallback, "news_count", [params]);
-    },
-    get : function(successCallback, errorCallback, params) {
-        if (!params) {
-            params = {};
-        }
-        utils.exec(successCallback, errorCallback, "news_get", [params]);
-    },
-    list : function(successCallback, errorCallback, params) {
-        if (!params) {
-            params = {};
-        }
-        utils.exec(successCallback, errorCallback, "news_list", [params]);
-    }
-};
-
 RogerthatPlugin.prototype.security = {
-    createKeyPair : function(successCallback, errorCallback, algorithm, name, message, force, seed, arbitraryData) {
-        utils.exec(successCallback, errorCallback, "security_createKeyPair", [{"key_algorithm": algorithm,
-                                                                               "key_name": name,
-                                                                               "message": message,
-                                                                               "force": force,
-                                                                               "seed": seed,
-                                                                               "arbitrary_data": arbitraryData}]);
+    createKeyPair: function (successCallback, errorCallback, algorithm, name, message, force, seed, arbitraryData) {
+        utils.exec(successCallback, errorCallback, "security_createKeyPair", [{
+            "key_algorithm": algorithm,
+            "key_name": name,
+            "message": message,
+            "force": force,
+            "seed": seed,
+            "arbitrary_data": arbitraryData
+        }]);
     },
-    hasKeyPair: function(successCallback, errorCallback, algorithm, name, index) {
-        utils.exec(successCallback, errorCallback, "security_hasKeyPair", [{"key_algorithm": algorithm,
-                                                                            "key_name": name,
-                                                                            "key_index": index}]);
+    hasKeyPair: function (successCallback, errorCallback, algorithm, name, index) {
+        utils.exec(successCallback, errorCallback, "security_hasKeyPair", [{
+            "key_algorithm": algorithm,
+            "key_name": name,
+            "key_index": index
+        }]);
     },
-    getPublicKey: function(successCallback, errorCallback, algorithm, name, index) {
-        utils.exec(successCallback, errorCallback, "security_getPublicKey", [{"key_algorithm": algorithm,
-                                                                              "key_name": name,
-                                                                              "key_index": index}]);
+    getPublicKey: function (successCallback, errorCallback, algorithm, name, index) {
+        utils.exec(successCallback, errorCallback, "security_getPublicKey", [{
+            "key_algorithm": algorithm,
+            "key_name": name,
+            "key_index": index
+        }]);
     },
-    getSeed: function(successCallback, errorCallback, algorithm, name, message) {
-        utils.exec(successCallback, errorCallback, "security_getSeed", [{"key_algorithm": algorithm,
-                                                                         "key_name": name,
-                                                                         "message": message}]);
+    getSeed: function (successCallback, errorCallback, algorithm, name, message) {
+        utils.exec(successCallback, errorCallback, "security_getSeed", [{
+            "key_algorithm": algorithm,
+            "key_name": name,
+            "message": message
+        }]);
     },
-    listAddresses: function(successCallback, errorCallback, algorithm, name) {
-        utils.exec(successCallback, errorCallback, "security_listAddresses", [{"key_algorithm": algorithm,
-                                                                               "key_name": name}]);
+    listAddresses: function (successCallback, errorCallback, algorithm, name) {
+        utils.exec(successCallback, errorCallback, "security_listAddresses", [{
+            "key_algorithm": algorithm,
+            "key_name": name
+        }]);
     },
-    getAddress: function(successCallback, errorCallback, algorithm, name, index, message) {
-        utils.exec(successCallback, errorCallback, "security_getAddress", [{"key_algorithm": algorithm,
-                                                                            "key_name": name,
-                                                                            "key_index": index,
-                                                                            "message": message}]);
+    getAddress: function (successCallback, errorCallback, algorithm, name, index, message) {
+        utils.exec(successCallback, errorCallback, "security_getAddress", [{
+            "key_algorithm": algorithm,
+            "key_name": name,
+            "key_index": index,
+            "message": message
+        }]);
     },
-    sign : function (successCallback, errorCallback, algorithm, name, index, message, payload, forcePin, hashPayload) {
+    sign: function (successCallback, errorCallback, algorithm, name, index, message, payload, forcePin, hashPayload) {
         if (hashPayload === undefined) {
             hashPayload = true;
         }
-        utils.exec(successCallback, errorCallback, "security_sign", [{"key_algorithm": algorithm,
-                                                                      "key_name": name,
-                                                                      "key_index": index,
-                                                                      "message": message,
-                                                                      "payload": payload,
-                                                                      "force_pin": forcePin,
-                                                                      "hash_payload": hashPayload}]);
+        utils.exec(successCallback, errorCallback, "security_sign", [{
+            "key_algorithm": algorithm,
+            "key_name": name,
+            "key_index": index,
+            "message": message,
+            "payload": payload,
+            "force_pin": forcePin,
+            "hash_payload": hashPayload
+        }]);
     },
-    verify : function (successCallback, errorCallback, algorithm, name, index, payload, payloadSignature) {
-        utils.exec(successCallback, errorCallback, "security_verify", [{"key_algorithm": algorithm,
-                                                                        "key_name": name,
-                                                                        "key_index": index,
-                                                                        "payload": payload,
-                                                                        "payload_signature": payloadSignature}]);
+    verify: function (successCallback, errorCallback, algorithm, name, index, payload, payloadSignature) {
+        utils.exec(successCallback, errorCallback, "security_verify", [{
+            "key_algorithm": algorithm,
+            "key_name": name,
+            "key_index": index,
+            "payload": payload,
+            "payload_signature": payloadSignature
+        }]);
     },
-    listKeyPairs: function(successCallback, errorCallback){
-      utils.exec(successCallback, errorCallback, "security_listKeyPairs", []);
+    listKeyPairs: function (successCallback, errorCallback) {
+        utils.exec(successCallback, errorCallback, "security_listKeyPairs", []);
     }
 };
 
 RogerthatPlugin.prototype.service = {};
 
 RogerthatPlugin.prototype.system = {
-    onBackendConnectivityChanged : function (successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "system_onBackendConnectivityChanged", []);
+    onBackendConnectivityChanged: function (successCallback, errorCallback) {
+        return new Promise(function (resolve, reject) {
+            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "system_onBackendConnectivityChanged", []);
+        });
     }
 };
 
 RogerthatPlugin.prototype.ui = {
-    hideKeyboard : function () {
-        utils.exec(null, null, "ui_hideKeyboard", []);
+    hideKeyboard: function () {
+        return new Promise(function (resolve, reject) {
+            utils.exec(resolve, reject, "ui_hideKeyboard", []);
+        });
     }
 };
 
-RogerthatPlugin.prototype.user = {
-};
+RogerthatPlugin.prototype.user = {};
+
+function execCallback(promiseCallback, regularCallback) {
+    return function (result) {
+        if (regularCallback) {
+            console.warn('Callback is deprecated, use promise instead');
+            regularCallback(result);
+        }
+        promiseCallback(result);
+    };
+}
 
 RogerthatPlugin.prototype.util = {
-    embeddedAppTranslations : function(successCallback, errorCallback) {
-       utils.exec(successCallback, errorCallback, "util_embeddedAppTranslations", []);
+    embeddedAppTranslations: function (successCallback, errorCallback) {
+        return new Promise(function (resolve, reject) {
+            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_embeddedAppTranslations", []);
+        });
     },
-    isConnectedToInternet : function(successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "util_isConnectedToInternet", []);
+    isConnectedToInternet: function (successCallback, errorCallback) {
+        return new Promise(function (resolve, reject) {
+            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_isConnectedToInternet", []);
+        });
     },
-    open : function(params, successCallback, errorCallback) {
-        if (!params) {
-            return;
-        }
+    open: function (params, successCallback, errorCallback) {
         if (params.action_type) {
             if (params.action_type === "click" || params.action_type === "action") {
                 params.action = sha256(params.action);
             }
         }
-        utils.exec(successCallback, errorCallback, "util_open", [params]);
+        return new Promise(function (resolve, reject) {
+            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_open", [params]);
+        });
     },
-    playAudio : function (url, successCallback, errorCallback) {
-        utils.exec(successCallback, errorCallback, "util_playAudio", [{"url": url}]);
+    playAudio: function (url, successCallback, errorCallback) {
+        return new Promise(function (resolve, reject) {
+            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_playAudio", [{"url": url}]);
+        });
     },
-    translate : function(key, parameters) {
+    translate: function (key, parameters) {
         var language = rogerthatPlugin.user.language || rogerthatPlugin.util._translations.defaultLanguage;
         var translation = undefined;
         if (language != rogerthatPlugin.util._translations.defaultLanguage) {
@@ -388,38 +449,38 @@ RogerthatPlugin.prototype.util = {
         }
 
         if (parameters) {
-            $.each(parameters, function(param, value) {
+            $.each(parameters, function (param, value) {
                 translation = translation.replace('%(' + param + ')s', value);
             });
         }
         return translation;
     },
-    uuid : function() {
-        var S4 = function() {
+    uuid: function () {
+        var S4 = function () {
             return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
         };
         return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
     },
-    _translateHTML : function() {
+    _translateHTML: function () {
         var tags = document.getElementsByTagName('x-rogerthat-t');
-        for (var i = tags.length - 1; i >= 0; i--){
+        for (var i = tags.length - 1; i >= 0; i--) {
             var obj = tags[i];
             var translatedString = rogerthatPlugin.util.translate(obj.innerHTML);
-            if(obj.outerHTML) {
+            if (obj.outerHTML) {
                 obj.outerHTML = translatedString;
             } else {
                 var tmpObj = document.createElement("div");
-                tmpObj.innerHTML='<!--THIS DATA SHOULD BE REPLACED-->';
+                tmpObj.innerHTML = '<!--THIS DATA SHOULD BE REPLACED-->';
                 var objParent = obj.parentNode;
                 objParent.replaceChild(tmpObj, obj);
                 objParent.innerHTML = objParent.innerHTML.replace('<div><!--THIS DATA SHOULD BE REPLACED--></div>', translatedString);
             }
         }
     },
-    _translations : {
-        defaultLanguage : "en",
-        values : {
-        // eg; "Name": { "fr": "Nom", "nl": "Naam" }
+    _translations: {
+        defaultLanguage: "en",
+        values: {
+            // eg; "Name": { "fr": "Nom", "nl": "Naam" }
         }
     }
 };
@@ -454,7 +515,7 @@ function exceptionToObject(exception) {
     return result;
 }
 
-var bind = function(context, fn) {
+var bind = function (context, fn) {
     return function () {
         return fn.apply(context, arguments);
     };

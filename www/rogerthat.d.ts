@@ -1,11 +1,22 @@
 /**
  * See http://www.rogerthat.net/developers/javascript-api for more info
  */
-import { RogerthatError, RogerthatMessageOpenError, StartScanningQrCodeError, StopScanningQrCodeError } from './rogerthat-errors';
-import { MessageEmbeddedApp, PaymentRequestData, PayWidgetContextData, RogerthatPayments } from './rogerthat-payment';
+import { RogerthatError } from './rogerthat-errors';
+import { PaymentRequestData, PayWidgetContextData, RogerthatPayments } from './rogerthat-payment';
+import {
+  GetNewsGroupRequestTO,
+  GetNewsGroupResponseTO,
+  GetNewsGroupsRequestTO,
+  GetNewsGroupsResponseTO,
+  GetNewsStreamItemsRequestTO,
+  GetNewsStreamItemsResponseTO,
+  MessageEmbeddedApp,
+  NewsSenderTO,
+} from './types';
 
 export * from './rogerthat-errors';
 export * from './rogerthat-payment';
+export * from './types';
 
 
 export interface SignatureData {
@@ -17,12 +28,12 @@ export interface SignatureData {
 export interface RogerthatUserInfo {
   account: string;
   avatarUrl: string;
-  data: any;
+  data: { [ key: string ]: any };
   language: string;
   name: string;
   firstName: string;
   lastName: string;
-  put: (data: any) => void;
+  put: (data: any) => Promise<void>;
 }
 
 export interface RogerthatSystem {
@@ -31,25 +42,21 @@ export interface RogerthatSystem {
   appVersion: string; // '2.0.2000.I'
   appName: string; // 'Rogerthat'
   appId: string; // 'rogerthat'
-  // Older builds don't support this
-  colors?: {
+  colors: {
     accent: string;
     primary: string;
     primaryDark: string;
     text: string;
     textInverse: string;
-  }
-}
-
-export interface RogerthatService {
-  name: string;
-  account: string;
-  data: any;
+  };
+  debug: boolean;
+  baseUrl: string;
+  mainService: string;
 }
 
 export interface RogerthatMessage {
-  open: (messageKey: string, successCallback: () => void,
-         errorCallback: (error: RogerthatMessageOpenError) => void) => void;
+  // Returned error may be of type RogerthatMessageOpenError
+  open: (messageKey: string) => Promise<void>;
 }
 
 export const enum NewsItemType {
@@ -67,15 +74,9 @@ export interface NewsActionButton {
   id: string;
 }
 
-export interface NewsSender {
-  avatar_id: number;
-  email: string;
-  name: string;
-}
-
 export interface NewsItem {
   buttons: NewsActionButton[];
-  sender: NewsSender;
+  sender: NewsSenderTO;
   broadcast_type: string;
   flags: number;
   id: number;
@@ -116,36 +117,13 @@ export interface ListNewsItemsResult {
   cursor: string;
 }
 
-export interface RogerthatNews {
-  /**
-   * Count news items
-   */
-  count: (successCallback: (result: CountNewsItemsResult) => void,
-          errorCallback: (result: RogerthatError) => void) => void;
-  /**
-   * Get the details of a news item.
-   */
-  get: (successCallback: (result: NewsItem) => void,
-        errorCallback: (result: RogerthatError) => void,
-        params: { news_id: number }) => void;
-  /**
-   *  List news items for all or 1 service.
-   */
-  list: (successCallback: (result: ListNewsItemsResult) => void,
-         errorCallback: (result: RogerthatError) => void,
-         params: ListNewsItemsParams) => void;
-}
-
-
 export type CameraType = 'front' | 'back';
 
 export interface RogerthatCamera {
-  startScanningQrCode: (cameraType: CameraType,
-                        successCallback: () => void,
-                        errorCallback: (error: StartScanningQrCodeError) => void) => void;
-  stopScanningQrCode: (cameraType: CameraType,
-                       successCallback: () => void,
-                       errorCallback: (error: StopScanningQrCodeError) => void) => void;
+  // Returned error may be of type StartScanningQrCodeError
+  startScanningQrCode: (cameraType: CameraType) => Promise<void>;
+  // Returned error may be of type StopScanningQrCodeError
+  stopScanningQrCode: (cameraType: CameraType) => Promise<void>;
 }
 
 export interface PublicKey {
@@ -288,8 +266,8 @@ export interface RogerthatSecurity {
            index: number,
            payload: string,
            payload_signature: string) => void;
- listKeyPairs: (successCallback: (result: KeyPairList) => void,
-                errorCallback: (error: RogerthatError) => void) => void;
+  listKeyPairs: (successCallback: (result: KeyPairList) => void,
+                 errorCallback: (error: RogerthatError) => void) => void;
 
 }
 
@@ -306,7 +284,7 @@ export interface RogerthatFeatures {
 }
 
 export interface RogerthatUI {
-  hideKeyboard: () => void; // Android only
+  hideKeyboard: () => Promise<void>; // Android only
 }
 
 export interface InternetConnectionStatus {
@@ -318,21 +296,28 @@ interface Translations {
   /**
    * Example: { 'name': {'nl': 'Naam', 'en': 'Name'} }
    */
-  [key: string]: { [key: string]: string };
+  [ key: string ]: { [ key: string ]: string };
+}
+
+export interface OpenParams {
+  action_type?: string | null;
+  action: string;
+  title?: string | null;
+  service?: string | null;
+  params?: { [ key: string ]: any };
 }
 
 export interface RogerthatUtil {
   _translateHTML: () => void;
   _translations: { defaultLanguage: string; values: Translations };
-  embeddedAppTranslations: (successCallback: (translations: { translations: any }) => void,
-                            errorCallback: (error: RogerthatError) => void) => void;
-  isConnectedToInternet: (callback: (connectionStatus: InternetConnectionStatus) => void) => void;
-  open: (params: any, successCallback: () => void, errorCallback: () => void) => void;
+  embeddedAppTranslations: () => Promise<{ translations: any }>;
+  isConnectedToInternet: () => Promise<InternetConnectionStatus>
+  open: (params: OpenParams) => Promise<void>;
 
   /**
    * Play a sound file which is located in the branding zip
    */
-  playAudio: (path: string, callback: () => void) => void;
+  playAudio: (path: string) => Promise<void>;
   translate: (key: string, parameters: any) => string;
   /**
    * Generate a random UUID
@@ -392,7 +377,7 @@ export interface RogerthatApiCallbacks {
 }
 
 export interface RogerthatApi {
-  call: (method: string, data: string | null, tag: string) => void;
+  call: (method: string, data: string | null, tag: string) => Promise<void>;
   callbacks: RogerthatApiCallbacks;
 }
 
@@ -452,16 +437,23 @@ export class Rogerthat {
   app: RogerthatApp;
   callbacks: RogerthatCallbacks;
   camera: RogerthatCamera;
-  context: (successCallback: (result: { context: RogerthatContext | null }) => void,
-            errorCallback: (error: RogerthatError) => void) => void;
+  context: () => Promise<{ context: RogerthatContext | null }>;
   features: RogerthatFeatures;
   /**
    * The menu item that was pressed to open the html app.
    */
   menuItem: RogerthatMenuItem;
   message: RogerthatMessage;
-  news: RogerthatNews;
-  service: RogerthatService;
+  news: {
+    getNewsGroup: (request: GetNewsGroupRequestTO) => Promise<GetNewsGroupResponseTO>;
+    getNewsGroups: (request: GetNewsGroupsRequestTO) => Promise<GetNewsGroupsResponseTO>;
+    getNewsStreamItems: (request: GetNewsStreamItemsRequestTO) => Promise<GetNewsStreamItemsResponseTO>;
+  };
+  service: {
+    name: string;
+    account: string;
+    data: any;
+  };
   security: RogerthatSecurity;
   system: RogerthatSystem;
   ui: RogerthatUI;

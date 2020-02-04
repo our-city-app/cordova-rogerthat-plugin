@@ -223,6 +223,27 @@
                                     params:[self getRequestParams:command]];
 }
 
+- (void)news_getNewsGroup:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper getNewsGroupWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                        params:[self getRequestParams:command]];
+}
+
+- (void)news_getNewsGroups:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper getNewsGroupsWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                         params:[self getRequestParams:command]];
+}
+
+- (void)news_getNewsStreamItems:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper getNewsStreamItemsWithResultHandler:[self defaultResultHandlerWithCommand:command]
+                                              params:[self getRequestParams:command]];
+}
+
 - (void)security_createKeyPair:(CDVInvokedUrlCommand *)command
 {
     HERE();
@@ -447,7 +468,7 @@
     [self sendCallback:@"onBackendConnectivityChanged" withArguments:@(connected)];
 }
 
-- (void)onSecurityResultWithRequestId:(NSString *)requestId result:(NSDictionary *)result error:(NSDictionary *)error
+- (void)onJSResultWithRequestId:(NSString *)requestId result:(NSDictionary *)result error:(NSDictionary *)error
 {
     [self commandProcessed:[CDVInvokedUrlCommand commandWithCallbackId:requestId]
                 withResult:result

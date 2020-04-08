@@ -485,7 +485,7 @@
     [self sendCallback:@"badgeUpdated" withArguments:params];
 }
 
-- (BOOL)shouldOverrideLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType
+- (BOOL)shouldOverrideLoadWithRequest:(NSURLRequest*)request navigationType:(int)navigationType
 {
     if ([request.URL.scheme isEqualToString:@"poke"]) {
         LOG(@"Received %@", request.URL.absoluteString);

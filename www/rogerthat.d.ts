@@ -373,6 +373,10 @@ export interface RogerthatCallbacks {
 }
 
 export interface RogerthatApiCallbacks {
+  /**
+   * Callbacks from service api callbacks with 'synchronous' set to false will be received here.
+   * It is not necessary to use this when you always set 'synchronous' to true.
+   */
   resultReceived: (callback: (method: string, result: any, error: string | null, tag: string) => void) => void;
 }
 
@@ -380,9 +384,12 @@ export interface RogerthatApi {
   /**
    * `synchronous` makes the server execute the callback immediately instead of async with retries.
    * Setting this to true should make the result arrive much quicker, since there are less
-   * roundtrips to the server this way.
+   * round trips to the server this way.
+   *
+   * When synchronous is true, the result will be returned here as a promise.
+   * Otherwise, the result will arrive at the callback registered at `rogerthat.api.callbacks.resultReceived`
    */
-  call: (method: string, data: string | null, tag: string, synchronous: boolean) => Promise<void>;
+  call: (method: string, data: string | null, tag: string, synchronous: boolean) => Promise<{result: string | null} | void>;
   callbacks: RogerthatApiCallbacks;
 }
 

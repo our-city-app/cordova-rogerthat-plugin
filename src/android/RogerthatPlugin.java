@@ -386,7 +386,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         final String method = JsonUtils.optString(args, "method", null);
         final String params = JsonUtils.optString(args, "params", null);
         final String tag = JsonUtils.optString(args, "tag", null);
-        final boolean synchronous = args.optBoolean("synchronous", false);
+        final boolean synchronous = args.optBoolean("synchronous", true);
 
         mActivity.getFriendsPlugin().sendApiCall(mActivity.getServiceEmail(),
             mActivity.getItemTagHash(), method, params, tag, synchronous);

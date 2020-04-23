@@ -377,7 +377,12 @@ export interface RogerthatApiCallbacks {
 }
 
 export interface RogerthatApi {
-  call: (method: string, data: string | null, tag: string) => Promise<void>;
+  /**
+   * `synchronous` makes the server execute the callback immediately instead of async with retries.
+   * Setting this to true should make the result arrive much quicker, since there are less
+   * roundtrips to the server this way.
+   */
+  call: (method: string, data: string | null, tag: string, synchronous: boolean) => Promise<void>;
   callbacks: RogerthatApiCallbacks;
 }
 

@@ -149,8 +149,10 @@
 - (void)api_call:(CDVInvokedUrlCommand *)command
 {
     HERE();
-    [self.helper sendApiCall:[self getRequestParams:command]];
-    [self commandProcessed:command];
+    BOOL synchronous = [self.helper sendApiCall:[self getRequestParams:command] resultHandler:[self defaultResultHandlerWithCommand:command]];
+    if (!synchronous) {
+        [self commandProcessed:command];
+    }
 }
 
 - (void)api_resultHandlerConfigured:(CDVInvokedUrlCommand *)command

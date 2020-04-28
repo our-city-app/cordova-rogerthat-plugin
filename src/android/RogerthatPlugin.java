@@ -388,9 +388,11 @@ public class RogerthatPlugin extends CordovaPlugin {
         final String tag = JsonUtils.optString(args, "tag", null);
         final boolean synchronous = args.optBoolean("synchronous", true);
 
-        mActivity.getFriendsPlugin().sendApiCall(mActivity.getServiceEmail(),
-            mActivity.getItemTagHash(), method, params, tag, synchronous);
-        callbackContext.success(new JSONObject());
+        mActivity.getFriendsPlugin().sendApiCall(mActivity.getServiceEmail(), mActivity.getItemTagHash(), method, params, tag, synchronous, callbackContext);
+        // Callback will be called with the response in case of synchronous calls
+        if (!synchronous) {
+            callbackContext.success(new JSONObject());
+        }
     }
 
     private boolean deliverApiResult(ServiceApiCallbackResult r) {

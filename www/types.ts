@@ -25,6 +25,9 @@ export type FormValidatorTO =
   | RequiredValidatorTO
   | MinDateValidatorTO;
 
+export type MapActionChipTO = 
+  SearchSuggestionTO;
+
 export type MapAnnouncementTO = 
   TextAnnouncementTO;
 
@@ -34,10 +37,26 @@ export type MapGeometryTO =
   | PolygonGeometryTO
   | MultiPolygonGeometryTO;
 
+export type MapItemLineTO = 
+  MapItemLineTextTO;
+
+export type MapListSectionItemTO = 
+  OpeningHoursListSectionItemTO
+  | ToggleListSectionItemTO
+  | LinkListSectionItemTO
+  | ExpandableListSectionItemTO;
+
+export type MapSearchSuggestionTO = 
+  MapSearchSuggestionItemTO
+  | MapSearchSuggestionKeywordTO;
+
 export type MapSectionTO = 
   GeometrySectionTO
   | TextSectionTO
-  | VoteSectionTO;
+  | ListSectionTO
+  | MediaSectionTO
+  | VoteSectionTO
+  | NewsSectionTO;
 
 export type NewFlowMessageTO = 
   MessageTO
@@ -75,6 +94,10 @@ export enum FormValidatorType {
   MINDATE = 'mindate',
 }
 
+export enum MapActionChipType {
+  SEARCH_SUGGESTION = 'search_suggestion',
+}
+
 export enum MapAnnouncementType {
   TEXT = 'text',
 }
@@ -86,10 +109,29 @@ export enum MapGeometryType {
   MULTI_LINE_STRING = 'MultiLineString',
 }
 
+export enum MapItemLineType {
+  TEXT = 'text',
+}
+
+export enum MapListSectionItemType {
+  OPENING_HOURS = 'opening_hours',
+  EXPANDABLE = 'expandable',
+  LINK = 'link',
+  TOGGLE = 'toggle',
+}
+
+export enum MapSearchSuggestionType {
+  ITEM = 'item',
+  KEYWORD = 'keyword',
+}
+
 export enum MapSectionType {
   GEOMETRY = 'geometry',
+  MEDIA = 'media',
+  LIST = 'list',
   TEXT = 'text',
   VOTE = 'vote',
+  NEWS = 'news',
 }
 
 export enum MessageType {
@@ -153,6 +195,19 @@ export interface AddProfileAddressResponseTO {
   type: number;
   uid: string | null;
   zip_code: string | null;
+}
+
+export interface AddProfilePhoneNumberRequestTO {
+  label: string | null;
+  number: string | null;
+  type: number;
+}
+
+export interface AddProfilePhoneNumberResponseTO {
+  label: string | null;
+  number: string | null;
+  type: number;
+  uid: string | null;
 }
 
 export interface AdvancedOrderCategory {
@@ -224,7 +279,6 @@ export interface AdvancedOrderWidgetResultTO {
 }
 
 export interface AppNewsInfoTO {
-  broadcast_type: string | null;
   feed_name: string | null;
   id: number;
   sender_email: string | null;
@@ -324,6 +378,11 @@ export interface AutoCompleteTO {
   place_holder: string | null;
   suggestions: string[];
   value: string | null;
+}
+
+export interface BaseMediaTO {
+  content: string | null;
+  type: string | null;
 }
 
 export interface BasePaymentMethod {
@@ -593,6 +652,13 @@ export interface DeleteProfileAddressesRequestTO {
 export interface DeleteProfileAddressesResponseTO {
 }
 
+export interface DeleteProfilePhoneNumbersRequestTO {
+  uids: string[];
+}
+
+export interface DeleteProfilePhoneNumbersResponseTO {
+}
+
 export interface DisableNewsRequestTO {
   news_id: number;
 }
@@ -651,6 +717,13 @@ export interface ErrorTO {
   caption: string | null;
   message: string | null;
   title: string | null;
+}
+
+export interface ExpandableListSectionItemTO {
+  icon: string | null;
+  icon_color: string | null;
+  title: string | null;
+  readonly type: MapListSectionItemType.EXPANDABLE
 }
 
 export interface FacebookRogerthatProfileMatchTO {
@@ -1253,6 +1326,7 @@ export interface GetMapItemDetailsResponseTO {
 
 export interface GetMapItemsRequestTO {
   coords: GeoPointTO | null;
+  search: MapSearchTO | null;
   cursor: string | null;
   distance: number;
   filter: string | null;
@@ -1271,6 +1345,7 @@ export interface GetMapRequestTO {
 }
 
 export interface GetMapResponseTO {
+  action_chips: MapActionChipTO[];
   addresses: ProfileAddressTO[];
   announcement: MapAnnouncementTO | null;
   base_urls: MapBaseUrlsTO | null;
@@ -1279,7 +1354,20 @@ export interface GetMapResponseTO {
   filters: MapFilterTO[];
   notifications: MapNotificationsTO | null;
   empty_text: string | null;
+  functionalities: string[];
   title: string | null;
+}
+
+export interface GetMapSearchSuggestionsRequestTO {
+  coords: GeoPointTO | null;
+  search: MapSearchTO | null;
+  distance: number;
+  filter: string | null;
+  tag: string | null;
+}
+
+export interface GetMapSearchSuggestionsResponseTO {
+  items: MapSearchSuggestionTO[];
 }
 
 export interface GetMenuIconRequestTO {
@@ -1431,6 +1519,23 @@ export interface GetProfileAddressesRequestTO {
 
 export interface GetProfileAddressesResponseTO {
   items: ProfileAddressTO[];
+}
+
+export interface GetProfilePhoneNumbersRequestTO {
+}
+
+export interface GetProfilePhoneNumbersResponseTO {
+  items: ProfilePhoneNumberTO[];
+}
+
+export interface GetSavedMapItemsRequestTO {
+  cursor: string | null;
+  tag: string | null;
+}
+
+export interface GetSavedMapItemsResponseTO {
+  items: MapItemTO[];
+  cursor: string | null;
 }
 
 export interface GetServiceActionInfoRequestTO {
@@ -1662,6 +1767,22 @@ export interface LineStringGeometryTO {
   readonly type: MapGeometryType.LINE_STRING
 }
 
+export interface LinkListSectionItemTO {
+  external: boolean;
+  request_user_link: boolean;
+  url: string | null;
+  icon: string | null;
+  icon_color: string | null;
+  title: string | null;
+  readonly type: MapListSectionItemType.LINK
+}
+
+export interface ListSectionTO {
+  items: MapListSectionItemTO[];
+  style: string | null;
+  readonly type: MapSectionType.LIST
+}
+
 export interface ListStreetsRequestTO {
   zip_code: string | null;
 }
@@ -1814,9 +1935,20 @@ export interface MapItemDetailsTO {
   id: string | null;
 }
 
+export interface MapItemLineTextPartTO {
+  color: string | null;
+  text: string | null;
+}
+
+export interface MapItemLineTextTO {
+  parts: MapItemLineTextPartTO[];
+  readonly type: MapItemLineType.TEXT
+}
+
 export interface MapItemTO {
   coords: GeoPointTO | null;
   icon: MapIconTO | null;
+  lines: MapItemLineTO[];
   description: string | null;
   id: string | null;
   title: string | null;
@@ -1824,6 +1956,21 @@ export interface MapItemTO {
 
 export interface MapNotificationsTO {
   enabled: boolean;
+}
+
+export interface MapSearchSuggestionItemTO {
+  id: string | null;
+  text: string | null;
+  readonly type: MapSearchSuggestionType.ITEM
+}
+
+export interface MapSearchSuggestionKeywordTO {
+  text: string | null;
+  readonly type: MapSearchSuggestionType.KEYWORD
+}
+
+export interface MapSearchTO {
+  query: string | null;
 }
 
 export interface MapVoteOptionTO {
@@ -1863,6 +2010,12 @@ export interface MaxValidatorTO {
   error_message: string | null;
   value: number;
   readonly type: FormValidatorType.MAX
+}
+
+export interface MediaSectionTO {
+  items: BaseMediaTO[];
+  ratio: SizeTO | null;
+  readonly type: MapSectionType.MEDIA
 }
 
 export interface MediaTO {
@@ -2405,6 +2558,13 @@ export interface NewsGroupTabInfoTO {
   notifications: number;
 }
 
+export interface NewsSectionTO {
+  filter: GetNewsStreamFilterTO | null;
+  limit: number;
+  placeholder_image: string | null;
+  readonly type: MapSectionType.NEWS
+}
+
 export interface NewsSenderTO {
   avatar_id: number;
   email: string | null;
@@ -2552,6 +2712,24 @@ export interface OpenIdWidgetResultTO {
   name: string | null;
   phone_number: string | null;
   phone_number_verified: boolean;
+}
+
+export interface OpeningHoursListSectionItemTO {
+  opening_hours: OpeningInfoTO | null;
+  icon: string | null;
+  icon_color: string | null;
+  title: string | null;
+  readonly type: MapListSectionItemType.OPENING_HOURS
+}
+
+export interface OpeningInfoTO {
+  weekday_text: WeekDayTextTO[];
+  description: string | null;
+  description_color: string | null;
+  name: string | null;
+  subtitle: string | null;
+  title: string | null;
+  title_color: string | null;
 }
 
 export interface ParagraphComponentTO {
@@ -2804,6 +2982,13 @@ export interface ProfileAddressTO {
   zip_code: string | null;
 }
 
+export interface ProfilePhoneNumberTO {
+  label: string | null;
+  number: string | null;
+  type: number;
+  uid: string | null;
+}
+
 export interface PublicKeyTO {
   algorithm: string | null;
   index: string | null;
@@ -3010,15 +3195,28 @@ export interface SaveSettingsResponse {
   settings: SettingsTO | null;
 }
 
+export interface SearchSuggestionTO {
+  icon: string | null;
+  title: string | null;
+  readonly type: MapActionChipType.SEARCH_SUGGESTION
+}
+
+export interface SendApiCallCallbackResultTO {
+  error: string | null;
+  result: string | null;
+}
+
 export interface SendApiCallRequestTO {
   hashed_tag: string | null;
   id: number;
   method: string | null;
   params: string | null;
   service: string | null;
+  synchronous: boolean;
 }
 
 export interface SendApiCallResponseTO {
+  result: SendApiCallCallbackResultTO | null;
 }
 
 export interface SendMessageRequestTO {
@@ -3286,6 +3484,11 @@ export interface SingleSliderTO {
   step: number;
   unit: string | null;
   value: number;
+}
+
+export interface SizeTO {
+  height: number;
+  width: number;
 }
 
 export interface StartChatRequestTO {
@@ -3686,6 +3889,28 @@ export interface Thumbnail {
   height: number;
   url: string | null;
   width: number;
+}
+
+export interface ToggleListSectionItemTO {
+  filled: boolean;
+  id: string | null;
+  state: string | null;
+  icon: string | null;
+  icon_color: string | null;
+  title: string | null;
+  readonly type: MapListSectionItemType.TOGGLE
+}
+
+export interface ToggleMapItemRequestTO {
+  item_id: string | null;
+  state: string | null;
+  tag: string | null;
+  toggle_id: string | null;
+}
+
+export interface ToggleMapItemResponseTO {
+  toggle_item: ToggleListSectionItemTO | null;
+  item_id: string | null;
 }
 
 export interface ToolbarSettingsTO {
@@ -4092,6 +4317,20 @@ export interface UpdateProfileAddressResponseTO {
   zip_code: string | null;
 }
 
+export interface UpdateProfilePhoneNumberRequestTO {
+  label: string | null;
+  number: string | null;
+  type: number;
+  uid: string | null;
+}
+
+export interface UpdateProfilePhoneNumberResponseTO {
+  label: string | null;
+  number: string | null;
+  type: number;
+  uid: string | null;
+}
+
 export interface UpdateRangeSliderFormRequestTO {
   result: FloatListWidgetResultTO | null;
   acked_timestamp: number;
@@ -4245,6 +4484,11 @@ export interface VoteSectionTO {
   options: MapVoteOptionTO[];
   id: string | null;
   readonly type: MapSectionType.VOTE
+}
+
+export interface WeekDayTextTO {
+  lines: MapItemLineTextPartTO[];
+  day: string | null;
 }
 
 export interface Widget {

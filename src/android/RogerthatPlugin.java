@@ -330,7 +330,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             poke(tag);
             return true;
         } else if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")
-                || lowerCaseUrl.startsWith("tel") || lowerCaseUrl.startsWith("sms") || lowerCaseUrl.startsWith("mailto")) {
+            || lowerCaseUrl.startsWith("tel") || lowerCaseUrl.startsWith("sms") || lowerCaseUrl.startsWith("mailto")) {
             CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
             CustomTabsIntent customTabsIntent = customTabsBuilder.build();
             customTabsIntent.launchUrl(activity, uri);
@@ -354,7 +354,7 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     private void setInfo() throws JSONException {
         Map<String, Object> info = mActivity.getFriendsPlugin().getRogerthatUserAndServiceInfo(
-                mActivity.getServiceEmail(), mActivity.getServiceFriend(), mMenuItem);
+            mActivity.getServiceEmail(), mActivity.getServiceFriend(), mMenuItem);
         sendCallbackUpdate("setInfo", new JSONObject(info));
     }
 
@@ -372,7 +372,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         final String message = JsonUtils.optString(args, "m", null);
         if (errorMessage != null) {
             mActivity.getActionScreenUtils().logError(mActivity.getServiceEmail(), mActivity.getItemLabel(),
-                    mActivity.getItemCoords(), errorMessage);
+                mActivity.getItemCoords(), errorMessage);
         } else {
             L.i("[BRANDING] " + message);
         }
@@ -386,9 +386,13 @@ public class RogerthatPlugin extends CordovaPlugin {
         final String method = JsonUtils.optString(args, "method", null);
         final String params = JsonUtils.optString(args, "params", null);
         final String tag = JsonUtils.optString(args, "tag", null);
+        final boolean synchronous = args.optBoolean("synchronous", true);
 
-        mActivity.getFriendsPlugin().sendApiCall(mActivity.getServiceEmail(), mActivity.getItemTagHash(), method, params, tag);
-        callbackContext.success(new JSONObject());
+        mActivity.getFriendsPlugin().sendApiCall(mActivity.getServiceEmail(), mActivity.getItemTagHash(), method, params, tag, synchronous, callbackContext);
+        // Callback will be called with the response in case of synchronous calls
+        if (!synchronous) {
+            callbackContext.success(new JSONObject());
+        }
     }
 
     private boolean deliverApiResult(ServiceApiCallbackResult r) {
@@ -443,11 +447,11 @@ public class RogerthatPlugin extends CordovaPlugin {
                 @Override
                 protected void safeRun() throws Exception {
                     error(callbackContext, "camera_permission_was_not_granted",
-                            mActivity.getString(R.string.camera_permission_was_not_granted));
+                        mActivity.getString(R.string.camera_permission_was_not_granted));
                 }
             };
             if (mActivity.askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
-                    continueRunnable, cancelRunnable))
+                continueRunnable, cancelRunnable))
                 return;
         }
 
@@ -763,7 +767,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         final JSONObject activityParams = args.optJSONObject("params");
 
         String errorMessage = mActivity.getActionScreenUtils().openActivity(actionType, action, title, service,
-                activityParams == null ? null : JsonUtils.toMap(activityParams));
+            activityParams == null ? null : JsonUtils.toMap(activityParams));
         if (errorMessage != null) {
             error(callbackContext, "unknown_error_occurred", errorMessage);
             return;
@@ -832,7 +836,7 @@ public class RogerthatPlugin extends CordovaPlugin {
                         JSONObject result = new JSONObject();
                         result.put("content", rawScanResult);
                         if (rawScanResult.toLowerCase(Locale.US).startsWith("http://")
-                                || rawScanResult.toLowerCase(Locale.US).startsWith("https://")) {
+                            || rawScanResult.toLowerCase(Locale.US).startsWith("https://")) {
                             if (mScanCommunication == null) {
                                 mScanCommunication = new ScanCommunication(mActivity.getMainService());
                             }

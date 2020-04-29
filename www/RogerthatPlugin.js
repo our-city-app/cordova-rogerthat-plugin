@@ -218,9 +218,9 @@ apiCallbacksRegister.resultReceived = function (callback) {
 
 RogerthatPlugin.prototype.api = {
     callbacks: apiCallbacksRegister,
-    call: function (method, params, tag) {
+    call: function (method, params, tag, synchronous) {
         return new Promise(function (resolve, reject) {
-            utils.exec(resolve, reject, "api_call", [{method: method, params: params, tag: tag}]);
+            utils.exec(resolve, reject, "api_call", [{method: method, params: params, tag: tag, synchronous: synchronous}]);
         });
 
     }

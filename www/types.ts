@@ -278,37 +278,6 @@ export interface AdvancedOrderWidgetResultTO {
   currency: string | null;
 }
 
-export interface AppNewsInfoTO {
-  feed_name: string | null;
-  id: number;
-  sender_email: string | null;
-  sort_priority: number;
-  sort_timestamp: number;
-  version: number;
-}
-
-export interface AppNewsItemTO {
-  buttons: NewsActionButtonTO[];
-  media: MediaTO | null;
-  sender: NewsSenderTO | null;
-  broadcast_type: string | null;
-  feed_name: string | null;
-  flags: number;
-  id: number;
-  image_url: string | null;
-  message: string | null;
-  qr_code_caption: string | null;
-  qr_code_content: string | null;
-  reach: number;
-  sort_priority: number;
-  sort_timestamp: number;
-  timestamp: number;
-  title: string | null;
-  type: number;
-  users_that_rogered: string[];
-  version: number;
-}
-
 export interface AppPaymentProviderTO {
   asset_types: string[];
   background_color: string | null;
@@ -1409,24 +1378,6 @@ export interface GetNewsGroupsResponseTO {
   has_locations: boolean;
 }
 
-export interface GetNewsItemsRequestTO {
-  ids: number[];
-}
-
-export interface GetNewsItemsResponseTO {
-  items: AppNewsItemTO[];
-}
-
-export interface GetNewsRequestTO {
-  cursor: string | null;
-  updated_since: number;
-}
-
-export interface GetNewsResponseTO {
-  result: AppNewsInfoTO[];
-  cursor: string | null;
-}
-
 export interface GetNewsStreamFilterTO {
   group_id: string | null;
   group_type: string | null;
@@ -2428,13 +2379,6 @@ export interface NewMyDigiPassFormRequestTO {
 
 export interface NewMyDigiPassFormResponseTO {
   received_timestamp: number;
-}
-
-export interface NewNewsRequestTO {
-  news_item: AppNewsItemTO | null;
-}
-
-export interface NewNewsResponseTO {
 }
 
 export interface NewOauthFormRequestTO {

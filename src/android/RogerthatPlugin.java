@@ -30,7 +30,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 
-import com.google.zxing.client.android.CaptureActivity;
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.BarcodeScanningActivity;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;

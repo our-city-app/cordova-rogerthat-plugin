@@ -30,9 +30,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 
-import com.google.zxing.client.android.CaptureActivity;
-import com.google.zxing.client.android.Intents;
 import com.mobicage.rogerth.at.R;
+import com.mobicage.rogerthat.BarcodeScanningActivity;
 import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.Poker;
@@ -457,17 +456,15 @@ public class RogerthatPlugin extends CordovaPlugin {
 
         mQRCodeScannerOpen = true;
 
-        final Intent intent = new Intent(mActivity, CaptureActivity.class);
-        intent.setAction(Intents.Scan.ACTION);
-        intent.putExtra(Intents.Scan.MODE, Intents.Scan.QR_CODE_MODE);
-        this.cordova.startActivityForResult(this, intent, ScanTabActivity.ZXING_SCAN_RESULT);
+        final Intent intent = new Intent(mActivity, BarcodeScanningActivity.class);
+        this.cordova.startActivityForResult(this, intent, ScanTabActivity.QR_SCAN_RESULT);
 
         callbackContext.success(new JSONObject());
     }
 
-    private void stopScanningQrCode(final CallbackContext callbackContext) throws JSONException {
+    private void stopScanningQrCode(final CallbackContext callbackContext) {
         mQRCodeScannerOpen = false;
-        Intent intent = new Intent(CaptureActivity.FINISH_INTENT);
+        Intent intent = new Intent(BarcodeScanningActivity.FINISH_INTENT);
         cordova.getActivity().sendBroadcast(intent);
         callbackContext.success(new JSONObject());
     }
@@ -824,12 +821,10 @@ public class RogerthatPlugin extends CordovaPlugin {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         L.i("RogerthatPlugin.onActivityResult requestCode -> " + requestCode);
-        if (requestCode == ScanTabActivity.ZXING_SCAN_RESULT) {
+        if (requestCode == ScanTabActivity.QR_SCAN_RESULT) {
             mQRCodeScannerOpen = false;
             if (resultCode == Activity.RESULT_OK) {
-                L.i("onActivityResult ZXING_SCAN_RESULT");
-                mQRCodeScannerOpen = false;
-                final String rawScanResult = intent.getStringExtra("SCAN_RESULT");
+                final String rawScanResult = intent.getStringExtra(BarcodeScanningActivity.RAW_VALUE);
                 try {
                     if (rawScanResult != null) {
                         L.i("Scanned QR code: " + rawScanResult);
@@ -849,7 +844,6 @@ public class RogerthatPlugin extends CordovaPlugin {
                         sendCallbackUpdate("qrCodeScanned", result);
 
                     } else {
-                        L.i("onActivityResult ZXING_SCAN_RESULT error");
                         JSONObject obj = new JSONObject();
                         obj.put("status", "error");
                         obj.put("content", "An unknown error has occurred");

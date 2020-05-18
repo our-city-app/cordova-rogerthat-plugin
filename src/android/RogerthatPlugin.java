@@ -32,6 +32,7 @@ import android.net.Uri;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.BarcodeScanningActivity;
+import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.Poker;
 import com.mobicage.rogerthat.plugins.friends.ServiceApiCallbackResult;

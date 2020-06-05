@@ -1,4 +1,4 @@
-export type FormComponentTO = 
+export type FormComponentTO =
   FileComponentTO
   | TextInputComponentTO
   | MultiSelectComponentTO
@@ -7,7 +7,7 @@ export type FormComponentTO =
   | LocationComponentTO
   | SingleSelectComponentTO;
 
-export type FormComponentValueTO = 
+export type FormComponentValueTO =
   SingleSelectComponentValueTO
   | TextInputComponentValueTO
   | MultiSelectComponentValueTO
@@ -15,7 +15,7 @@ export type FormComponentValueTO =
   | LocationComponentValueTO
   | FileComponentValueTO;
 
-export type FormValidatorTO = 
+export type FormValidatorTO =
   RegexValidatorTO
   | MinLengthValidatorTO
   | MaxDateValidatorTO
@@ -25,32 +25,36 @@ export type FormValidatorTO =
   | RequiredValidatorTO
   | MinDateValidatorTO;
 
-export type MapActionChipTO = 
+export type JobOfferActionTO =
+  JobOfferOpenActionTO
+  | JobOfferChatActionTO;
+
+export type MapActionChipTO =
   SearchSuggestionTO;
 
-export type MapAnnouncementTO = 
+export type MapAnnouncementTO =
   TextAnnouncementTO;
 
-export type MapGeometryTO = 
+export type MapGeometryTO =
   MultiLineStringGeometryTO
   | LineStringGeometryTO
   | PolygonGeometryTO
   | MultiPolygonGeometryTO;
 
-export type MapItemLineTO = 
+export type MapItemLineTO =
   MapItemLineTextTO;
 
-export type MapListSectionItemTO = 
+export type MapListSectionItemTO =
   OpeningHoursListSectionItemTO
   | ToggleListSectionItemTO
   | LinkListSectionItemTO
   | ExpandableListSectionItemTO;
 
-export type MapSearchSuggestionTO = 
+export type MapSearchSuggestionTO =
   MapSearchSuggestionItemTO
   | MapSearchSuggestionKeywordTO;
 
-export type MapSectionTO = 
+export type MapSectionTO =
   GeometrySectionTO
   | TextSectionTO
   | ListSectionTO
@@ -58,17 +62,17 @@ export type MapSectionTO =
   | VoteSectionTO
   | NewsSectionTO;
 
-export type NewFlowMessageTO = 
+export type NewFlowMessageTO =
   MessageTO
   | FormMessageTO;
 
-export type NextActionTO = 
+export type NextActionTO =
   NextActionURLTO
   | NextActionSectionTO
   | NextActionSubmitTO
   | NextActionDefaultTO;
 
-export type Step = 
+export type Step =
   MessageFlowStepTO
   | FormFlowStepTO;
 
@@ -92,6 +96,11 @@ export enum FormValidatorType {
   MINLENGTH = 'minlength',
   MAXDATE = 'maxdate',
   MINDATE = 'mindate',
+}
+
+export enum JobOfferActionType {
+  OPEN = 0,
+  CHAT = 1,
 }
 
 export enum MapActionChipType {
@@ -278,6 +287,37 @@ export interface AdvancedOrderWidgetResultTO {
   currency: string | null;
 }
 
+export interface AppNewsInfoTO {
+  feed_name: string | null;
+  id: number;
+  sender_email: string | null;
+  sort_priority: number;
+  sort_timestamp: number;
+  version: number;
+}
+
+export interface AppNewsItemTO {
+  buttons: NewsActionButtonTO[];
+  media: MediaTO | null;
+  sender: NewsSenderTO | null;
+  broadcast_type: string | null;
+  feed_name: string | null;
+  flags: number;
+  id: number;
+  image_url: string | null;
+  message: string | null;
+  qr_code_caption: string | null;
+  qr_code_content: string | null;
+  reach: number;
+  sort_priority: number;
+  sort_timestamp: number;
+  timestamp: number;
+  title: string | null;
+  type: number;
+  users_that_rogered: string[];
+  version: number;
+}
+
 export interface AppPaymentProviderTO {
   asset_types: string[];
   background_color: string | null;
@@ -373,6 +413,15 @@ export interface BreakFriendshipRequestTO {
 }
 
 export interface BreakFriendshipResponseTO {
+}
+
+export interface BulkSaveJobsRequestTO {
+  ids: number[];
+  status: number;
+}
+
+export interface BulkSaveJobsResponseTO {
+  ids: number[];
 }
 
 export interface ButtonTO {
@@ -479,6 +528,16 @@ export interface CreateAssetResponseTO {
   error: ErrorPaymentTO | null;
   result: PaymentProviderAssetTO | null;
   success: boolean;
+}
+
+export interface CreateJobChatRequestTO {
+  anonymous: boolean;
+  job_id: number;
+  message: string | null;
+}
+
+export interface CreateJobChatResponseTO {
+  message_key: string | null;
 }
 
 export interface CreateNotificationRequestTO {
@@ -1246,6 +1305,18 @@ export interface GetJSEmbeddingResponseTO {
   items: JSEmbeddingItemTO[];
 }
 
+export interface GetJobChatInfoRequestTO {
+  job_id: number;
+}
+
+export interface GetJobChatInfoResponseTO {
+  anonymous: JobChatAnonymousTO | null;
+  chat_key: string | null;
+  default_text: string | null;
+  info_text: string | null;
+  job_id: number;
+}
+
 export interface GetJobsCriteriaRequestTO {
 }
 
@@ -1254,19 +1325,22 @@ export interface GetJobsCriteriaResponseTO {
   job_domains: JobKeyLabelTO[];
   location: JobCriteriaLocationTO | null;
   notifications: JobCriteriaNotificationsTO | null;
+  active: boolean;
   keywords: string[];
 }
 
 export interface GetJobsRequestTO {
   activity_type: string | null;
   cursor: string | null;
+  ids: number[];
 }
 
 export interface GetJobsResponseTO {
+  info: JobsInfoTO | null;
   items: JobOfferTO[];
   cursor: string | null;
-  has_criteria: boolean;
   has_more: boolean;
+  is_profile_active: boolean;
 }
 
 export interface GetLocationErrorTO {
@@ -1376,6 +1450,24 @@ export interface GetNewsGroupsResponseTO {
   if_empty: IfEmtpyScreenTO | null;
   rows: NewsGroupRowTO[];
   has_locations: boolean;
+}
+
+export interface GetNewsItemsRequestTO {
+  ids: number[];
+}
+
+export interface GetNewsItemsResponseTO {
+  items: AppNewsItemTO[];
+}
+
+export interface GetNewsRequestTO {
+  cursor: string | null;
+  updated_since: number;
+}
+
+export interface GetNewsResponseTO {
+  result: AppNewsInfoTO[];
+  cursor: string | null;
 }
 
 export interface GetNewsStreamFilterTO {
@@ -1650,6 +1742,11 @@ export interface JSEmbeddingItemTO {
   name: string | null;
 }
 
+export interface JobChatAnonymousTO {
+  default_value: boolean;
+  enabled: boolean;
+}
+
 export interface JobCriteriaGeoLocationTO {
   latitude: number;
   longitude: number;
@@ -1674,6 +1771,13 @@ export interface JobKeyLabelTO {
   label: string | null;
 }
 
+export interface JobOfferChatActionTO {
+  chat_key: string | null;
+  icon: string | null;
+  label: string | null;
+  readonly type: JobOfferActionType.CHAT
+}
+
 export interface JobOfferContractTO {
   type: string | null;
 }
@@ -1688,18 +1792,48 @@ export interface JobOfferFunctionTO {
 }
 
 export interface JobOfferLocationTO {
+  geo_location: LatLonTO | null;
   city: string | null;
+  country_code: string | null;
+  postal_code: string | null;
+  street: string | null;
+  street_number: string | null;
+}
+
+export interface JobOfferOpenActionTO {
+  action: string | null;
+  icon: string | null;
+  label: string | null;
+  readonly type: JobOfferActionType.OPEN
+}
+
+export interface JobOfferProviderTO {
+  image_url: string | null;
+}
+
+export interface JobOfferSourceTO {
+  avatar_url: string | null;
+  id: string | null;
+  name: string | null;
+  type: string | null;
 }
 
 export interface JobOfferTO {
+  actions: JobOfferActionTO[];
   contract: JobOfferContractTO | null;
   employer: JobOfferEmployerTO | null;
   function: JobOfferFunctionTO | null;
   location: JobOfferLocationTO | null;
+  source: JobOfferSourceTO | null;
   details: string | null;
-  interested: boolean;
   job_id: number;
   timestamp: number;
+}
+
+export interface JobsInfoTO {
+  providers: JobOfferProviderTO[];
+  description: string | null;
+  title: string | null;
 }
 
 export interface JsMessageFlowMemberRunTO {
@@ -1710,6 +1844,11 @@ export interface JsMessageFlowMemberRunTO {
   parent_message_key: string | null;
   sender: string | null;
   service_action: string | null;
+}
+
+export interface LatLonTO {
+  lat: number;
+  lon: number;
 }
 
 export interface LineStringGeometryTO {
@@ -2338,15 +2477,6 @@ export interface NewGPSLocationFormRequestTO {
 
 export interface NewGPSLocationFormResponseTO {
   received_timestamp: number;
-}
-
-export interface NewJobNotificationRequestTO {
-  item: JobOfferTO | null;
-  count: number;
-  creation_time: number;
-}
-
-export interface NewJobNotificationResponseTO {
 }
 
 export interface NewJobsRequestTO {
@@ -3061,23 +3191,22 @@ export interface RequiredValidatorTO {
   readonly type: FormValidatorType.REQUIRED
 }
 
-export interface SaveJobInterestsRequestTO {
-  interested: boolean;
-  job_id: number;
-}
-
-export interface SaveJobInterestsResponseTO {
-}
-
 export interface SaveJobsCriteriaRequestTO {
+  criteria: SaveJobsCriteriaTO | null;
+  active: boolean;
+}
+
+export interface SaveJobsCriteriaResponseTO {
+  active: boolean;
+  new_profile: boolean;
+}
+
+export interface SaveJobsCriteriaTO {
   location: JobCriteriaLocationTO | null;
   notifications: JobCriteriaNotificationsTO | null;
   contract_types: string[];
   job_domains: string[];
   keywords: string[];
-}
-
-export interface SaveJobsCriteriaResponseTO {
 }
 
 export interface SaveMapItemVoteRequestTO {

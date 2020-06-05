@@ -18,13 +18,6 @@ export * from './rogerthat-errors';
 export * from './rogerthat-payment';
 export * from './types';
 
-
-export interface SignatureData {
-  data: string;
-  transaction: string;
-  transactionHash: string;
-}
-
 export interface RogerthatUserInfo {
   account: string;
   avatarUrl: string;
@@ -109,151 +102,6 @@ export interface RogerthatCamera {
   stopScanningQrCode: (cameraType: CameraType) => Promise<void>;
 }
 
-export interface PublicKey {
-  algorithm: string;
-  name: string;
-  index: string;
-  public_key: string;
-}
-
-export interface CreateKeyPairResult {
-  public_key: string;
-  seed: string;
-}
-
-export interface HasKeyPairResult {
-  exists: boolean;
-}
-
-export interface ListAddressesResult {
-  index: number;
-  address: string;
-}
-
-export interface CryptoSeed {
-  seed: string;
-}
-
-export interface CryptoAddress {
-  address: string;
-}
-
-export interface CryptoSignature {
-  /**
-   * Base64 payload
-   */
-  payload: string;
-  /**
-   * Base64 signature
-   */
-  payload_signature: string;
-}
-
-export interface CryptoTransactionInput {
-  parent_id: string;
-  timelock: number;
-}
-
-export interface CryptoTransactionOutput {
-  value: string;
-  unlockhash: string;
-}
-
-export interface CryptoTransactionData {
-  input: CryptoTransactionInput;
-  outputs: CryptoTransactionOutput[];
-  algorithm: SupportedAlgorithms;
-  public_key: string;
-  public_key_index: number;
-  /**
-   * base64
-   */
-  signature_hash: string;
-  /**
-   * base64 signature, this should be set by using rogerthat.security.sign by the client
-   */
-  signature: string;
-  timelock: number;
-}
-
-export interface CryptoTransaction {
-  data: CryptoTransactionData[];
-  from_address: string;
-  minerfees: string;
-  to_address: string;
-}
-
-export interface VerifyResult {
-  valid: boolean;
-}
-
-export type SupportedAlgorithms = 'ed25519';
-
-export interface KeyPair {
-  algorithm: SupportedAlgorithms;
-  name: string;
-  arbitrary_data: string | null;
-}
-
-export interface KeyPairList {
-  keyPairs: KeyPair[];
-}
-
-export interface RogerthatSecurity {
-  createKeyPair: (successCallback: (result: CreateKeyPairResult) => void,
-                  errorCallback: (error: RogerthatError) => void,
-                  algorithm: SupportedAlgorithms,
-                  keyName: string,
-                  message: string | null,
-                  force: boolean,
-                  seed: string | null,
-                  arbitraryData: string | null) => void;
-  getAddress: (successCallback: (result: CryptoAddress) => void,
-               errorCallback: (error: RogerthatError) => void,
-               algorithm: SupportedAlgorithms,
-               keyName: string,
-               index: number,
-               message: string | null) => void;
-  getPublicKey: (successCallback: (result: PublicKey) => void,
-                 errorCallback: (error: RogerthatError) => void,
-                 algorithm: SupportedAlgorithms,
-                 keyName: string) => void;
-  getSeed: (successCallback: (result: CryptoSeed) => void,
-            errorCallback: (error: RogerthatError) => void,
-            algorithm: SupportedAlgorithms,
-            keyName: string,
-            message: string) => void;
-  hasKeyPair: (successCallback: (result: HasKeyPairResult) => void,
-               errorCallback: (error: RogerthatError) => void,
-               algorithm: SupportedAlgorithms,
-               keyName: string,
-               index: number) => void;
-  listAddresses: (successCallback: (result: ListAddressesResult[]) => void,
-                  errorCallback: (error: RogerthatError) => void,
-                  algorithm: SupportedAlgorithms,
-                  keyName: string,
-                  index: number) => void;
-  sign: (successCallback: (result: CryptoSignature) => void,
-         errorCallback: (error: RogerthatError) => void,
-         algorithm: SupportedAlgorithms,
-         keyName: string,
-         index: number,
-         message: string,
-         payload: string,
-         forcePin: boolean,
-         hashPayload: boolean) => void;
-  verify: (successCallback: (result: VerifyResult) => void,
-           errorCallback: (error: RogerthatError) => void,
-           algorithm: SupportedAlgorithms,
-           keyName: string,
-           index: number,
-           payload: string,
-           payload_signature: string) => void;
-  listKeyPairs: (successCallback: (result: KeyPairList) => void,
-                 errorCallback: (error: RogerthatError) => void) => void;
-
-}
-
 export const enum FeatureSupported {
   CHECKING = 0,
   SUPPORTED = 1,
@@ -314,8 +162,6 @@ export interface UserDetails {
   email: string; // 'test@example.com
   language: string; // 'en_US'
   name: string; // 'test user'
-  public_key: string | null;
-  public_keys: PublicKey[];
 }
 
 export interface QrCodeScannedContent {
@@ -448,7 +294,6 @@ export class Rogerthat {
     account: string;
     data: any;
   };
-  security: RogerthatSecurity;
   system: RogerthatSystem;
   ui: RogerthatUI;
   user: RogerthatUserInfo;

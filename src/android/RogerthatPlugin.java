@@ -215,33 +215,6 @@ public class RogerthatPlugin extends CordovaPlugin {
             case "news_getNewsStreamItems":
                 getNewsStreamItems(callbackContext, new GetNewsStreamItemsRequestTO(JsonUtils.toMap(args)));
                 break;
-            case "security_createKeyPair":
-                createKeyPair(callbackContext, args);
-                break;
-            case "security_hasKeyPair":
-                hasKeyPair(callbackContext, args);
-                break;
-            case "security_getPublicKey":
-                getPublicKey(callbackContext, args);
-                break;
-            case "security_getSeed":
-                getSeed(callbackContext, args);
-                break;
-            case "security_listAddresses":
-                listAddresses(callbackContext, args);
-                break;
-            case "security_getAddress":
-                getAddress(callbackContext, args);
-                break;
-            case "security_sign":
-                signPayload(callbackContext, args);
-                break;
-            case "security_verify":
-                verifySignedPayload(callbackContext, args);
-                break;
-            case "security_listKeyPairs":
-                listKeyPairs(callbackContext, args);
-                break;
             case "system_onBackendConnectivityChanged":
                 onBackendConnectivityChanged(callbackContext);
                 break;
@@ -472,34 +445,6 @@ public class RogerthatPlugin extends CordovaPlugin {
         callbackContext.success(new JSONObject());
     }
 
-    private abstract class SecurityCallback<T> implements MainService.SecurityCallback<T> {
-        private CallbackContext callbackContext;
-
-        public SecurityCallback(CallbackContext callbackContext) {
-            this.callbackContext = callbackContext;
-        }
-
-        public abstract void populateResult(final T result, final JSONObject obj) throws JSONException;
-
-        @Override
-        public void onSuccess(T result) {
-            try {
-                JSONObject obj = new JSONObject();
-                populateResult(result, obj);
-                callbackContext.success(obj);
-            } catch (JSONException je) {
-                L.e("JSONException... This should never happen", je);
-                callbackContext.error("Could not process json...");
-            }
-        }
-
-        @Override
-        public void onError(String code, String errorMessage) {
-            error(callbackContext, code, errorMessage);
-        }
-
-    }
-
     private void error(final CallbackContext callbackContext, String code, String errorMessage) {
         try {
             JSONObject obj = new JSONObject();
@@ -510,137 +455,6 @@ public class RogerthatPlugin extends CordovaPlugin {
             L.e("JSONException... This should never happen", je);
             callbackContext.error("Could not process json...");
         }
-    }
-
-    private void createKeyPair(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        SecurityCallback<MainService.CreateKeyPairResult> sc = new SecurityCallback<MainService.CreateKeyPairResult>(callbackContext) {
-            @Override
-            public void populateResult(MainService.CreateKeyPairResult r, JSONObject obj) throws JSONException {
-                obj.put("public_key", r.publicKey);
-                obj.put("seed", r.seed);
-            }
-        };
-
-        mActivity.getActionScreenUtils().createKeyPair(args, sc);
-    }
-
-    private void hasKeyPair(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        SecurityCallback<Boolean> sc = new SecurityCallback<Boolean>(callbackContext) {
-            @Override
-            public void populateResult(Boolean exists, JSONObject obj) throws JSONException {
-                obj.put("exists", exists);
-            }
-        };
-
-        mActivity.getActionScreenUtils().hasKeyPair(args, sc);
-    }
-
-    private void getPublicKey(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        SecurityCallback<String> sc = new SecurityCallback<String>(callbackContext) {
-            @Override
-            public void populateResult(String publicKey, JSONObject obj) throws JSONException {
-                obj.put("public_key", publicKey);
-            }
-
-            @Override
-            public void onSuccess(String publicKey) {
-                if (publicKey == null) {
-                    onError("key_not_found", mActivity.getString(R.string.key_not_found));
-                } else {
-                    super.onSuccess(publicKey);
-                }
-            }
-        };
-
-        mActivity.getActionScreenUtils().getPublicKey(args, sc);
-    }
-
-    private void getSeed(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        SecurityCallback<String> sc = new SecurityCallback<String>(callbackContext) {
-            @Override
-            public void populateResult(String seed, JSONObject obj) throws JSONException {
-                obj.put("seed", seed);
-            }
-        };
-
-        mActivity.getActionScreenUtils().getSeed(args, sc);
-    }
-
-    private void listAddresses(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        SecurityCallback<List<Map<String, String>>> sc = new SecurityCallback<List<Map<String, String>>>(callbackContext) {
-            @Override
-            public void populateResult(List<Map<String, String>> addresses, JSONObject obj) throws JSONException {
-                obj.put("addresses", addresses);
-            }
-        };
-
-        mActivity.getActionScreenUtils().listAddresses(args, sc);
-    }
-
-    private void getAddress(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        SecurityCallback<String> sc = new SecurityCallback<String>(callbackContext) {
-            @Override
-            public void populateResult(String address, JSONObject obj) throws JSONException {
-                obj.put("address", address);
-            }
-        };
-
-        mActivity.getActionScreenUtils().getAddress(args, sc);
-    }
-
-    private void signPayload(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        final String payload = JsonUtils.optString(args, "payload", null);
-
-        SecurityCallback<String> sc = new SecurityCallback<String>(callbackContext) {
-            @Override
-            public void populateResult(String result, JSONObject obj) throws JSONException {
-            }
-
-            @Override
-            public void onSuccess(String payloadSignature) {
-                try {
-                    JSONObject obj = new JSONObject();
-                    obj.put("payload", payload);
-                    obj.put("payload_signature", payloadSignature);
-                    callbackContext.success(obj);
-                } catch (Exception e) {
-                    L.bug("signPayload onSuccess exception", e);
-                    onError("unknown_error_occurred", mActivity.getString(R.string.unknown_error_occurred));
-                }
-            }
-        };
-
-        mActivity.getActionScreenUtils().signPayload(args, payload, sc);
-    }
-
-    private void verifySignedPayload(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        SecurityCallback<Boolean> sc = new SecurityCallback<Boolean>(callbackContext) {
-            @Override
-            public void populateResult(Boolean valid, JSONObject obj) throws JSONException {
-                obj.put("valid", valid);
-            }
-        };
-
-        mActivity.getActionScreenUtils().verifySignedPayload(args, sc);
-    }
-
-    private void listKeyPairs(final CallbackContext callbackContext, final JSONObject args) {
-        SecurityCallback<List<Map<String, String>>> sc = new SecurityCallback<List<Map<String, String>>>(callbackContext) {
-            @Override
-            public void populateResult(List<Map<String, String>> keyPairs, JSONObject obj) throws JSONException {
-                JSONArray array = new JSONArray();
-                for (Map<String, String> pair : keyPairs) {
-                    JSONObject jsonPair = new JSONObject();
-                    for (String key : pair.keySet()) {
-                        jsonPair.put(key, pair.get(key));
-                    }
-                    array.put(jsonPair);
-                }
-                obj.put("keyPairs", array);
-            }
-        };
-
-        mActivity.getActionScreenUtils().listKeyPairs(args, sc);
     }
 
     private void onBackendConnectivityChanged(final CallbackContext callbackContext) throws JSONException {

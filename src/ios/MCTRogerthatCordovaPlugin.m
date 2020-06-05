@@ -204,27 +204,6 @@
                                        params:[self getRequestParams:command]];
 }
 
-- (void)news_count:(CDVInvokedUrlCommand *)command
-{
-    HERE();
-    [self.helper countNewsWithResultHandler:[self defaultResultHandlerWithCommand:command]
-                                     params:[self getRequestParams:command]];
-}
-
-- (void)news_get:(CDVInvokedUrlCommand *)command
-{
-    HERE();
-    [self.helper getNewsItemWithResultHandler:[self defaultResultHandlerWithCommand:command]
-                                       params:[self getRequestParams:command]];
-}
-
-- (void)news_list:(CDVInvokedUrlCommand *)command
-{
-    HERE();
-    [self.helper listNewsWithResultHandler:[self defaultResultHandlerWithCommand:command]
-                                    params:[self getRequestParams:command]];
-}
-
 - (void)news_getNewsGroup:(CDVInvokedUrlCommand *)command
 {
     HERE();
@@ -409,11 +388,6 @@
     [self commandProcessed:[CDVInvokedUrlCommand commandWithCallbackId:requestId]
                 withResult:result
                  withError:error];
-}
-
-- (void)newsReceived:(NSArray *)ids
-{
-    [self sendCallback:@"newsReceived" withArguments:ids];
 }
 
 - (void)badgeUpdated:(NSDictionary *)params

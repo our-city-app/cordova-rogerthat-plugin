@@ -29,7 +29,6 @@ var userCallbacks = {
     ready: _dummy,
     serviceDataUpdated: _dummy,
     userDataUpdated: _dummy,
-    newsReceived: _dummy,
     badgeUpdated: _dummy
 };
 
@@ -104,9 +103,6 @@ var utils = {
         } else if (result.callback === "apiResult") {
             apiUserCallbacks.resultReceived(result.args.method, result.args.result, result.args.error, result.args.tag);
 
-        } else if (result.callback === "newsReceived") {
-            userCallbacks.newsReceived(result.args);
-
         } else if (result.callback === "badgeUpdated") {
             userCallbacks.badgeUpdated(result.args);
 
@@ -164,25 +160,6 @@ function RogerthatPlugin() {
     patchConsole();
 
     this.news = {
-        // TODO cleanup obsolete news functions
-        count: function (successCallback, errorCallback, params) {
-            if (!params) {
-                params = {};
-            }
-            utils.exec(successCallback, errorCallback, "news_count", [params]);
-        },
-        get: function (successCallback, errorCallback, params) {
-            if (!params) {
-                params = {};
-            }
-            utils.exec(successCallback, errorCallback, "news_get", [params]);
-        },
-        list: function (successCallback, errorCallback, params) {
-            if (!params) {
-                params = {};
-            }
-            utils.exec(successCallback, errorCallback, "news_list", [params]);
-        },
         getNewsGroup: function (request) {
             return new Promise(function (resolve, reject) {
                 utils.exec(resolve, reject, "news_getNewsGroup", [request]);

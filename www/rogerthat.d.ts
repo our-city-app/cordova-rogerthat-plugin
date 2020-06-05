@@ -93,23 +93,6 @@ export interface NewsItem {
   sortKey: number;
 }
 
-export interface CountNewsItemsResult {
-  count: number;
-}
-
-export interface ListNewsItemsParams {
-  cursor?: string;
-  /**
-   * Amount of news items that will be returned
-   */
-  limit?: number;
-}
-
-export interface ListNewsItemsResult {
-  items: NewsItem[];
-  cursor: string;
-}
-
 export type CameraType = 'front' | 'back';
 
 export interface RogerthatCamera {
@@ -192,7 +175,6 @@ export interface QrCodeScannedContent {
 
 export interface RogerthatCallbacks {
   badgeUpdated: (callback: (result: { key: string, count: number }) => void) => void;
-  newsReceived: (callback: (result: { ids: number[] }) => void) => void;
   /**
    * The device its Internet connectivity has changed.
    */

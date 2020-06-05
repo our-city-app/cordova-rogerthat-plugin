@@ -125,17 +125,6 @@ public class RogerthatPlugin extends CordovaPlugin {
         }
 
         @Override
-        public void newsReceived(long[] ids) {
-            try {
-                JSONObject obj = new JSONObject();
-                obj.put("ids", ids);
-                sendCallbackUpdate("newsReceived", obj);
-            } catch (JSONException e) {
-                L.e("JSONException... This should never happen", e);
-            }
-        }
-
-        @Override
         public void badgeUpdated(Map<String, Object> params) {
             sendCallbackUpdate("badgeUpdated", new JSONObject(params));
         }
@@ -216,16 +205,6 @@ public class RogerthatPlugin extends CordovaPlugin {
                 break;
             case "message_open":
                 openMessage(callbackContext, args);
-                break;
-            // TODO: remove old news calls
-            case "news_count":
-                countNews(callbackContext, args);
-                break;
-            case "news_get":
-                getNews(callbackContext, args);
-                break;
-            case "news_list":
-                listNews(callbackContext, args);
                 break;
             case "news_getNewsGroup":
                 getNewsGroup(callbackContext, new GetNewsGroupRequestTO(JsonUtils.toMap(args)));
@@ -464,46 +443,6 @@ public class RogerthatPlugin extends CordovaPlugin {
         }
         mActivity.getMessagingPlugin().showMessage(mActivity, message, false, null, false);
         callbackContext.success(new JSONObject());
-    }
-
-    private void countNews(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        if (args == null) {
-            returnArgsMissing(callbackContext);
-            return;
-        }
-        long count = mActivity.getActionScreenUtils().countNews(args);
-        JSONObject obj = new JSONObject();
-        obj.put("count", count);
-        callbackContext.success(obj);
-    }
-
-    private void getNews(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        if (args == null) {
-            returnArgsMissing(callbackContext);
-            return;
-        }
-        NewsItem item = mActivity.getActionScreenUtils().getNews(args);
-        JSONObject obj = new JSONObject();
-        obj.put("item", item == null ? null : item.toJSONMap());
-        callbackContext.success(obj);
-    }
-
-    private void listNews(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
-        if (args == null) {
-            returnArgsMissing(callbackContext);
-            return;
-        }
-        Map<String, Object> result = mActivity.getActionScreenUtils().listNews(args);
-
-        JSONArray newsItems = new JSONArray();
-        for (NewsItem ni : (List<NewsItem>) result.get("items")) {
-            newsItems.put(ni.toJSONMap());
-        }
-
-        JSONObject obj = new JSONObject();
-        obj.put("cursor", result.get("cursor"));
-        obj.put("items", newsItems);
-        callbackContext.success(obj);
     }
 
     private void error(final CallbackContext callbackContext, String code, String errorMessage) {

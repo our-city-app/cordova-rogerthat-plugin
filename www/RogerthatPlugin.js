@@ -305,11 +305,6 @@ function execCallback(promiseCallback, regularCallback) {
 }
 
 RogerthatPlugin.prototype.util = {
-    embeddedAppTranslations: function (successCallback, errorCallback) {
-        return new Promise(function (resolve, reject) {
-            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_embeddedAppTranslations", []);
-        });
-    },
     isConnectedToInternet: function (successCallback, errorCallback) {
         return new Promise(function (resolve, reject) {
             utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_isConnectedToInternet", []);

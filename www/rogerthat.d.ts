@@ -141,7 +141,6 @@ export interface OpenParams {
 export interface RogerthatUtil {
   _translateHTML: () => void;
   _translations: { defaultLanguage: string; values: Translations };
-  embeddedAppTranslations: () => Promise<{ translations: any }>;
   isConnectedToInternet: () => Promise<InternetConnectionStatus>
   open: (params: OpenParams) => Promise<void>;
 

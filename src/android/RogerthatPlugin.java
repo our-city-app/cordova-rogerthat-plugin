@@ -32,13 +32,11 @@ import android.net.Uri;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.BarcodeScanningActivity;
-import com.mobicage.rogerthat.MainService;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.Poker;
 import com.mobicage.rogerthat.plugins.friends.ServiceApiCallbackResult;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemInfo;
 import com.mobicage.rogerthat.plugins.messaging.Message;
-import com.mobicage.rogerthat.plugins.news.NewsItem;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
@@ -65,7 +63,6 @@ import org.json.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -223,9 +220,6 @@ public class RogerthatPlugin extends CordovaPlugin {
                 break;
             case "user_put":
                 putUserData(callbackContext, args);
-                break;
-            case "util_embeddedAppTranslations":
-                embeddedAppTranslations(callbackContext);
                 break;
             case "util_isConnectedToInternet":
                 isConnectedToInternet(callbackContext);
@@ -482,19 +476,6 @@ public class RogerthatPlugin extends CordovaPlugin {
         boolean smart = args.optBoolean("smart", false);
         mActivity.getFriendsPlugin().putUserData(mActivity.getServiceEmail(), data, smart);
         callbackContext.success(new JSONObject());
-    }
-
-    private void embeddedAppTranslations(final CallbackContext callbackContext) throws JSONException {
-        String embeddedApp = mActivity.getEmbeddedApp();
-        if (embeddedApp == null) {
-            error(callbackContext, "unknown_error_occurred", mActivity.getString(R.string.unknown_error_occurred));
-            return;
-        }
-
-        String translations = mActivity.getSystemPlugin().getStore().getEmbeddedAppTranslations(embeddedApp);
-        JSONObject obj = new JSONObject();
-        obj.put("translations", translations == null ? new JSONObject() : new JSONObject(translations));
-        callbackContext.success(obj);
     }
 
     private void isConnectedToInternet(final CallbackContext callbackContext) throws JSONException {

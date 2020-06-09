@@ -243,22 +243,6 @@
     [self.helper putUserData:[self getRequestParams:command]];
 }
 
-- (void)util_embeddedAppTranslations:(CDVInvokedUrlCommand *)command
-{
-    HERE();
-    if (self.vc.embeddedApp == nil) {
-        NSString *errorMessage = MCTLocalizedString(@"An unknown error occurred", nil);
-        [self commandProcessed:command withError:@{@"code": @"unknown_error_occurred",
-                                                   @"message": errorMessage,
-                                                   @"exception": errorMessage}];
-        return;
-    }
-
-    NSString *translations = [[MCTComponentFramework systemPlugin].store translationsForEmbeddedApp:self.vc.embeddedApp];
-    NSDictionary *translationsDict = [translations MCT_JSONValue];
-    [self commandProcessed:command withResult:@{@"translations":OR(translationsDict, @{})}];
-}
-
 - (void)util_isConnectedToInternet:(CDVInvokedUrlCommand *)command
 {
     HERE();

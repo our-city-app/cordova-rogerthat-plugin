@@ -720,11 +720,6 @@ export interface EmbeddedAppTO {
   version: number;
 }
 
-export interface EmbeddedAppTranslationsTO {
-  embedded_app: string | null;
-  translations: string | null;
-}
-
 export interface EndMessageFlowRequestTO {
   message_flow_run_id: string | null;
   parent_message_key: string | null;
@@ -4110,13 +4105,6 @@ export interface UpdateEmbeddedAppRequestTO {
 }
 
 export interface UpdateEmbeddedAppResponseTO {
-}
-
-export interface UpdateEmbeddedAppTranslationsRequestTO {
-  translations: EmbeddedAppTranslationsTO[];
-}
-
-export interface UpdateEmbeddedAppTranslationsResponseTO {
 }
 
 export interface UpdateEmbeddedAppsRequestTO {

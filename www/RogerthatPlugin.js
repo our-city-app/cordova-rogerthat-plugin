@@ -1,6 +1,36 @@
 var exec = cordova.require("cordova/exec");
 var sha256 = require("./Sha256");
 
+if (typeof Object.assign !== 'function') {
+    // Must be writable: true, enumerable: false, configurable: true
+    Object.defineProperty(Object, "assign", {
+        value: function assign(target, varArgs) { // .length of function is 2
+            'use strict';
+            if (target === null || target === undefined) {
+                throw new TypeError('Cannot convert undefined or null to object');
+            }
+
+            var to = Object(target);
+
+            for (var index = 1; index < arguments.length; index++) {
+                var nextSource = arguments[index];
+
+                if (nextSource !== null && nextSource !== undefined) {
+                    for (var nextKey in nextSource) {
+                        // Avoid bugs when hasOwnProperty is shadowed
+                        if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+                            to[nextKey] = nextSource[nextKey];
+                        }
+                    }
+                }
+            }
+            return to;
+        },
+        writable: true,
+        configurable: true
+    });
+}
+
 var MAJOR_VERSION = 0;
 var MINOR_VERSION = 1;
 var PATCH_VERSION = 0;
@@ -311,13 +341,15 @@ RogerthatPlugin.prototype.util = {
         });
     },
     open: function (params, successCallback, errorCallback) {
-        if (params.action_type) {
-            if (params.action_type === "click" || params.action_type === "action") {
-                params.action = sha256(params.action);
+        var paramsCopy = Object.assign({}, params);
+        if (paramsCopy.action_type) {
+            if (paramsCopy.action_type === "click" || paramsCopy.action_type === "action") {
+                // TODO move this to native android/ios and remove the sha256 js library
+                paramsCopy.action = sha256(paramsCopy.action);
             }
         }
         return new Promise(function (resolve, reject) {
-            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_open", [params]);
+            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_open", [paramsCopy]);
         });
     },
     playAudio: function (url, successCallback, errorCallback) {

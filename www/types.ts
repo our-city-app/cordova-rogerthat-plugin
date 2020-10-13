@@ -1,3 +1,4 @@
+// tslint:disable:no-empty-interface
 export type FormComponentTO =
   FileComponentTO
   | TextInputComponentTO
@@ -48,7 +49,8 @@ export type MapListSectionItemTO =
   OpeningHoursListSectionItemTO
   | ToggleListSectionItemTO
   | LinkListSectionItemTO
-  | ExpandableListSectionItemTO;
+  | ExpandableListSectionItemTO
+  | OpeningHoursSectionItemTO;
 
 export type MapSearchSuggestionTO =
   MapSearchSuggestionItemTO
@@ -77,7 +79,7 @@ export type Step =
   | FormFlowStepTO;
 
 
-export enum FormComponentType {
+export const enum FormComponentType {
   TEXT_INPUT = 'text_input',
   FILE = 'file',
   MULTI_SELECT = 'multi_select',
@@ -87,7 +89,7 @@ export enum FormComponentType {
   SINGLE_SELECT = 'single_select',
 }
 
-export enum FormValidatorType {
+export const enum FormValidatorType {
   REGEX = 'regex',
   REQUIRED = 'required',
   MIN = 'min',
@@ -98,43 +100,44 @@ export enum FormValidatorType {
   MINDATE = 'mindate',
 }
 
-export enum JobOfferActionType {
+export const enum JobOfferActionType {
   OPEN = 0,
   CHAT = 1,
 }
 
-export enum MapActionChipType {
+export const enum MapActionChipType {
   SEARCH_SUGGESTION = 'search_suggestion',
 }
 
-export enum MapAnnouncementType {
+export const enum MapAnnouncementType {
   TEXT = 'text',
 }
 
-export enum MapGeometryType {
+export const enum MapGeometryType {
   MULTI_POLYGON = 'MultiPolygon',
   POLYGON = 'Polygon',
   LINE_STRING = 'LineString',
   MULTI_LINE_STRING = 'MultiLineString',
 }
 
-export enum MapItemLineType {
+export const enum MapItemLineType {
   TEXT = 'text',
 }
 
-export enum MapListSectionItemType {
+export const enum MapListSectionItemType {
   OPENING_HOURS = 'opening_hours',
   EXPANDABLE = 'expandable',
+  DYNAMIC_OPENING_HOURS = 'opening-hours',
   LINK = 'link',
   TOGGLE = 'toggle',
 }
 
-export enum MapSearchSuggestionType {
+export const enum MapSearchSuggestionType {
   ITEM = 'item',
   KEYWORD = 'keyword',
 }
 
-export enum MapSectionType {
+export const enum MapSectionType {
   GEOMETRY = 'geometry',
   MEDIA = 'media',
   LIST = 'list',
@@ -143,17 +146,17 @@ export enum MapSectionType {
   NEWS = 'news',
 }
 
-export enum MessageType {
+export const enum MessageType {
   MESSAGE = 'message_step',
   FORM = 'form_step',
 }
 
-export enum NewMessageType {
+export const enum NewMessageType {
   FORM_MESSAGE = 2,
   MESSAGE = 1,
 }
 
-export enum NextActionType {
+export const enum NextActionType {
   URL = 'url',
   SECTION = 'section',
   SUBMIT = 'submit',
@@ -287,37 +290,6 @@ export interface AdvancedOrderWidgetResultTO {
   currency: string | null;
 }
 
-export interface AppNewsInfoTO {
-  feed_name: string | null;
-  id: number;
-  sender_email: string | null;
-  sort_priority: number;
-  sort_timestamp: number;
-  version: number;
-}
-
-export interface AppNewsItemTO {
-  buttons: NewsActionButtonTO[];
-  media: MediaTO | null;
-  sender: NewsSenderTO | null;
-  broadcast_type: string | null;
-  feed_name: string | null;
-  flags: number;
-  id: number;
-  image_url: string | null;
-  message: string | null;
-  qr_code_caption: string | null;
-  qr_code_content: string | null;
-  reach: number;
-  sort_priority: number;
-  sort_timestamp: number;
-  timestamp: number;
-  title: string | null;
-  type: number;
-  users_that_rogered: string[];
-  version: number;
-}
-
 export interface AppPaymentProviderTO {
   asset_types: string[];
   background_color: string | null;
@@ -432,17 +404,6 @@ export interface ButtonTO {
   ui_flags: number;
 }
 
-export interface CallRecordTO {
-  geoPoint: GeoPointTO | null;
-  rawLocation: RawLocationInfoTO | null;
-  countrycode: string | null;
-  duration: number;
-  id: number;
-  phoneNumber: string | null;
-  starttime: number;
-  type: number;
-}
-
 export interface CancelPaymentRequestTO {
   transaction_id: string | null;
 }
@@ -473,25 +434,6 @@ export interface ChoiceTO {
   value: string | null;
 }
 
-export interface ColorSettingsTO {
-  primary_color: string | null;
-  primary_color_dark: string | null;
-  primary_icon_color: string | null;
-  secondary_color: string | null;
-  tint_color: string | null;
-}
-
-export interface ConfirmPaymentRequestTO {
-  crypto_transaction: CryptoTransactionTO | null;
-  transaction_id: string | null;
-}
-
-export interface ConfirmPaymentResponseTO {
-  error: ErrorPaymentTO | null;
-  result: PendingPaymentTO | null;
-  success: boolean;
-}
-
 export interface ConsentSettingsTO {
   ask_push_notifications: boolean;
   ask_tos: boolean;
@@ -516,10 +458,8 @@ export interface CoordsListTO {
 }
 
 export interface CreateAssetRequestTO {
-  address: string | null;
   currency: string | null;
   iban: string | null;
-  id: string | null;
   provider_id: string | null;
   type: string | null;
 }
@@ -560,34 +500,6 @@ export interface CreateTransactionResponseTO {
 export interface CreateTransactionResultTO {
   params: string | null;
   transaction_id: string | null;
-}
-
-export interface CryptoTransactionDataTO {
-  input: CryptoTransactionInputTO | null;
-  outputs: CryptoTransactionOutputTO[];
-  algorithm: string | null;
-  public_key: string | null;
-  public_key_index: number;
-  signature: string | null;
-  signature_hash: string | null;
-  timelock: number;
-}
-
-export interface CryptoTransactionInputTO {
-  parent_id: string | null;
-  timelock: number;
-}
-
-export interface CryptoTransactionOutputTO {
-  unlockhash: string | null;
-  value: string | null;
-}
-
-export interface CryptoTransactionTO {
-  data: CryptoTransactionDataTO[];
-  from_address: string | null;
-  minerfees: string | null;
-  to_address: string | null;
 }
 
 export interface DateSelectFormMessageTO {
@@ -646,7 +558,7 @@ export interface DatetimeComponentTO {
   id: string | null;
   sensitive: boolean;
   title: string | null;
-  readonly type: FormComponentType.DATETIME
+  readonly type: FormComponentType.DATETIME;
 }
 
 export interface DatetimeComponentValueTO {
@@ -656,7 +568,7 @@ export interface DatetimeComponentValueTO {
   month: number;
   year: number;
   id: string | null;
-  readonly type: FormComponentType.DATETIME
+  readonly type: FormComponentType.DATETIME;
 }
 
 export interface DeleteConversationRequestTO {
@@ -746,7 +658,7 @@ export interface ExpandableListSectionItemTO {
   icon: string | null;
   icon_color: string | null;
   title: string | null;
-  readonly type: MapListSectionItemType.EXPANDABLE
+  readonly type: MapListSectionItemType.EXPANDABLE;
 }
 
 export interface FacebookRogerthatProfileMatchTO {
@@ -763,7 +675,7 @@ export interface FileComponentTO {
   id: string | null;
   sensitive: boolean;
   title: string | null;
-  readonly type: FormComponentType.FILE
+  readonly type: FormComponentType.FILE;
 }
 
 export interface FileComponentValueTO {
@@ -771,7 +683,7 @@ export interface FileComponentValueTO {
   name: string | null;
   value: string | null;
   id: string | null;
-  readonly type: FormComponentType.FILE
+  readonly type: FormComponentType.FILE;
 }
 
 export interface FindFriendItemTO {
@@ -868,7 +780,7 @@ export interface FormFlowStepTO {
   message_flow_id: string | null;
   received_timestamp: number;
   step_id: string | null;
-  readonly step_type: MessageType.FORM
+  readonly step_type: MessageType.FORM;
 }
 
 export interface FormMessageTO {
@@ -893,7 +805,7 @@ export interface FormMessageTO {
   thread_size: number;
   thread_text_color: string | null;
   timestamp: number;
-  readonly message_type: NewMessageType.FORM_MESSAGE
+  readonly message_type: NewMessageType.FORM_MESSAGE;
 }
 
 export interface FormResult {
@@ -949,11 +861,6 @@ export interface FriendCategoryTO {
   avatar: string | null;
   guid: string | null;
   name: string | null;
-}
-
-export interface FriendLocationTO {
-  location: GeoPointWithTimestampTO | null;
-  email: string | null;
 }
 
 export interface FriendRelationTO {
@@ -1077,12 +984,6 @@ export interface GPSLocationTO {
 }
 
 export interface GeoPointTO {
-  accuracy: number;
-  latitude: number;
-  longitude: number;
-}
-
-export interface GeoPointTO {
   lat: number;
   lon: number;
 }
@@ -1098,7 +999,7 @@ export interface GeometrySectionTO {
   geometry: MapGeometryTO[];
   description: string | null;
   title: string | null;
-  readonly type: MapSectionType.GEOMETRY
+  readonly type: MapSectionType.GEOMETRY;
 }
 
 export interface GetAppAssetRequestTO {
@@ -1225,14 +1126,6 @@ export interface GetFriendInvitationSecretsResponseTO {
   secrets: string[];
 }
 
-export interface GetFriendLocationRequestTO {
-  friend: string | null;
-}
-
-export interface GetFriendLocationResponseTO {
-  location: GeoPointWithTimestampTO | null;
-}
-
 export interface GetFriendRequestTO {
   avatar_size: number;
   email: string | null;
@@ -1242,21 +1135,6 @@ export interface GetFriendResponseTO {
   friend: FriendTO | null;
   avatar: string | null;
   generation: number;
-}
-
-export interface GetFriendsListRequestTO {
-}
-
-export interface GetFriendsListResponseTO {
-  friends: FriendTO[];
-  generation: number;
-}
-
-export interface GetFriendsLocationRequestTO {
-}
-
-export interface GetFriendsLocationResponseTO {
-  locations: FriendLocationTO[];
 }
 
 export interface GetGroupAvatarRequestTO {
@@ -1336,21 +1214,6 @@ export interface GetJobsResponseTO {
   cursor: string | null;
   has_more: boolean;
   is_profile_active: boolean;
-}
-
-export interface GetLocationErrorTO {
-  message: string | null;
-  status: number;
-}
-
-export interface GetLocationRequestTO {
-  friend: string | null;
-  high_prio: boolean;
-  target: number;
-}
-
-export interface GetLocationResponseTO {
-  error: GetLocationErrorTO | null;
 }
 
 export interface GetMapItemDetailsRequestTO {
@@ -1447,22 +1310,12 @@ export interface GetNewsGroupsResponseTO {
   has_locations: boolean;
 }
 
-export interface GetNewsItemsRequestTO {
-  ids: number[];
+export interface GetNewsItemDetailsRequestTO {
+  id: number;
 }
 
-export interface GetNewsItemsResponseTO {
-  items: AppNewsItemTO[];
-}
-
-export interface GetNewsRequestTO {
-  cursor: string | null;
-  updated_since: number;
-}
-
-export interface GetNewsResponseTO {
-  result: AppNewsInfoTO[];
-  cursor: string | null;
+export interface GetNewsItemDetailsResponseTO {
+  item: NewsStreamItemTO | null;
 }
 
 export interface GetNewsStreamFilterTO {
@@ -1538,17 +1391,6 @@ export interface GetPendingPaymentDetailsRequestTO {
 export interface GetPendingPaymentDetailsResponseTO {
   error: ErrorPaymentTO | null;
   result: PendingPaymentDetailsTO | null;
-  success: boolean;
-}
-
-export interface GetPendingPaymentSignatureDataRequestTO {
-  asset_id: string | null;
-  transaction_id: string | null;
-}
-
-export interface GetPendingPaymentSignatureDataResponseTO {
-  error: ErrorPaymentTO | null;
-  result: CryptoTransactionTO | null;
   success: boolean;
 }
 
@@ -1662,7 +1504,6 @@ export interface HeartBeatRequestTO {
   buildFingerPrint: string | null;
   deviceId: string | null;
   deviceModelName: string | null;
-  embeddedApps: string[];
   flushBackLog: boolean;
   localeCountry: string | null;
   localeLanguage: string | null;
@@ -1687,16 +1528,10 @@ export interface HeartBeatResponseTO {
   systemTime: number;
 }
 
-export interface HomeScreenSettingsTO {
-  items: NavigationItemTO[];
-  color: string | null;
-  header_image_url: string | null;
-  style: string | null;
-}
-
 export interface IdentityTO {
   avatarId: number;
   birthdate: number;
+  communityId: number;
   email: string | null;
   firstName: string | null;
   gender: number;
@@ -1770,7 +1605,7 @@ export interface JobOfferChatActionTO {
   chat_key: string | null;
   icon: string | null;
   label: string | null;
-  readonly type: JobOfferActionType.CHAT
+  readonly type: JobOfferActionType.CHAT;
 }
 
 export interface JobOfferContractTO {
@@ -1799,7 +1634,7 @@ export interface JobOfferOpenActionTO {
   action: string | null;
   icon: string | null;
   label: string | null;
-  readonly type: JobOfferActionType.OPEN
+  readonly type: JobOfferActionType.OPEN;
 }
 
 export interface JobOfferProviderTO {
@@ -1849,23 +1684,24 @@ export interface LatLonTO {
 export interface LineStringGeometryTO {
   line: CoordsListTO | null;
   color: string | null;
-  readonly type: MapGeometryType.LINE_STRING
+  readonly type: MapGeometryType.LINE_STRING;
 }
 
 export interface LinkListSectionItemTO {
   external: boolean;
   request_user_link: boolean;
+  style: number;
   url: string | null;
   icon: string | null;
   icon_color: string | null;
   title: string | null;
-  readonly type: MapListSectionItemType.LINK
+  readonly type: MapListSectionItemType.LINK;
 }
 
 export interface ListSectionTO {
   items: MapListSectionItemTO[];
   style: string | null;
-  readonly type: MapSectionType.LIST
+  readonly type: MapSectionType.LIST;
 }
 
 export interface ListStreetsRequestTO {
@@ -1889,7 +1725,7 @@ export interface LocationComponentTO {
   id: string | null;
   sensitive: boolean;
   title: string | null;
-  readonly type: FormComponentType.LOCATION
+  readonly type: FormComponentType.LOCATION;
 }
 
 export interface LocationComponentValueTO {
@@ -1897,21 +1733,7 @@ export interface LocationComponentValueTO {
   latitude: number;
   longitude: number;
   id: string | null;
-  readonly type: FormComponentType.LOCATION
-}
-
-export interface LocationRecordTO {
-  geoPoint: GeoPointTO | null;
-  rawLocation: RawLocationInfoTO | null;
-  timestamp: number;
-}
-
-export interface LocationResultRequestTO {
-  location: GeoPointWithTimestampTO | null;
-  friend: string | null;
-}
-
-export interface LocationResultResponseTO {
+  readonly type: FormComponentType.LOCATION;
 }
 
 export interface LocationWidgetResultTO {
@@ -1930,14 +1752,6 @@ export interface LockMessageRequestTO {
 
 export interface LockMessageResponseTO {
   members: MemberStatusTO[];
-}
-
-export interface LogCallRequestTO {
-  record: CallRecordTO | null;
-}
-
-export interface LogCallResponseTO {
-  recordId: number;
 }
 
 export interface LogErrorRequestTO {
@@ -1961,27 +1775,8 @@ export interface LogInvitationSecretSentRequestTO {
 export interface LogInvitationSecretSentResponseTO {
 }
 
-export interface LogLocationRecipientTO {
-  friend: string | null;
-  target: number;
-}
-
-export interface LogLocationsRequestTO {
-  recipients: LogLocationRecipientTO[];
-  records: LocationRecordTO[];
-}
-
-export interface LogLocationsResponseTO {
-}
-
 export interface LongWidgetResultTO {
   value: number;
-}
-
-export interface LookAndFeelTO {
-  colors: ColorSettingsTO | null;
-  homescreen: HomeScreenSettingsTO | null;
-  toolbar: ToolbarSettingsTO | null;
 }
 
 export interface MapBaseUrlsTO {
@@ -2027,7 +1822,7 @@ export interface MapItemLineTextPartTO {
 
 export interface MapItemLineTextTO {
   parts: MapItemLineTextPartTO[];
-  readonly type: MapItemLineType.TEXT
+  readonly type: MapItemLineType.TEXT;
 }
 
 export interface MapItemTO {
@@ -2046,12 +1841,12 @@ export interface MapNotificationsTO {
 export interface MapSearchSuggestionItemTO {
   id: string | null;
   text: string | null;
-  readonly type: MapSearchSuggestionType.ITEM
+  readonly type: MapSearchSuggestionType.ITEM;
 }
 
 export interface MapSearchSuggestionKeywordTO {
   text: string | null;
-  readonly type: MapSearchSuggestionType.KEYWORD
+  readonly type: MapSearchSuggestionType.KEYWORD;
 }
 
 export interface MapSearchTO {
@@ -2082,25 +1877,25 @@ export interface MaxDateValidatorTO {
   minute: number;
   month: number;
   year: number;
-  readonly type: FormValidatorType.MAXDATE
+  readonly type: FormValidatorType.MAXDATE;
 }
 
 export interface MaxLengthValidatorTO {
   error_message: string | null;
   value: number;
-  readonly type: FormValidatorType.MAXLENGTH
+  readonly type: FormValidatorType.MAXLENGTH;
 }
 
 export interface MaxValidatorTO {
   error_message: string | null;
   value: number;
-  readonly type: FormValidatorType.MAX
+  readonly type: FormValidatorType.MAX;
 }
 
 export interface MediaSectionTO {
   items: BaseMediaTO[];
   ratio: SizeTO | null;
-  readonly type: MapSectionType.MEDIA
+  readonly type: MapSectionType.MEDIA;
 }
 
 export interface MediaTO {
@@ -2188,7 +1983,7 @@ export interface MessageFlowStepTO {
   message_flow_id: string | null;
   received_timestamp: number;
   step_id: string | null;
-  readonly step_type: MessageType.MESSAGE
+  readonly step_type: MessageType.MESSAGE;
 }
 
 export interface MessageLockedRequestTO {
@@ -2226,7 +2021,7 @@ export interface MessageTO {
   thread_text_color: string | null;
   timeout: number;
   timestamp: number;
-  readonly message_type: NewMessageType.MESSAGE
+  readonly message_type: NewMessageType.MESSAGE;
 }
 
 export interface MinDateValidatorTO {
@@ -2236,31 +2031,31 @@ export interface MinDateValidatorTO {
   minute: number;
   month: number;
   year: number;
-  readonly type: FormValidatorType.MINDATE
+  readonly type: FormValidatorType.MINDATE;
 }
 
 export interface MinLengthValidatorTO {
   error_message: string | null;
   value: number;
-  readonly type: FormValidatorType.MINLENGTH
+  readonly type: FormValidatorType.MINLENGTH;
 }
 
 export interface MinValidatorTO {
   error_message: string | null;
   value: number;
-  readonly type: FormValidatorType.MIN
+  readonly type: FormValidatorType.MIN;
 }
 
 export interface MultiLineStringGeometryTO {
   lines: CoordsListTO[];
   color: string | null;
-  readonly type: MapGeometryType.MULTI_LINE_STRING
+  readonly type: MapGeometryType.MULTI_LINE_STRING;
 }
 
 export interface MultiPolygonGeometryTO {
   polygons: PolygonTO[];
   color: string | null;
-  readonly type: MapGeometryType.MULTI_POLYGON
+  readonly type: MapGeometryType.MULTI_POLYGON;
 }
 
 export interface MultiSelectComponentTO {
@@ -2270,13 +2065,13 @@ export interface MultiSelectComponentTO {
   id: string | null;
   sensitive: boolean;
   title: string | null;
-  readonly type: FormComponentType.MULTI_SELECT
+  readonly type: FormComponentType.MULTI_SELECT;
 }
 
 export interface MultiSelectComponentValueTO {
   values: string[];
   id: string | null;
-  readonly type: FormComponentType.MULTI_SELECT
+  readonly type: FormComponentType.MULTI_SELECT;
 }
 
 export interface MultiSelectFormMessageTO {
@@ -2411,17 +2206,6 @@ export interface MyDigiPassWidgetResultTO {
   eid_photo: string | null;
   email: string | null;
   phone: string | null;
-}
-
-export interface NavigationItemTO {
-  action: string | null;
-  action_type: string | null;
-  collapse: boolean;
-  icon: string | null;
-  icon_color: string | null;
-  params: string | null;
-  service_email: string | null;
-  text: string | null;
 }
 
 export interface NewAdvancedOrderFormRequestTO {
@@ -2593,12 +2377,6 @@ export interface NewsActionButtonTO {
   id: string | null;
 }
 
-export interface NewsGroupFilterInfoTO {
-  enabled: boolean;
-  key: string | null;
-  name: string | null;
-}
-
 export interface NewsGroupLayoutTO {
   background_image_url: string | null;
   badge_count: number;
@@ -2621,7 +2399,6 @@ export interface NewsGroupTO {
 }
 
 export interface NewsGroupTabInfoTO {
-  filters: NewsGroupFilterInfoTO[];
   key: string | null;
   name: string | null;
   notifications: number;
@@ -2631,11 +2408,12 @@ export interface NewsSectionTO {
   filter: GetNewsStreamFilterTO | null;
   limit: number;
   placeholder_image: string | null;
-  readonly type: MapSectionType.NEWS
+  readonly type: MapSectionType.NEWS;
 }
 
 export interface NewsSenderTO {
   avatar_id: number;
+  avatar_url: string | null;
   email: string | null;
   name: string | null;
 }
@@ -2654,27 +2432,28 @@ export interface NewsStreamItemTO {
   notifications: number;
   qr_code_caption: string | null;
   qr_code_content: string | null;
+  share_url: string | null;
   timestamp: number;
   title: string | null;
   type: number;
 }
 
 export interface NextActionDefaultTO {
-  readonly type: NextActionType.NEXT
+  readonly type: NextActionType.NEXT;
 }
 
 export interface NextActionSectionTO {
   section: string | null;
-  readonly type: NextActionType.SECTION
+  readonly type: NextActionType.SECTION;
 }
 
 export interface NextActionSubmitTO {
-  readonly type: NextActionType.SUBMIT
+  readonly type: NextActionType.SUBMIT;
 }
 
 export interface NextActionURLTO {
   url: string | null;
-  readonly type: NextActionType.URL
+  readonly type: NextActionType.URL;
 }
 
 export interface OauthFormMessageTO {
@@ -2783,12 +2562,42 @@ export interface OpenIdWidgetResultTO {
   phone_number_verified: boolean;
 }
 
+export interface OpeningHourExceptionTO {
+  periods: OpeningPeriodTO[];
+  description: string | null;
+  description_color: string | null;
+  end_date: string | null;
+  start_date: string | null;
+}
+
+export interface OpeningHourTO {
+  day: number;
+  time: string | null;
+}
+
 export interface OpeningHoursListSectionItemTO {
   opening_hours: OpeningInfoTO | null;
   icon: string | null;
   icon_color: string | null;
   title: string | null;
-  readonly type: MapListSectionItemType.OPENING_HOURS
+  readonly type: MapListSectionItemType.OPENING_HOURS;
+}
+
+export interface OpeningHoursSectionItemTO {
+  opening_hours: OpeningHoursTO | null;
+  icon: string | null;
+  icon_color: string | null;
+  title: string | null;
+  readonly type: MapListSectionItemType.DYNAMIC_OPENING_HOURS;
+}
+
+export interface OpeningHoursTO {
+  exceptional_opening_hours: OpeningHourExceptionTO[];
+  periods: OpeningPeriodTO[];
+  id: string | null;
+  text: string | null;
+  title: string | null;
+  type: string | null;
 }
 
 export interface OpeningInfoTO {
@@ -2801,10 +2610,17 @@ export interface OpeningInfoTO {
   title_color: string | null;
 }
 
+export interface OpeningPeriodTO {
+  close: OpeningHourTO | null;
+  open: OpeningHourTO | null;
+  description: string | null;
+  description_color: string | null;
+}
+
 export interface ParagraphComponentTO {
   description: string | null;
   title: string | null;
-  readonly type: FormComponentType.PARAGRAPH
+  readonly type: FormComponentType.PARAGRAPH;
 }
 
 export interface PayFormMessageTO {
@@ -3007,7 +2823,7 @@ export interface PokeServiceResponseTO {
 export interface PolygonGeometryTO {
   rings: CoordsListTO[];
   color: string | null;
-  readonly type: MapGeometryType.POLYGON
+  readonly type: MapGeometryType.POLYGON;
 }
 
 export interface PolygonTO {
@@ -3127,14 +2943,6 @@ export interface RangeSliderTO {
   unit: string | null;
 }
 
-export interface RawLocationInfoTO {
-  cid: number;
-  lac: number;
-  mobileDataType: number;
-  net: number;
-  signalStrength: number;
-}
-
 export interface ReceiveApiCallResultRequestTO {
   error: string | null;
   id: number;
@@ -3161,7 +2969,7 @@ export interface ReceivePaymentResponseTO {
 export interface RegexValidatorTO {
   error_message: string | null;
   value: string | null;
-  readonly type: FormValidatorType.REGEX
+  readonly type: FormValidatorType.REGEX;
 }
 
 export interface ReportObjectionableContentRequestTO {
@@ -3173,17 +2981,9 @@ export interface ReportObjectionableContentRequestTO {
 export interface ReportObjectionableContentResponseTO {
 }
 
-export interface RequestShareLocationRequestTO {
-  friend: string | null;
-  message: string | null;
-}
-
-export interface RequestShareLocationResponseTO {
-}
-
 export interface RequiredValidatorTO {
   error_message: string | null;
-  readonly type: FormValidatorType.REQUIRED
+  readonly type: FormValidatorType.REQUIRED;
 }
 
 export interface SaveJobsCriteriaRequestTO {
@@ -3227,14 +3027,6 @@ export interface SaveMapNotificationsResponseTO {
   message: string | null;
 }
 
-export interface SaveNewsGroupFiltersRequestTO {
-  enabled_filters: string[];
-  group_id: string | null;
-}
-
-export interface SaveNewsGroupFiltersResponseTO {
-}
-
 export interface SaveNewsGroupServicesRequestTO {
   action: string | null;
   group_id: string | null;
@@ -3266,7 +3058,7 @@ export interface SaveSettingsResponse {
 export interface SearchSuggestionTO {
   icon: string | null;
   title: string | null;
-  readonly type: MapActionChipType.SEARCH_SUGGESTION
+  readonly type: MapActionChipType.SEARCH_SUGGESTION;
 }
 
 export interface SendApiCallCallbackResultTO {
@@ -3355,14 +3147,6 @@ export interface SetMobilePhoneNumberRequestTO {
 export interface SetMobilePhoneNumberResponseTO {
 }
 
-export interface SetSecureInfoRequestTO {
-  public_keys: PublicKeyTO[];
-  public_key: string | null;
-}
-
-export interface SetSecureInfoResponseTO {
-}
-
 export interface SettingsTO {
   consent: ConsentSettingsTO | null;
   backgroundFetchTimestamps: number[];
@@ -3381,14 +3165,6 @@ export interface SettingsTO {
   version: number;
   wifiOnlyDownloads: boolean;
   xmppReconnectInterval: number;
-}
-
-export interface ShareLocationRequestTO {
-  enabled: boolean;
-  friend: string | null;
-}
-
-export interface ShareLocationResponseTO {
 }
 
 export interface ShareServiceRequestTO {
@@ -3457,13 +3233,13 @@ export interface SingleSelectComponentTO {
   id: string | null;
   sensitive: boolean;
   title: string | null;
-  readonly type: FormComponentType.SINGLE_SELECT
+  readonly type: FormComponentType.SINGLE_SELECT;
 }
 
 export interface SingleSelectComponentValueTO {
   value: string | null;
   id: string | null;
-  readonly type: FormComponentType.SINGLE_SELECT
+  readonly type: FormComponentType.SINGLE_SELECT;
 }
 
 export interface SingleSelectFormMessageTO {
@@ -3838,7 +3614,7 @@ export interface TestFormResponseTO {
 export interface TextAnnouncementTO {
   description: string | null;
   title: string | null;
-  readonly type: MapAnnouncementType.TEXT
+  readonly type: MapAnnouncementType.TEXT;
 }
 
 export interface TextBlockFormMessageTO {
@@ -3894,13 +3670,13 @@ export interface TextInputComponentTO {
   placeholder: string | null;
   sensitive: boolean;
   title: string | null;
-  readonly type: FormComponentType.TEXT_INPUT
+  readonly type: FormComponentType.TEXT_INPUT;
 }
 
 export interface TextInputComponentValueTO {
   value: string | null;
   id: string | null;
-  readonly type: FormComponentType.TEXT_INPUT
+  readonly type: FormComponentType.TEXT_INPUT;
 }
 
 export interface TextLineFormMessageTO {
@@ -3950,7 +3726,7 @@ export interface TextLineTO {
 export interface TextSectionTO {
   description: string | null;
   title: string | null;
-  readonly type: MapSectionType.TEXT
+  readonly type: MapSectionType.TEXT;
 }
 
 export interface Thumbnail {
@@ -3966,7 +3742,7 @@ export interface ToggleListSectionItemTO {
   icon: string | null;
   icon_color: string | null;
   title: string | null;
-  readonly type: MapListSectionItemType.TOGGLE
+  readonly type: MapListSectionItemType.TOGGLE;
 }
 
 export interface ToggleMapItemRequestTO {
@@ -3979,22 +3755,6 @@ export interface ToggleMapItemRequestTO {
 export interface ToggleMapItemResponseTO {
   toggle_item: ToggleListSectionItemTO | null;
   item_id: string | null;
-}
-
-export interface ToolbarSettingsTO {
-  items: NavigationItemTO[];
-}
-
-export interface TrackLocationRequestTO {
-  distance_filter: number;
-  friend: string | null;
-  high_prio: boolean;
-  target: number;
-  until: number;
-}
-
-export interface TrackLocationResponseTO {
-  error: GetLocationErrorTO | null;
 }
 
 export interface TransferCompletedRequestTO {
@@ -4173,13 +3933,6 @@ export interface UpdateJSEmbeddingRequestTO {
 }
 
 export interface UpdateJSEmbeddingResponseTO {
-}
-
-export interface UpdateLookAndFeelRequestTO {
-  look_and_feel: LookAndFeelTO | null;
-}
-
-export interface UpdateLookAndFeelResponseTO {
 }
 
 export interface UpdateMessageEmbeddedAppRequestTO {
@@ -4505,13 +4258,11 @@ export interface UploadChunkResponseTO {
 }
 
 export interface UserDetailsTO {
-  public_keys: PublicKeyTO[];
   app_id: string | null;
   avatar_url: string | null;
   email: string | null;
   language: string | null;
   name: string | null;
-  public_key: string | null;
 }
 
 export interface UserScannedRequestTO {
@@ -4544,7 +4295,7 @@ export interface VerifyPaymentAssetResponseTO {
 export interface VoteSectionTO {
   options: MapVoteOptionTO[];
   id: string | null;
-  readonly type: MapSectionType.VOTE
+  readonly type: MapSectionType.VOTE;
 }
 
 export interface WeekDayTextTO {

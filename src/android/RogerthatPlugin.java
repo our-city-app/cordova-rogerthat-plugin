@@ -32,11 +32,14 @@ import android.net.Uri;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.BarcodeScanningActivity;
+import com.mobicage.rogerthat.ServiceBoundActivity;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
+import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.Poker;
 import com.mobicage.rogerthat.plugins.friends.ServiceApiCallbackResult;
 import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemInfo;
 import com.mobicage.rogerthat.plugins.messaging.Message;
+import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
 import com.mobicage.rogerthat.plugins.news.NewsPlugin;
 import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
 import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
@@ -44,6 +47,7 @@ import com.mobicage.rogerthat.util.ActionScreenUtils;
 import com.mobicage.rogerthat.util.JsonUtils;
 import com.mobicage.rogerthat.util.RequestStore;
 import com.mobicage.rogerthat.util.logging.L;
+import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
 import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IncompleteMessageException;
@@ -80,16 +84,16 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     private boolean mApiResultHandlerSet = false;
     private boolean mIsListeningBacklogConnectivityChanged = false;
+    private boolean hasInitializedBadges = false;
 
-    private CordovaActionScreenActivity mActivity = null;
+    private CordovaRogerthatInterface mRogerthatInterface = null;
+    private ActionScreenUtils mActionScreenUtils = null;
     private ScanCommunication mScanCommunication = null;
 
     private static final String POKE = "poke://";
-    private Poker<CordovaActionScreenActivity> mPoker;
+    private Poker<ServiceBoundActivity> mPoker;
 
     protected final static String[] permissions = {Manifest.permission.CAMERA};
-
-    private ServiceMenuItemInfo mMenuItem;
 
     private BroadcastReceiver mBroadcastReceiver;
     private Map<String, CallbackContext> callbackMap = new HashMap<>();
@@ -159,7 +163,7 @@ public class RogerthatPlugin extends CordovaPlugin {
                 }
                 mCallbackContext = callbackContext;
 
-                mActivity.getActionScreenUtils().start(mIntentCallback);
+                mActionScreenUtils.start(mIntentCallback);
 
                 PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
                 pluginResult.setKeepCallback(true);
@@ -179,7 +183,7 @@ public class RogerthatPlugin extends CordovaPlugin {
                 break;
             case "api_resultHandlerConfigured":
                 mApiResultHandlerSet = true;
-                mActivity.getActionScreenUtils().deliverAllApiResults();
+                mActionScreenUtils.deliverAllApiResults();
                 callbackContext.success(new JSONObject());
 
                 break;
@@ -199,6 +203,9 @@ public class RogerthatPlugin extends CordovaPlugin {
                 break;
             case "context":
                 getContext(callbackContext);
+                break;
+            case "getBadges":
+                getBadges(callbackContext);
                 break;
             case "message_open":
                 openMessage(callbackContext, args);
@@ -242,11 +249,11 @@ public class RogerthatPlugin extends CordovaPlugin {
     }
 
     private void getNewsGroup(CallbackContext callbackContext, GetNewsGroupRequestTO request) {
-        callbackMap.put(mActivity.getNewsPlugin().getNewsGroup(request), callbackContext);
+        callbackMap.put(getNewsPlugin().getNewsGroup(request), callbackContext);
     }
 
     private void getNewsGroups(CallbackContext callbackContext, GetNewsGroupsRequestTO request) {
-        callbackMap.put(mActivity.getNewsPlugin().getNewsGroups(), callbackContext);
+        callbackMap.put(getNewsPlugin().getNewsGroups(), callbackContext);
     }
 
     private void getNewsStreamItems(CallbackContext callbackContext, GetNewsStreamItemsRequestTO request) {
@@ -267,7 +274,6 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     public boolean onOverrideUrlLoading(String url) {
         L.i("Branding is loading url: " + url);
-        CordovaActionScreenActivity activity = getActivity();
         Uri uri = Uri.parse(url);
         String lowerCaseUrl = url.toLowerCase();
         if (lowerCaseUrl.startsWith(POKE)) {
@@ -278,7 +284,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             || lowerCaseUrl.startsWith("tel") || lowerCaseUrl.startsWith("sms") || lowerCaseUrl.startsWith("mailto")) {
             CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
             CustomTabsIntent customTabsIntent = customTabsBuilder.build();
-            customTabsIntent.launchUrl(activity, uri);
+            customTabsIntent.launchUrl(cordova.getActivity(), uri);
             return true;
         }
         return super.onOverrideUrlLoading(url);
@@ -287,37 +293,61 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     public void onDestroy() {
         if (mIsListeningBacklogConnectivityChanged) {
-            mActivity.getActionScreenUtils().stopBacklogListener();
+            mActionScreenUtils.stopBacklogListener();
         }
-        mActivity.getActionScreenUtils().stop();
-        mActivity.unregisterReceiver(mBroadcastReceiver);
+        mActionScreenUtils.stop();
+        getServiceBoundActivity().unregisterReceiver(mBroadcastReceiver);
+        if (mPoker != null) {
+            mPoker.stop();
+        }
     }
 
     private void returnArgsMissing(final CallbackContext callbackContext) {
         callbackContext.error("User did not specify data to encode");
     }
 
-    private void setInfo() throws JSONException {
-        Map<String, Object> info = mActivity.getFriendsPlugin().getRogerthatUserAndServiceInfo(
-            mActivity.getServiceEmail(), mActivity.getServiceFriend(), mMenuItem);
+    private void setInfo() {
+        CordovaRogerthatInterface rtInterface = getRogerthatInterface();
+        String label = rtInterface.getItemLabel();
+        String hash = rtInterface.getItemTagHash();
+        ServiceMenuItemInfo menuItem;
+        if (hash == null && label == null) {
+            menuItem = null;
+        } else {
+            menuItem = new ServiceMenuItemInfo(label, hash);
+        }
+        Map<String, Object> info = getFriendsPlugin().getRogerthatUserAndServiceInfo(
+            rtInterface.getServiceEmail(), rtInterface.getServiceFriend(), menuItem);
         sendCallbackUpdate("setInfo", new JSONObject(info));
     }
 
+    /**
+     * To be removed
+     * @deprecated use getBadges instead
+     */
     private void setBadges() {
-        for (Map.Entry<String, Long> entry : mActivity.getMainService().getBadges().entrySet()) {
-            Map<String, Object> params = new HashMap<>();
-            params.put("key", entry.getKey());
-            params.put("count", entry.getValue());
-            mIntentCallback.badgeUpdated(params);
+        if (hasInitializedBadges) {
+            L.d("Not initialising badges, they were already initialized");
+            return;
         }
+        hasInitializedBadges = true;
+        ServiceBoundActivity activity = getServiceBoundActivity();
+        activity.getMainService().getBadgesStore().observe(activity, badges -> {
+            for (Map.Entry<String, Integer> entry : badges.entrySet()) {
+                Map<String, Object> params = new HashMap<>();
+                params.put("key", entry.getKey());
+                params.put("count", entry.getValue());
+                mIntentCallback.badgeUpdated(params);
+            }
+        });
     }
 
-    private void log(final JSONObject args) throws JSONException {
+    private void log(final JSONObject args) {
         final String errorMessage = JsonUtils.optString(args, "e", null);
         final String message = JsonUtils.optString(args, "m", null);
         if (errorMessage != null) {
-            mActivity.getActionScreenUtils().logError(mActivity.getServiceEmail(), mActivity.getItemLabel(),
-                mActivity.getItemCoords(), errorMessage);
+            mActionScreenUtils.logError(mRogerthatInterface.getServiceEmail(), mRogerthatInterface.getItemLabel(),
+                mRogerthatInterface.getItemCoords(), errorMessage);
         } else {
             L.i("[BRANDING] " + message);
         }
@@ -333,7 +363,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         final String tag = JsonUtils.optString(args, "tag", null);
         final boolean synchronous = args.optBoolean("synchronous", true);
 
-        mActivity.getFriendsPlugin().sendApiCall(mActivity.getServiceEmail(), mActivity.getItemTagHash(), method, params, tag, synchronous, callbackContext);
+        getFriendsPlugin().sendApiCall(mRogerthatInterface.getServiceEmail(), mRogerthatInterface.getItemTagHash(), method, params, tag, synchronous, callbackContext);
         // Callback will be called with the response in case of synchronous calls
         if (!synchronous) {
             callbackContext.success(new JSONObject());
@@ -358,29 +388,30 @@ public class RogerthatPlugin extends CordovaPlugin {
         return true;
     }
 
-    private void exitApp(final CallbackContext callbackContext) throws JSONException {
-        mActivity.finish();
+    private void exitApp(final CallbackContext callbackContext) {
+        getServiceBoundActivity().finish();
         callbackContext.success(new JSONObject());
     }
 
-    private void exitAppWithResult(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+    private void exitAppWithResult(final CallbackContext callbackContext, final JSONObject args) {
         final String result = JsonUtils.optString(args, "result", null);
         if (result != null) {
             Intent resultIntent = new Intent(ActionScreenActivity.EXIT_APP);
             resultIntent.putExtra(ActionScreenActivity.EXIT_APP_RESULT, result);
-            mActivity.setResult(Activity.RESULT_OK, resultIntent);
+            getServiceBoundActivity().setResult(Activity.RESULT_OK, resultIntent);
         }
-        mActivity.finish();
+        getServiceBoundActivity().finish();
         callbackContext.success(new JSONObject());
     }
 
-    private void startScanningQrCode(final CallbackContext callbackContext) throws JSONException {
+    private void startScanningQrCode(final CallbackContext callbackContext) {
+        ServiceBoundActivity activity = getServiceBoundActivity();
         if (mQRCodeScannerOpen) {
-            error(callbackContext, "camera_was_already_open", mActivity.getString(R.string.camera_was_already_open));
+            error(callbackContext, "camera_was_already_open", activity.getString(R.string.camera_was_already_open));
             return;
         }
 
-        int cameraPermission = ContextCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA);
+        int cameraPermission = ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA);
         if (cameraPermission != PackageManager.PERMISSION_GRANTED) {
             final SafeRunnable continueRunnable = new SafeRunnable() {
                 @Override
@@ -392,17 +423,17 @@ public class RogerthatPlugin extends CordovaPlugin {
                 @Override
                 protected void safeRun() throws Exception {
                     error(callbackContext, "camera_permission_was_not_granted",
-                        mActivity.getString(R.string.camera_permission_was_not_granted));
+                        activity.getString(R.string.camera_permission_was_not_granted));
                 }
             };
-            if (mActivity.askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
+            if (getServiceBoundActivity().askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
                 continueRunnable, cancelRunnable))
                 return;
         }
 
         mQRCodeScannerOpen = true;
 
-        final Intent intent = new Intent(mActivity, BarcodeScanningActivity.class);
+        final Intent intent = new Intent(getServiceBoundActivity(), BarcodeScanningActivity.class);
         this.cordova.startActivityForResult(this, intent, ScanTabActivity.QR_SCAN_RESULT);
 
         callbackContext.success(new JSONObject());
@@ -417,9 +448,28 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     private void getContext(final CallbackContext callbackContext) throws JSONException {
         JSONObject obj = new JSONObject();
-        String context = mActivity.getContext();
+        String context = mRogerthatInterface.getOpenContext();
         obj.put("context", context == null ? new JSONObject() : new JSONObject(context));
         callbackContext.success(obj);
+    }
+
+    private void getBadges(final CallbackContext callbackContext) {
+        ServiceBoundActivity activity = getServiceBoundActivity();
+        activity.getMainService().getBadgesStore().observe(activity, badges -> {
+            // Convert map to array
+            JSONArray badgesArray = new JSONArray();
+            for (Map.Entry<String, Integer> thing : badges.entrySet()) {
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("key", thing.getKey());
+                    obj.put("count", thing.getValue());
+                    badgesArray.put(obj);
+                } catch (JSONException e) {
+                    L.bug(e);
+                }
+            }
+            callbackContext.success(badgesArray);
+        });
     }
 
     private void openMessage(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
@@ -428,14 +478,14 @@ public class RogerthatPlugin extends CordovaPlugin {
             return;
         }
         final String messageKey = JsonUtils.optString(args, "message_key", null);
-        final Message message = mActivity.getMessagingPlugin().getStore().getMessageByKey(messageKey, true);
+        final Message message = getMessagingPlugin().getStore().getMessageByKey(messageKey, true);
         if (message == null) {
             JSONObject obj = new JSONObject();
             obj.put("type", "MessageNotFound");
             callbackContext.error(obj);
             return;
         }
-        mActivity.getMessagingPlugin().showMessage(mActivity, message, false, null, false);
+        getMessagingPlugin().showMessage(getServiceBoundActivity(), message, false, null, false);
         callbackContext.success(new JSONObject());
     }
 
@@ -453,36 +503,42 @@ public class RogerthatPlugin extends CordovaPlugin {
 
     private void onBackendConnectivityChanged(final CallbackContext callbackContext) throws JSONException {
         JSONObject obj = new JSONObject();
-        obj.put("connected", mActivity.getMainService().isBacklogConnected());
+        obj.put("connected", getServiceBoundActivity().getMainService().isBacklogConnected());
         callbackContext.success(obj);
 
         if (!mIsListeningBacklogConnectivityChanged && CloudConstants.USE_XMPP_KICK_CHANNEL) {
-            mActivity.getActionScreenUtils().startBacklogListener();
+            mActionScreenUtils.startBacklogListener();
             mIsListeningBacklogConnectivityChanged = true;
         }
     }
 
     private void hideKeyboard(final CallbackContext callbackContext) {
-        mActivity.getActionScreenUtils().hideKeyboard(mActivity.getCurrentFocus().getWindowToken());
+        mActionScreenUtils.hideKeyboard(getServiceBoundActivity().getCurrentFocus().getWindowToken());
         callbackContext.success(new JSONObject());
     }
 
-    private void putUserData(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+    private void putUserData(final CallbackContext callbackContext, final JSONObject args) {
         if (args == null) {
             returnArgsMissing(callbackContext);
             return;
         }
         final String data = JsonUtils.optString(args, "u", null);
         boolean smart = args.optBoolean("smart", false);
-        mActivity.getFriendsPlugin().putUserData(mActivity.getServiceEmail(), data, smart);
+        String serviceEmail = mRogerthatInterface.getServiceEmail();
+        if (serviceEmail == null) {
+            callbackContext.error("User data cannot be saved from a service-independent context");
+            return;
+        }
+        getFriendsPlugin().putUserData(serviceEmail, data, smart);
         callbackContext.success(new JSONObject());
     }
 
     private void isConnectedToInternet(final CallbackContext callbackContext) throws JSONException {
-        boolean wifiConnected = mActivity.getMainService().getNetworkConnectivityManager().isWifiConnected();
+        NetworkConnectivityManager manager = getServiceBoundActivity().getMainService().getNetworkConnectivityManager();
+        boolean wifiConnected = manager.isWifiConnected();
         JSONObject obj = new JSONObject();
         obj.put("connectedToWifi", wifiConnected);
-        obj.put("connected", wifiConnected || mActivity.getMainService().getNetworkConnectivityManager().isMobileDataConnected());
+        obj.put("connected", wifiConnected || manager.isMobileDataConnected());
         callbackContext.success(obj);
     }
 
@@ -497,7 +553,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         final String service = JsonUtils.optString(args, "service", null);
         final JSONObject activityParams = args.optJSONObject("params");
 
-        String errorMessage = mActivity.getActionScreenUtils().openActivity(actionType, action, title, service,
+        String errorMessage = mActionScreenUtils.openActivity(actionType, action, title, service,
             activityParams == null ? null : JsonUtils.toMap(activityParams));
         if (errorMessage != null) {
             error(callbackContext, "unknown_error_occurred", errorMessage);
@@ -512,8 +568,8 @@ public class RogerthatPlugin extends CordovaPlugin {
             return;
         }
         final String url = JsonUtils.optString(args, "url", null);
-        String fileOnDisk = "file://" + mActivity.getBrandingResult().dir.getAbsolutePath() + "/" + url;
-        mActivity.getActionScreenUtils().playAudio(fileOnDisk);
+        String fileOnDisk = "file://" + mRogerthatInterface.getFilePath() + "/" + url;
+        mActionScreenUtils.playAudio(fileOnDisk);
         callbackContext.success(new JSONObject());
     }
 
@@ -544,9 +600,8 @@ public class RogerthatPlugin extends CordovaPlugin {
     }
 
     private void poke(String tag) {
-        CordovaActionScreenActivity activity = getActivity();
         if (mPoker == null) {
-            mPoker = new Poker<>(activity, activity.getServiceEmail());
+            mPoker = new Poker<>(getServiceBoundActivity(), mRogerthatInterface.getServiceEmail());
         }
 
         mPoker.poke(tag, null);
@@ -567,7 +622,7 @@ public class RogerthatPlugin extends CordovaPlugin {
                         if (rawScanResult.toLowerCase(Locale.US).startsWith("http://")
                             || rawScanResult.toLowerCase(Locale.US).startsWith("https://")) {
                             if (mScanCommunication == null) {
-                                mScanCommunication = new ScanCommunication(mActivity.getMainService());
+                                mScanCommunication = new ScanCommunication(getServiceBoundActivity().getMainService());
                             }
                             mScanCommunication.resolveUrl(rawScanResult);
                             result.put("status", "resolving");
@@ -593,9 +648,19 @@ public class RogerthatPlugin extends CordovaPlugin {
     }
 
     protected void pluginInitialize() {
-        mMenuItem = getActivity().getServiceMenuItem();
+        setRogerthatInterface();
         mBroadcastReceiver = getBroadcastReceiver();
-        mActivity.registerReceiver(mBroadcastReceiver, getIntentFilter());
+        getServiceBoundActivity().registerReceiver(mBroadcastReceiver, getIntentFilter());
+    }
+
+    private ServiceBoundActivity getServiceBoundActivity() {
+        Activity activity = cordova.getActivity();
+        if (activity instanceof ServiceBoundActivity) {
+            return (ServiceBoundActivity) activity;
+        }
+        String msg = String.format("Expected activity using RogerthatPlugin to inherit from ServiceBoundActivity: %s", activity.toString());
+        L.bug(msg);
+        throw new RuntimeException(msg);
     }
 
     private IntentFilter getIntentFilter() {
@@ -638,18 +703,40 @@ public class RogerthatPlugin extends CordovaPlugin {
                     case NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED:
                         Exception err = (Exception) intent.getSerializableExtra(IntentResponseHandler.ERROR);
                         L.e(err);
-                        error(callbackContext, "unknown", mActivity.getString(R.string.unknown_error_occurred));
+                        error(callbackContext, "unknown", getServiceBoundActivity().getString(R.string.unknown_error_occurred));
                         break;
                 }
             }
         };
     }
 
-    private CordovaActionScreenActivity getActivity() {
-        if (mActivity == null) {
-            mActivity = (CordovaActionScreenActivity) cordova.getActivity();
+    private void setRogerthatInterface() {
+        Activity activity = cordova.getActivity();
+        if (activity instanceof CordovaRogerthatInterface) {
+            mRogerthatInterface = (CordovaRogerthatInterface) activity;
+        } else if (activity instanceof CordovaRogerthatInterfaceGetter) {
+            mRogerthatInterface = ((CordovaRogerthatInterfaceGetter) activity).getRogerthatCordovaInterface();
         }
-        return mActivity;
+        mActionScreenUtils = new ActionScreenUtils(getServiceBoundActivity(),
+            mRogerthatInterface.getServiceEmail(),
+            mRogerthatInterface.getItemTagHash(),
+            true);
+    }
+
+    private CordovaRogerthatInterface getRogerthatInterface() {
+        return mRogerthatInterface;
+    }
+
+    private NewsPlugin getNewsPlugin() {
+        return getServiceBoundActivity().getMainService().getPlugin(NewsPlugin.class);
+    }
+
+    private FriendsPlugin getFriendsPlugin() {
+        return getServiceBoundActivity().getMainService().getPlugin(FriendsPlugin.class);
+    }
+
+    private MessagingPlugin getMessagingPlugin() {
+        return getServiceBoundActivity().getMainService().getPlugin(MessagingPlugin.class);
     }
 
 }

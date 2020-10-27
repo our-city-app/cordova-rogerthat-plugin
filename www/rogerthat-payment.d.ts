@@ -1,5 +1,5 @@
 // todo Everything payments-related should be in the rogerthat-payments-plugin but I don't know how
-import { CryptoTransaction, PaymentMethod, SignatureData, SupportedAlgorithms, UserDetails } from './rogerthat';
+import { PaymentMethod, UserDetails } from './rogerthat';
 import { RogerthatError } from './rogerthat-errors';
 
 export interface RogerthatPaymentApp {
@@ -164,18 +164,6 @@ export interface PendingPayment {
   assets: PaymentProviderAsset[];
   receiver: UserDetails;
   receiver_asset: PaymentProviderAsset;
-  getSignatureData: (successCallback: (signature?: CryptoTransaction) => void,
-                     errorCallback: (error: RogerthatError) => void,
-                     assetId: string) => void;
-  getTransactionData: (successCallback: (payload: CryptoTransaction) => void,
-                       errorCallback: (error: RogerthatError) => void,
-                       algorithm: SupportedAlgorithms,
-                       name: string,
-                       index: number,
-                       signature_data: string) => void;
-  confirm: (successCallback: (status: PendingPaymentUpdate) => void,
-            errorCallback: (error: RogerthatError) => void,
-            signature?: string | null) => void;
   cancel: (successCallback: () => void, errorCallback: (error: RogerthatError) => void) => void;
 }
 
@@ -255,10 +243,8 @@ export const enum RogerthatPaymentErrorCode {
   TRANSACTION_ALREADY_INITIATED = 'transaction_already_initiated',
   TRANSACTION_FINISHED = 'transaction_finished',
   ACCOUNT_ALREADY_EXISTS = 'account_already_exists',
-  DUPLICATE_WALLET = 'duplicate_wallet',
   INVALID_IBAN = 'invalid_iban',
   INVALID_VERIFICATION_CODE = 'invalid_verification_code',
-  CANNOT_VERIFY_WALLET_TYPE = 'cannot_verify_wallet_type',
   INSUFFICIENT_FUNDS = 'insufficient_funds',
 }
 
@@ -298,12 +284,6 @@ export class RogerthatPayments {
                   providerId: PaymentProviderId,
                   target: string,
                   currency: string) => void;
-  getTransactionData: (successCallback: (payload: SignatureData) => void,
-                       errorCallback: (error: RogerthatError) => void,
-                       algorithm: SupportedAlgorithms,
-                       name: string,
-                       index: number,
-                       transaction: string) => void;
   /**
    * Lists payment providers. If the `all` parameter is true, all available payment providers are returned.
    * Otherwise, only the payment providers that the user is connected with are returned.

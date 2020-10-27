@@ -287,37 +287,6 @@ export interface AdvancedOrderWidgetResultTO {
   currency: string | null;
 }
 
-export interface AppNewsInfoTO {
-  feed_name: string | null;
-  id: number;
-  sender_email: string | null;
-  sort_priority: number;
-  sort_timestamp: number;
-  version: number;
-}
-
-export interface AppNewsItemTO {
-  buttons: NewsActionButtonTO[];
-  media: MediaTO | null;
-  sender: NewsSenderTO | null;
-  broadcast_type: string | null;
-  feed_name: string | null;
-  flags: number;
-  id: number;
-  image_url: string | null;
-  message: string | null;
-  qr_code_caption: string | null;
-  qr_code_content: string | null;
-  reach: number;
-  sort_priority: number;
-  sort_timestamp: number;
-  timestamp: number;
-  title: string | null;
-  type: number;
-  users_that_rogered: string[];
-  version: number;
-}
-
 export interface AppPaymentProviderTO {
   asset_types: string[];
   background_color: string | null;
@@ -432,17 +401,6 @@ export interface ButtonTO {
   ui_flags: number;
 }
 
-export interface CallRecordTO {
-  geoPoint: GeoPointTO | null;
-  rawLocation: RawLocationInfoTO | null;
-  countrycode: string | null;
-  duration: number;
-  id: number;
-  phoneNumber: string | null;
-  starttime: number;
-  type: number;
-}
-
 export interface CancelPaymentRequestTO {
   transaction_id: string | null;
 }
@@ -473,25 +431,6 @@ export interface ChoiceTO {
   value: string | null;
 }
 
-export interface ColorSettingsTO {
-  primary_color: string | null;
-  primary_color_dark: string | null;
-  primary_icon_color: string | null;
-  secondary_color: string | null;
-  tint_color: string | null;
-}
-
-export interface ConfirmPaymentRequestTO {
-  crypto_transaction: CryptoTransactionTO | null;
-  transaction_id: string | null;
-}
-
-export interface ConfirmPaymentResponseTO {
-  error: ErrorPaymentTO | null;
-  result: PendingPaymentTO | null;
-  success: boolean;
-}
-
 export interface ConsentSettingsTO {
   ask_push_notifications: boolean;
   ask_tos: boolean;
@@ -516,10 +455,8 @@ export interface CoordsListTO {
 }
 
 export interface CreateAssetRequestTO {
-  address: string | null;
   currency: string | null;
   iban: string | null;
-  id: string | null;
   provider_id: string | null;
   type: string | null;
 }
@@ -560,34 +497,6 @@ export interface CreateTransactionResponseTO {
 export interface CreateTransactionResultTO {
   params: string | null;
   transaction_id: string | null;
-}
-
-export interface CryptoTransactionDataTO {
-  input: CryptoTransactionInputTO | null;
-  outputs: CryptoTransactionOutputTO[];
-  algorithm: string | null;
-  public_key: string | null;
-  public_key_index: number;
-  signature: string | null;
-  signature_hash: string | null;
-  timelock: number;
-}
-
-export interface CryptoTransactionInputTO {
-  parent_id: string | null;
-  timelock: number;
-}
-
-export interface CryptoTransactionOutputTO {
-  unlockhash: string | null;
-  value: string | null;
-}
-
-export interface CryptoTransactionTO {
-  data: CryptoTransactionDataTO[];
-  from_address: string | null;
-  minerfees: string | null;
-  to_address: string | null;
 }
 
 export interface DateSelectFormMessageTO {
@@ -951,11 +860,6 @@ export interface FriendCategoryTO {
   name: string | null;
 }
 
-export interface FriendLocationTO {
-  location: GeoPointWithTimestampTO | null;
-  email: string | null;
-}
-
 export interface FriendRelationTO {
   avatarId: number;
   email: string | null;
@@ -1074,12 +978,6 @@ export interface GPSLocationFormTO {
 
 export interface GPSLocationTO {
   gps: boolean;
-}
-
-export interface GeoPointTO {
-  accuracy: number;
-  latitude: number;
-  longitude: number;
 }
 
 export interface GeoPointTO {
@@ -1225,14 +1123,6 @@ export interface GetFriendInvitationSecretsResponseTO {
   secrets: string[];
 }
 
-export interface GetFriendLocationRequestTO {
-  friend: string | null;
-}
-
-export interface GetFriendLocationResponseTO {
-  location: GeoPointWithTimestampTO | null;
-}
-
 export interface GetFriendRequestTO {
   avatar_size: number;
   email: string | null;
@@ -1242,21 +1132,6 @@ export interface GetFriendResponseTO {
   friend: FriendTO | null;
   avatar: string | null;
   generation: number;
-}
-
-export interface GetFriendsListRequestTO {
-}
-
-export interface GetFriendsListResponseTO {
-  friends: FriendTO[];
-  generation: number;
-}
-
-export interface GetFriendsLocationRequestTO {
-}
-
-export interface GetFriendsLocationResponseTO {
-  locations: FriendLocationTO[];
 }
 
 export interface GetGroupAvatarRequestTO {
@@ -1336,21 +1211,6 @@ export interface GetJobsResponseTO {
   cursor: string | null;
   has_more: boolean;
   is_profile_active: boolean;
-}
-
-export interface GetLocationErrorTO {
-  message: string | null;
-  status: number;
-}
-
-export interface GetLocationRequestTO {
-  friend: string | null;
-  high_prio: boolean;
-  target: number;
-}
-
-export interface GetLocationResponseTO {
-  error: GetLocationErrorTO | null;
 }
 
 export interface GetMapItemDetailsRequestTO {
@@ -1447,22 +1307,12 @@ export interface GetNewsGroupsResponseTO {
   has_locations: boolean;
 }
 
-export interface GetNewsItemsRequestTO {
-  ids: number[];
+export interface GetNewsItemDetailsRequestTO {
+  id: number;
 }
 
-export interface GetNewsItemsResponseTO {
-  items: AppNewsItemTO[];
-}
-
-export interface GetNewsRequestTO {
-  cursor: string | null;
-  updated_since: number;
-}
-
-export interface GetNewsResponseTO {
-  result: AppNewsInfoTO[];
-  cursor: string | null;
+export interface GetNewsItemDetailsResponseTO {
+  item: NewsStreamItemTO | null;
 }
 
 export interface GetNewsStreamFilterTO {
@@ -1538,17 +1388,6 @@ export interface GetPendingPaymentDetailsRequestTO {
 export interface GetPendingPaymentDetailsResponseTO {
   error: ErrorPaymentTO | null;
   result: PendingPaymentDetailsTO | null;
-  success: boolean;
-}
-
-export interface GetPendingPaymentSignatureDataRequestTO {
-  asset_id: string | null;
-  transaction_id: string | null;
-}
-
-export interface GetPendingPaymentSignatureDataResponseTO {
-  error: ErrorPaymentTO | null;
-  result: CryptoTransactionTO | null;
   success: boolean;
 }
 
@@ -1662,7 +1501,6 @@ export interface HeartBeatRequestTO {
   buildFingerPrint: string | null;
   deviceId: string | null;
   deviceModelName: string | null;
-  embeddedApps: string[];
   flushBackLog: boolean;
   localeCountry: string | null;
   localeLanguage: string | null;
@@ -1687,16 +1525,10 @@ export interface HeartBeatResponseTO {
   systemTime: number;
 }
 
-export interface HomeScreenSettingsTO {
-  items: NavigationItemTO[];
-  color: string | null;
-  header_image_url: string | null;
-  style: string | null;
-}
-
 export interface IdentityTO {
   avatarId: number;
   birthdate: number;
+  communityId: number;
   email: string | null;
   firstName: string | null;
   gender: number;
@@ -1900,20 +1732,6 @@ export interface LocationComponentValueTO {
   readonly type: FormComponentType.LOCATION
 }
 
-export interface LocationRecordTO {
-  geoPoint: GeoPointTO | null;
-  rawLocation: RawLocationInfoTO | null;
-  timestamp: number;
-}
-
-export interface LocationResultRequestTO {
-  location: GeoPointWithTimestampTO | null;
-  friend: string | null;
-}
-
-export interface LocationResultResponseTO {
-}
-
 export interface LocationWidgetResultTO {
   altitude: number;
   horizontal_accuracy: number;
@@ -1930,14 +1748,6 @@ export interface LockMessageRequestTO {
 
 export interface LockMessageResponseTO {
   members: MemberStatusTO[];
-}
-
-export interface LogCallRequestTO {
-  record: CallRecordTO | null;
-}
-
-export interface LogCallResponseTO {
-  recordId: number;
 }
 
 export interface LogErrorRequestTO {
@@ -1961,27 +1771,8 @@ export interface LogInvitationSecretSentRequestTO {
 export interface LogInvitationSecretSentResponseTO {
 }
 
-export interface LogLocationRecipientTO {
-  friend: string | null;
-  target: number;
-}
-
-export interface LogLocationsRequestTO {
-  recipients: LogLocationRecipientTO[];
-  records: LocationRecordTO[];
-}
-
-export interface LogLocationsResponseTO {
-}
-
 export interface LongWidgetResultTO {
   value: number;
-}
-
-export interface LookAndFeelTO {
-  colors: ColorSettingsTO | null;
-  homescreen: HomeScreenSettingsTO | null;
-  toolbar: ToolbarSettingsTO | null;
 }
 
 export interface MapBaseUrlsTO {
@@ -2413,17 +2204,6 @@ export interface MyDigiPassWidgetResultTO {
   phone: string | null;
 }
 
-export interface NavigationItemTO {
-  action: string | null;
-  action_type: string | null;
-  collapse: boolean;
-  icon: string | null;
-  icon_color: string | null;
-  params: string | null;
-  service_email: string | null;
-  text: string | null;
-}
-
 export interface NewAdvancedOrderFormRequestTO {
   form_message: AdvancedOrderFormMessageTO | null;
 }
@@ -2593,12 +2373,6 @@ export interface NewsActionButtonTO {
   id: string | null;
 }
 
-export interface NewsGroupFilterInfoTO {
-  enabled: boolean;
-  key: string | null;
-  name: string | null;
-}
-
 export interface NewsGroupLayoutTO {
   background_image_url: string | null;
   badge_count: number;
@@ -2621,7 +2395,6 @@ export interface NewsGroupTO {
 }
 
 export interface NewsGroupTabInfoTO {
-  filters: NewsGroupFilterInfoTO[];
   key: string | null;
   name: string | null;
   notifications: number;
@@ -2636,6 +2409,7 @@ export interface NewsSectionTO {
 
 export interface NewsSenderTO {
   avatar_id: number;
+  avatar_url: string | null;
   email: string | null;
   name: string | null;
 }
@@ -2654,6 +2428,7 @@ export interface NewsStreamItemTO {
   notifications: number;
   qr_code_caption: string | null;
   qr_code_content: string | null;
+  share_url: string | null;
   timestamp: number;
   title: string | null;
   type: number;
@@ -3127,14 +2902,6 @@ export interface RangeSliderTO {
   unit: string | null;
 }
 
-export interface RawLocationInfoTO {
-  cid: number;
-  lac: number;
-  mobileDataType: number;
-  net: number;
-  signalStrength: number;
-}
-
 export interface ReceiveApiCallResultRequestTO {
   error: string | null;
   id: number;
@@ -3171,14 +2938,6 @@ export interface ReportObjectionableContentRequestTO {
 }
 
 export interface ReportObjectionableContentResponseTO {
-}
-
-export interface RequestShareLocationRequestTO {
-  friend: string | null;
-  message: string | null;
-}
-
-export interface RequestShareLocationResponseTO {
 }
 
 export interface RequiredValidatorTO {
@@ -3225,14 +2984,6 @@ export interface SaveMapNotificationsRequestTO {
 export interface SaveMapNotificationsResponseTO {
   notifications: MapNotificationsTO | null;
   message: string | null;
-}
-
-export interface SaveNewsGroupFiltersRequestTO {
-  enabled_filters: string[];
-  group_id: string | null;
-}
-
-export interface SaveNewsGroupFiltersResponseTO {
 }
 
 export interface SaveNewsGroupServicesRequestTO {
@@ -3355,14 +3106,6 @@ export interface SetMobilePhoneNumberRequestTO {
 export interface SetMobilePhoneNumberResponseTO {
 }
 
-export interface SetSecureInfoRequestTO {
-  public_keys: PublicKeyTO[];
-  public_key: string | null;
-}
-
-export interface SetSecureInfoResponseTO {
-}
-
 export interface SettingsTO {
   consent: ConsentSettingsTO | null;
   backgroundFetchTimestamps: number[];
@@ -3381,14 +3124,6 @@ export interface SettingsTO {
   version: number;
   wifiOnlyDownloads: boolean;
   xmppReconnectInterval: number;
-}
-
-export interface ShareLocationRequestTO {
-  enabled: boolean;
-  friend: string | null;
-}
-
-export interface ShareLocationResponseTO {
 }
 
 export interface ShareServiceRequestTO {
@@ -3981,22 +3716,6 @@ export interface ToggleMapItemResponseTO {
   item_id: string | null;
 }
 
-export interface ToolbarSettingsTO {
-  items: NavigationItemTO[];
-}
-
-export interface TrackLocationRequestTO {
-  distance_filter: number;
-  friend: string | null;
-  high_prio: boolean;
-  target: number;
-  until: number;
-}
-
-export interface TrackLocationResponseTO {
-  error: GetLocationErrorTO | null;
-}
-
 export interface TransferCompletedRequestTO {
   message_key: string | null;
   parent_message_key: string | null;
@@ -4173,13 +3892,6 @@ export interface UpdateJSEmbeddingRequestTO {
 }
 
 export interface UpdateJSEmbeddingResponseTO {
-}
-
-export interface UpdateLookAndFeelRequestTO {
-  look_and_feel: LookAndFeelTO | null;
-}
-
-export interface UpdateLookAndFeelResponseTO {
 }
 
 export interface UpdateMessageEmbeddedAppRequestTO {
@@ -4505,13 +4217,11 @@ export interface UploadChunkResponseTO {
 }
 
 export interface UserDetailsTO {
-  public_keys: PublicKeyTO[];
   app_id: string | null;
   avatar_url: string | null;
   email: string | null;
   language: string | null;
   name: string | null;
-  public_key: string | null;
 }
 
 export interface UserScannedRequestTO {

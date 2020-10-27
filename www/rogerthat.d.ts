@@ -21,6 +21,7 @@ export * from './types';
 export interface RogerthatUserInfo {
   account: string;
   avatarUrl: string;
+  communityId: number;
   data: { [ key: string ]: any };
   language: string;
   name: string;

@@ -204,7 +204,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             case "context":
                 getContext(callbackContext);
                 break;
-            case "getBadges":
+            case "badges_list":
                 getBadges(callbackContext);
                 break;
             case "message_open":

@@ -293,10 +293,12 @@ RogerthatPlugin.prototype.features = {
     callback: undefined
 };
 
-RogerthatPlugin.prototype.getBadges = function(){
-    return new Promise(function(resolve, reject){
-        utils.exec(resolve, reject, "getBadges", []);
-    });
+RogerthatPlugin.prototype.badges = {
+    list: function(){
+        return new Promise(function(resolve, reject) {
+            utils.exec(resolve, reject, "badges_list", []);
+        });
+    }
 }
 
 RogerthatPlugin.prototype.message = {

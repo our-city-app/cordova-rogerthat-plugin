@@ -57,7 +57,8 @@ export type MapSearchSuggestionTO =
   | MapSearchSuggestionKeywordTO;
 
 export type MapSectionTO =
-  GeometrySectionTO
+  NewsGroupSectionTO
+  | GeometrySectionTO
   | TextSectionTO
   | ListSectionTO
   | MediaSectionTO
@@ -138,6 +139,7 @@ export const enum MapSearchSuggestionType {
 }
 
 export const enum MapSectionType {
+  NEWS_GROUP = 'news-group',
   GEOMETRY = 'geometry',
   MEDIA = 'media',
   LIST = 'list',
@@ -1537,6 +1539,7 @@ export interface IdentityTO {
   gender: number;
   hasBirthdate: boolean;
   hasGender: boolean;
+  homeScreenId: string | null;
   lastName: string | null;
   name: string | null;
   owncloudPassword: string | null;
@@ -2389,6 +2392,14 @@ export interface NewsGroupRowTO {
   items: NewsGroupTO[];
 }
 
+export interface NewsGroupSectionTO {
+  filter: GetNewsStreamFilterTO | null;
+  items: NewsStreamItemTO[];
+  group_id: string | null;
+  placeholder_image: string | null;
+  readonly type: MapSectionType.NEWS_GROUP;
+}
+
 export interface NewsGroupTO {
   if_empty: IfEmtpyScreenTO | null;
   layout: NewsGroupLayoutTO | null;
@@ -2585,6 +2596,7 @@ export interface OpeningHoursListSectionItemTO {
 
 export interface OpeningHoursSectionItemTO {
   opening_hours: OpeningHoursTO | null;
+  timezone: string | null;
   icon: string | null;
   icon_color: string | null;
   title: string | null;

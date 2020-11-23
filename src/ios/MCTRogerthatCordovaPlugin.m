@@ -176,6 +176,12 @@
     [self commandProcessed:command];
 }
 
+- (void)badges_list:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper listbadges:[self listBadgesResultHandlerWithCommand:command]];
+}
+
 - (void)camera_startScanningQrCode:(CDVInvokedUrlCommand *)command
 {
     HERE();
@@ -278,6 +284,14 @@
     };
 }
 
+- (MCTScreenBrandingListBadgesResultHandler)listBadgesResultHandlerWithCommand:(CDVInvokedUrlCommand *)command
+{
+    __weak __typeof__(self) weakSelf = self;
+    return ^(NSArray *result) {
+        [weakSelf sendArrayCallback:command.callbackId withData:result];
+    };
+}
+
 - (void)commandProcessed:(CDVInvokedUrlCommand *)command
 {
     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
@@ -318,6 +332,14 @@
                                                                         @"args": args}];
     pluginResult.keepCallback = @(YES);
     [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+}
+
+- (void)sendArrayCallback:(NSString *)callbackId withData:(NSArray *)data
+{
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                       messageAsArray:data];
+    pluginResult.keepCallback = @(YES);
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
 }
 
 #pragma mark - MCTScreenBrandingDelegate

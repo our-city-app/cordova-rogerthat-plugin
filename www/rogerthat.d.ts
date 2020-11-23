@@ -1,7 +1,6 @@
 /**
  * See http://www.rogerthat.net/developers/javascript-api for more info
  */
-import { RogerthatError } from './rogerthat-errors';
 import { PaymentRequestData, PayWidgetContextData, RogerthatPayments } from './rogerthat-payment';
 import {
   GetNewsGroupRequestTO,
@@ -174,6 +173,9 @@ export interface QrCodeScannedContent {
 }
 
 export interface RogerthatCallbacks {
+  /**
+   * @deprecated use rogerthat.getBadges instead
+   */
   badgeUpdated: (callback: (result: { key: string, count: number }) => void) => void;
   /**
    * The device its Internet connectivity has changed.
@@ -272,6 +274,11 @@ export interface UrlContext {
 
 export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext | PaymentRequestContext | QrScannedContext | UrlContext;
 
+export interface RogerthatBadge {
+  key: 'news' | 'messages';
+  count: number;
+}
+
 export class Rogerthat {
   api: RogerthatApi;
   app: RogerthatApp;
@@ -279,6 +286,11 @@ export class Rogerthat {
   camera: RogerthatCamera;
   context: () => Promise<{ context: RogerthatContext | null }>;
   features: RogerthatFeatures;
+  /**
+   * Receives a new result every time a badge is updated as well.
+   * Replaces rogerthat.callbacks.badgeUpdated
+   */
+  getBadges: () => Promise<RogerthatBadge[]>;
   /**
    * The menu item that was pressed to open the html app.
    */

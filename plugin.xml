@@ -23,6 +23,7 @@
         <config-file target="config.xml" parent="/*">
             <feature name="RogerthatPlugin">
                 <param name="ios-package" value="MCTRogerthatCordovaPlugin" />
+                <param name="onload" value="true" />
             </feature>
         </config-file>
         <header-file src="src/ios/MCTRogerthatCordovaPlugin.h" />

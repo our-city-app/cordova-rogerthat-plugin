@@ -32,7 +32,12 @@ import android.net.Uri;
 
 import com.mobicage.rogerth.at.R;
 import com.mobicage.rogerthat.BarcodeScanningActivity;
+import com.mobicage.rogerthat.IdentityStore;
+import com.mobicage.rogerthat.MyIdentity;
 import com.mobicage.rogerthat.ServiceBoundActivity;
+import com.mobicage.rogerthat.home.HomeScreenContentResult;
+import com.mobicage.rogerthat.home.HomeScreenViewModel;
+import com.mobicage.rogerthat.home.UnsupportedHomeScreenVersion;
 import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
 import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
 import com.mobicage.rogerthat.plugins.friends.Poker;
@@ -73,6 +78,11 @@ import java.util.UUID;
 
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+
+import static androidx.lifecycle.Transformations.distinctUntilChanged;
 
 
 public class RogerthatPlugin extends CordovaPlugin {
@@ -130,6 +140,9 @@ public class RogerthatPlugin extends CordovaPlugin {
             sendCallbackUpdate("badgeUpdated", new JSONObject(params));
         }
     };
+    private String homeScreenKey;
+    private LiveData<HomeScreenContentResult> homeScreenLiveData = null;
+    private Observer<HomeScreenContentResult> homeScreenObserver = null;
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
@@ -237,6 +250,9 @@ public class RogerthatPlugin extends CordovaPlugin {
             case "util_playAudio":
                 playAudio(callbackContext, args);
                 break;
+            case "homescreen_getHomeScreen":
+                getHomeScreen(callbackContext, args);
+                break;
             default:
                 L.e("RogerthatPlugin.execute did not match '" + action + "'");
                 callbackContext.error("RogerthatPlugin doesn't know how to execute this action.");
@@ -281,7 +297,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             poke(tag);
             return true;
         } else if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")
-            || lowerCaseUrl.startsWith("tel") || lowerCaseUrl.startsWith("sms") || lowerCaseUrl.startsWith("mailto")) {
+                || lowerCaseUrl.startsWith("tel") || lowerCaseUrl.startsWith("sms") || lowerCaseUrl.startsWith("mailto")) {
             CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
             CustomTabsIntent customTabsIntent = customTabsBuilder.build();
             customTabsIntent.launchUrl(cordova.getActivity(), uri);
@@ -317,12 +333,13 @@ public class RogerthatPlugin extends CordovaPlugin {
             menuItem = new ServiceMenuItemInfo(label, hash);
         }
         Map<String, Object> info = getFriendsPlugin().getRogerthatUserAndServiceInfo(
-            rtInterface.getServiceEmail(), rtInterface.getServiceFriend(), menuItem);
+                rtInterface.getServiceEmail(), rtInterface.getServiceFriend(), menuItem);
         sendCallbackUpdate("setInfo", new JSONObject(info));
     }
 
     /**
      * To be removed
+     *
      * @deprecated use getBadges instead
      */
     private void setBadges() {
@@ -347,7 +364,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         final String message = JsonUtils.optString(args, "m", null);
         if (errorMessage != null) {
             mActionScreenUtils.logError(mRogerthatInterface.getServiceEmail(), mRogerthatInterface.getItemLabel(),
-                mRogerthatInterface.getItemCoords(), errorMessage);
+                    mRogerthatInterface.getItemCoords(), errorMessage);
         } else {
             L.i("[BRANDING] " + message);
         }
@@ -423,11 +440,11 @@ public class RogerthatPlugin extends CordovaPlugin {
                 @Override
                 protected void safeRun() throws Exception {
                     error(callbackContext, "camera_permission_was_not_granted",
-                        activity.getString(R.string.camera_permission_was_not_granted));
+                            activity.getString(R.string.camera_permission_was_not_granted));
                 }
             };
             if (getServiceBoundActivity().askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
-                continueRunnable, cancelRunnable))
+                    continueRunnable, cancelRunnable))
                 return;
         }
 
@@ -554,7 +571,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         final JSONObject activityParams = args.optJSONObject("params");
 
         String errorMessage = mActionScreenUtils.openActivity(actionType, action, title, service,
-            activityParams == null ? null : JsonUtils.toMap(activityParams));
+                activityParams == null ? null : JsonUtils.toMap(activityParams));
         if (errorMessage != null) {
             error(callbackContext, "unknown_error_occurred", errorMessage);
             return;
@@ -607,6 +624,56 @@ public class RogerthatPlugin extends CordovaPlugin {
         mPoker.poke(tag, null);
     }
 
+    private void getHomeScreen(CallbackContext callbackContext, JSONObject args) {
+        if (this.homeScreenObserver != null) {
+            callbackContext.error("You can only call getHomeScreen once");
+            return;
+        }
+        this.homeScreenObserver = homeScreenResult -> {
+            Map<String, Object> homeScreenData = homeScreenResult.component1();
+            Error error = homeScreenResult.component2();
+            if (error == null) {
+                JSONObject resultJson = new JSONObject(homeScreenData);
+                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, resultJson);
+                pluginResult.setKeepCallback(true);
+                callbackContext.sendPluginResult(pluginResult);
+            } else {
+                if (error instanceof UnsupportedHomeScreenVersion) {
+                    String msg = getServiceBoundActivity().getString(R.string.homescreen_update_required);
+                    callbackContext.error(msg);
+                } else {
+                    callbackContext.error(error.getMessage());
+                }
+            }
+        };
+        reloadHomeScreen();
+    }
+
+    private LiveData<HomeScreenContentResult> doGetHomeScreen(Long communityId, String homeScreenId) {
+        HomeScreenViewModel model = new ViewModelProvider(getServiceBoundActivity()).get(HomeScreenViewModel.class);
+        return model.getHomeScreenContent(communityId, homeScreenId);
+    }
+
+    private void reloadHomeScreen() {
+        if (this.homeScreenObserver == null) {
+            L.d("Not loading homeScreen: no observer set");
+            return;
+        }
+        ServiceBoundActivity activity = getServiceBoundActivity();
+        MyIdentity identity = activity.getMainService().getIdentityStore().getIdentity();
+        String key = String.format("%s/%s", identity.getCommunityId(), identity.getHomeScreenId());
+        if (key.equals(this.homeScreenKey)) {
+            return;
+        }
+        this.homeScreenKey = key;
+        if (this.homeScreenLiveData != null) {
+            this.homeScreenLiveData.removeObserver(this.homeScreenObserver);
+        }
+        LiveData<HomeScreenContentResult> liveData = doGetHomeScreen(identity.getCommunityId(), identity.getHomeScreenId());
+        liveData.observe(activity, this.homeScreenObserver);
+        this.homeScreenLiveData = liveData;
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         L.i("RogerthatPlugin.onActivityResult requestCode -> " + requestCode);
@@ -620,7 +687,7 @@ public class RogerthatPlugin extends CordovaPlugin {
                         JSONObject result = new JSONObject();
                         result.put("content", rawScanResult);
                         if (rawScanResult.toLowerCase(Locale.US).startsWith("http://")
-                            || rawScanResult.toLowerCase(Locale.US).startsWith("https://")) {
+                                || rawScanResult.toLowerCase(Locale.US).startsWith("https://")) {
                             if (mScanCommunication == null) {
                                 mScanCommunication = new ScanCommunication(getServiceBoundActivity().getMainService());
                             }
@@ -671,6 +738,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         filter.addAction(NewsPlugin.GET_NEWS_GROUPS_FAILED);
         filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS);
         filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED);
+        filter.addAction(IdentityStore.IDENTITY_CHANGED_INTENT);
         return filter;
     }
 
@@ -705,6 +773,9 @@ public class RogerthatPlugin extends CordovaPlugin {
                         L.e(err);
                         error(callbackContext, "unknown", getServiceBoundActivity().getString(R.string.unknown_error_occurred));
                         break;
+                    case IdentityStore.IDENTITY_CHANGED_INTENT:
+                        reloadHomeScreen();
+                        break;
                 }
             }
         };
@@ -718,9 +789,9 @@ public class RogerthatPlugin extends CordovaPlugin {
             mRogerthatInterface = ((CordovaRogerthatInterfaceGetter) activity).getRogerthatCordovaInterface();
         }
         mActionScreenUtils = new ActionScreenUtils(getServiceBoundActivity(),
-            mRogerthatInterface.getServiceEmail(),
-            mRogerthatInterface.getItemTagHash(),
-            true);
+                mRogerthatInterface.getServiceEmail(),
+                mRogerthatInterface.getItemTagHash(),
+                true);
     }
 
     private CordovaRogerthatInterface getRogerthatInterface() {

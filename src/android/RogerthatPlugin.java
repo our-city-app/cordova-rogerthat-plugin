@@ -250,7 +250,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             case "util_playAudio":
                 playAudio(callbackContext, args);
                 break;
-            case "homescreen_getHomeScreen":
+            case "homescreen_getHomeScreenContent":
                 getHomeScreen(callbackContext, args);
                 break;
             default:

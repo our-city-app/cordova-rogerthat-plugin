@@ -422,7 +422,7 @@ RogerthatPlugin.prototype.util = {
 };
 
 RogerthatPlugin.prototype.homeScreen = {
-    getHomeScreen: function (resolve, reject) {
+    getHomeScreenContent: function (resolve, reject) {
         // Not a promise since resolve may be called multiple times when the home screen is updated
         utils.exec(resolve, reject, "homescreen_getHomeScreenContent", []);
     }

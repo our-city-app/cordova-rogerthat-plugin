@@ -281,7 +281,7 @@ export interface RogerthatBadge {
 }
 
 export interface HomeScreenContent {
-  type: HomeScreenContentTypeEnum;
+  type: HomeScreenContentType;
   /**
    * Only set when \'type\' is embedded_app
    * @type {string}
@@ -292,7 +292,7 @@ export interface HomeScreenContent {
   service_email?: string;
 }
 
-export enum HomeScreenContentTypeEnum {
+export enum HomeScreenContentType {
   Native = 'native',
   EmbeddedApp = 'embedded_app'
 }

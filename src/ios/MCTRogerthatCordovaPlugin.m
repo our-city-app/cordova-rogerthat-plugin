@@ -303,8 +303,8 @@
 - (MCTScreenBrandingGetHomeScreenResultHandler)getHomeScreenResultHandlerWithCommand:(CDVInvokedUrlCommand *)command
 {
     __weak __typeof__(self) weakSelf = self;
-    return ^(NSDictionary *data, BOOL succes) {
-        [weakSelf sendDictionaryCallback:command.callbackId withData:result success:success];
+    return ^(NSDictionary *result, NSString *error) {
+        [weakSelf sendDictionaryCallback:command.callbackId withResult:result withError:error];
     };
 }
 
@@ -359,11 +359,17 @@
 }
 
 - (void)sendDictionaryCallback:(NSString *)callbackId 
-                      withData:(NSDictionary *)data
-                       success:(BOOL)success
+                    withResult:(NSDictionary *)result
+                     withError:(NSString *)error
 {
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:success ? CDVCommandStatus_OK : CDVCommandStatus_ERROR
-                                                       messageAsDictionary:data];
+    CDVPluginResult *pluginResult;
+    if (error) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                         messageAsString:error];
+    } else {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                     messageAsDictionary:result];
+    }
     pluginResult.keepCallback = @(YES);
     [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
 }

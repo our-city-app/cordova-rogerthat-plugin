@@ -266,8 +266,16 @@
 {
     HERE();
     [self.helper playAudioWithResultHandler:[self defaultResultHandlerWithCommand:command]
-                                              params:[self getRequestParams:command]];
+                                     params:[self getRequestParams:command]];
 }
+
+- (void)homescreen_getHomeScreenContent:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper getHomescreenWithResultHandler:[self getHomeScreenResultHandlerWithCommand:command]
+                                         params:[self getRequestParams:command]];
+}
+
 
 #pragma mark - RogerthatPlugin helper methods
 
@@ -289,6 +297,14 @@
     __weak __typeof__(self) weakSelf = self;
     return ^(NSArray *result) {
         [weakSelf sendArrayCallback:command.callbackId withData:result];
+    };
+}
+
+- (MCTScreenBrandingGetHomeScreenResultHandler)getHomeScreenResultHandlerWithCommand:(CDVInvokedUrlCommand *)command
+{
+    __weak __typeof__(self) weakSelf = self;
+    return ^(NSDictionary *result, NSString *error) {
+        [weakSelf sendDictionaryCallback:command.callbackId withResult:result withError:error];
     };
 }
 
@@ -338,6 +354,22 @@
 {
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                        messageAsArray:data];
+    pluginResult.keepCallback = @(YES);
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+}
+
+- (void)sendDictionaryCallback:(NSString *)callbackId 
+                    withResult:(NSDictionary *)result
+                     withError:(NSString *)error
+{
+    CDVPluginResult *pluginResult;
+    if (error) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                         messageAsString:error];
+    } else {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                     messageAsDictionary:result];
+    }
     pluginResult.keepCallback = @(YES);
     [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
 }

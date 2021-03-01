@@ -57,13 +57,14 @@ export type MapSearchSuggestionTO =
   | MapSearchSuggestionKeywordTO;
 
 export type MapSectionTO =
-  NewsGroupSectionTO
+  VoteSectionTO
+  | NewsItemSectionTO
+  | MediaSectionTO
   | GeometrySectionTO
   | TextSectionTO
+  | NewsSectionTO
   | ListSectionTO
-  | MediaSectionTO
-  | VoteSectionTO
-  | NewsSectionTO;
+  | NewsGroupSectionTO;
 
 export type NewFlowMessageTO =
   MessageTO
@@ -143,6 +144,7 @@ export const enum MapSectionType {
   GEOMETRY = 'geometry',
   MEDIA = 'media',
   LIST = 'list',
+  NEWS_ITEM = 'news-item',
   TEXT = 'text',
   VOTE = 'vote',
   NEWS = 'news',
@@ -236,7 +238,6 @@ export interface AdvancedOrderFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -323,7 +324,6 @@ export interface AutoCompleteFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -365,6 +365,7 @@ export interface AutoCompleteTO {
 
 export interface BaseMediaTO {
   content: string | null;
+  thumbnail_url: string | null;
   type: string | null;
 }
 
@@ -510,7 +511,6 @@ export interface DateSelectFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -791,7 +791,6 @@ export interface FormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -878,7 +877,6 @@ export interface FriendSelectFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -919,7 +917,6 @@ export interface FriendTO {
   appData: string | null;
   avatarHash: string | null;
   avatarId: number;
-  broadcastFlowHash: string | null;
   callbacks: number;
   category_id: string | null;
   contentBrandingHash: string | null;
@@ -950,7 +947,6 @@ export interface GPSLocationFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -1904,6 +1900,7 @@ export interface MediaSectionTO {
 export interface MediaTO {
   content: string | null;
   height: number;
+  thumbnail_url: string | null;
   type: string | null;
   width: number;
 }
@@ -1932,7 +1929,7 @@ export interface MemberStatusUpdateRequestTO {
 export interface MemberStatusUpdateResponseTO {
 }
 
-export interface MessageEmbeddedApp {
+export interface MessageEmbeddedAppTO {
   context: string | null;
   description: string | null;
   id: string | null;
@@ -2002,11 +1999,10 @@ export interface MessageLockedResponseTO {
 export interface MessageTO {
   attachments: AttachmentTO[];
   buttons: ButtonTO[];
-  embedded_app: MessageEmbeddedApp | null;
+  embedded_app: MessageEmbeddedAppTO | null;
   members: MemberStatusTO[];
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -2083,7 +2079,6 @@ export interface MultiSelectFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -2157,7 +2152,6 @@ export interface MyDigiPassFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -2415,6 +2409,13 @@ export interface NewsGroupTabInfoTO {
   notifications: number;
 }
 
+export interface NewsItemSectionTO {
+  item: NewsStreamItemTO | null;
+  group_id: string | null;
+  placeholder_image: string | null;
+  readonly type: MapSectionType.NEWS_ITEM;
+}
+
 export interface NewsSectionTO {
   filter: GetNewsStreamFilterTO | null;
   limit: number;
@@ -2473,7 +2474,6 @@ export interface OauthFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -2523,7 +2523,6 @@ export interface OpenIdFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -2641,7 +2640,6 @@ export interface PayFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -2784,7 +2782,6 @@ export interface PhotoUploadFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -2914,7 +2911,6 @@ export interface RangeSliderFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -3094,7 +3090,7 @@ export interface SendApiCallResponseTO {
 export interface SendMessageRequestTO {
   attachments: AttachmentTO[];
   buttons: ButtonTO[];
-  embedded_app: MessageEmbeddedApp | null;
+  embedded_app: MessageEmbeddedAppTO | null;
   flags: number;
   key: string | null;
   members: string[];
@@ -3193,7 +3189,6 @@ export interface SignFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -3260,7 +3255,6 @@ export interface SingleSelectFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -3302,7 +3296,6 @@ export interface SingleSliderFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -3635,7 +3628,6 @@ export interface TextBlockFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -3697,7 +3689,6 @@ export interface TextLineFormMessageTO {
   member: MemberStatusTO | null;
   alert_flags: number;
   branding: string | null;
-  broadcast_type: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
@@ -3948,19 +3939,19 @@ export interface UpdateJSEmbeddingResponseTO {
 }
 
 export interface UpdateMessageEmbeddedAppRequestTO {
-  embedded_app: MessageEmbeddedApp | null;
+  embedded_app: MessageEmbeddedAppTO | null;
   message_key: string | null;
   parent_message_key: string | null;
 }
 
 export interface UpdateMessageEmbeddedAppResponseTO {
-  embedded_app: MessageEmbeddedApp | null;
+  embedded_app: MessageEmbeddedAppTO | null;
   message_key: string | null;
   parent_message_key: string | null;
 }
 
 export interface UpdateMessageRequestTO {
-  embedded_app: MessageEmbeddedApp | null;
+  embedded_app: MessageEmbeddedAppTO | null;
   existence: number;
   flags: number;
   has_existence: boolean;

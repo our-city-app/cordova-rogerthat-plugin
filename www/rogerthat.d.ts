@@ -9,7 +9,8 @@ import {
   GetNewsGroupsResponseTO,
   GetNewsStreamItemsRequestTO,
   GetNewsStreamItemsResponseTO,
-  MessageEmbeddedApp,
+  MapSectionTO,
+  MessageEmbeddedAppTO,
   NewsSenderTO,
 } from './types';
 
@@ -256,7 +257,7 @@ export interface CreatePaymentRequestContext {
 
 export interface PaymentRequestContext {
   type: RogerthatContextType.PAYMENT_REQUEST;
-  data: MessageEmbeddedApp;
+  data: MessageEmbeddedAppTO;
 }
 
 export interface QrScannedContext {
@@ -277,6 +278,23 @@ export type RogerthatContext = PayWidgetContext | CreatePaymentRequestContext | 
 export interface RogerthatBadge {
   key: 'news' | 'messages';
   count: number;
+}
+
+export interface HomeScreenContent {
+  type: HomeScreenContentType;
+  /**
+   * Only set when \'type\' is embedded_app
+   * @type {string}
+   * @memberof HomeScreenContent
+   */
+  embedded_app?: string;
+  sections?: MapSectionTO[];
+  service_email?: string;
+}
+
+export enum HomeScreenContentType {
+  Native = 'native',
+  EmbeddedApp = 'embedded_app'
 }
 
 export class Rogerthat {
@@ -310,6 +328,9 @@ export class Rogerthat {
   ui: RogerthatUI;
   user: RogerthatUserInfo;
   util: RogerthatUtil;
+  homeScreen: {
+    getHomeScreenContent: (resolve: (result: HomeScreenContent) => void, reject: (rejectionReason: string) => void) => void;
+  };
   /**
    * Only available if rogerthat-payments plugin is available in the app
    */

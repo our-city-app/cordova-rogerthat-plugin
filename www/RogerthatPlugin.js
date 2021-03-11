@@ -348,8 +348,11 @@ RogerthatPlugin.prototype.util = {
         var paramsCopy = Object.assign({}, params);
         if (paramsCopy.action_type) {
             if (paramsCopy.action_type === "click" || paramsCopy.action_type === "action") {
-                // TODO move this to native android/ios and remove the sha256 js library
-                paramsCopy.action = sha256(paramsCopy.action);
+                // This should be handled higher up, not in this library.
+                if (paramsCopy.action.length !== 64) {
+                    paramsCopy.action = sha256(paramsCopy.action);
+                    console.warn('`action` should be an sha256 hash');
+                }
             }
         }
         return new Promise(function (resolve, reject) {

@@ -1,4 +1,7 @@
 // tslint:disable:no-empty-interface
+export type AppSearchSuggestionTO =
+  AppSearchSuggestionActionTO;
+
 export type FormComponentTO =
   FileComponentTO
   | TextInputComponentTO
@@ -80,6 +83,10 @@ export type Step =
   MessageFlowStepTO
   | FormFlowStepTO;
 
+
+export const enum AppSearchSuggestionType {
+  ACTION = 'action',
+}
 
 export const enum FormComponentType {
   TEXT_INPUT = 'text_input',
@@ -308,6 +315,18 @@ export interface AppPaymentProviderTO {
   oauth_authorize_url: string | null;
   text_color: string | null;
   version: number;
+}
+
+export interface AppSearchSuggestionActionTO {
+  action: string | null;
+  description: string | null;
+  icon: string | null;
+  title: string | null;
+  readonly type: AppSearchSuggestionType.ACTION;
+}
+
+export interface AppSearchTO {
+  query: string | null;
 }
 
 export interface AttachmentTO {
@@ -670,6 +689,12 @@ export interface FacebookRogerthatProfileMatchTO {
   rtId: string | null;
 }
 
+export interface FileComponentFileTO {
+  file_type: string | null;
+  name: string | null;
+  value: string | null;
+}
+
 export interface FileComponentTO {
   validators: FormValidatorTO[];
   description: string | null;
@@ -681,29 +706,12 @@ export interface FileComponentTO {
 }
 
 export interface FileComponentValueTO {
+  files: FileComponentFileTO[];
   file_type: string | null;
   name: string | null;
   value: string | null;
   id: string | null;
   readonly type: FormComponentType.FILE;
-}
-
-export interface FindFriendItemTO {
-  avatar_url: string | null;
-  email: string | null;
-  name: string | null;
-}
-
-export interface FindFriendRequestTO {
-  avatar_size: number;
-  cursor: string | null;
-  search_string: string | null;
-}
-
-export interface FindFriendResponseTO {
-  items: FindFriendItemTO[];
-  cursor: string | null;
-  error_string: string | null;
 }
 
 export interface FindRogerthatUsersViaEmailRequestTO {
@@ -1010,6 +1018,14 @@ export interface GetAppAssetResponseTO {
   url: string | null;
 }
 
+export interface GetAppSearchSuggestionsRequestTO {
+  search: AppSearchTO | null;
+}
+
+export interface GetAppSearchSuggestionsResponseTO {
+  items: AppSearchSuggestionTO[];
+}
+
 export interface GetAvatarRequestTO {
   avatarId: number;
   size: number;
@@ -1149,6 +1165,13 @@ export interface GetGroupsRequestTO {
 
 export interface GetGroupsResponseTO {
   groups: GroupTO[];
+}
+
+export interface GetHomeScreensRequestTO {
+}
+
+export interface GetHomeScreensResponseTO {
+  items: HomeScreenTO[];
 }
 
 export interface GetIdentityQRCodeRequestTO {
@@ -1524,6 +1547,11 @@ export interface HeartBeatRequestTO {
 
 export interface HeartBeatResponseTO {
   systemTime: number;
+}
+
+export interface HomeScreenTO {
+  id: string | null;
+  name: string | null;
 }
 
 export interface IdentityTO {
@@ -3146,6 +3174,14 @@ export interface ServiceMenuTO {
   shareLabel: string | null;
   shareLinkUrl: string | null;
   staticFlowBrandings: string[];
+}
+
+export interface SetHomeScreenRequestTO {
+  id: string | null;
+}
+
+export interface SetHomeScreenResponseTO {
+  id: string | null;
 }
 
 export interface SetMobilePhoneNumberRequestTO {

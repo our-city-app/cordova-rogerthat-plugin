@@ -12,7 +12,6 @@ import {
   GetNewsStreamItemsResponseTO,
   MapSectionTO,
   MessageEmbeddedAppTO,
-  NewsSenderTO,
 } from './types';
 
 export * from './rogerthat-errors';
@@ -23,12 +22,11 @@ export interface RogerthatUserInfo {
   account: string;
   avatarUrl: string;
   communityId: number;
-  data: { [ key: string ]: any };
+  homeScreenId: string;
   language: string;
   name: string;
   firstName: string;
   lastName: string;
-  put: (data: any) => Promise<void>;
 }
 
 export interface RogerthatSystem {
@@ -62,39 +60,6 @@ export const enum NewsItemType {
   QR_CODE = 2
 }
 
-export interface NewsActionButton {
-  action: string;
-  caption: string;
-  flow_params: string;
-  id: string;
-}
-
-export interface NewsItem {
-  buttons: NewsActionButton[];
-  sender: NewsSenderTO;
-  broadcast_type: string;
-  flags: number;
-  id: number;
-  image_url: string;
-  message: string;
-  qr_code_caption: string;
-  qr_code_content: string;
-  reach: number;
-  sort_priority: number;
-  sort_timestamp: number;
-  timestamp: number;
-  title: string;
-  type: NewsItemType;
-  users_that_rogered: string[];
-  version: number;
-  read: boolean;
-  pinned: boolean;
-  rogered: boolean;
-  disabled: boolean;
-  isPartial: boolean;
-  sortKey: number;
-}
-
 export type CameraType = 'front' | 'back';
 
 export interface RogerthatCamera {
@@ -102,18 +67,6 @@ export interface RogerthatCamera {
   startScanningQrCode: (cameraType: CameraType) => Promise<void>;
   // Returned error may be of type StopScanningQrCodeError
   stopScanningQrCode: (cameraType: CameraType) => Promise<void>;
-}
-
-export const enum FeatureSupported {
-  CHECKING = 0,
-  SUPPORTED = 1,
-  NON_SUPPORTED = 2,
-}
-
-export interface RogerthatFeatures {
-  base64URI: FeatureSupported;
-  backgroundSize: FeatureSupported;
-  callback: (feature: 'base64URI' | 'backgroundSize') => void;
 }
 
 export interface RogerthatUI {
@@ -304,7 +257,6 @@ export class Rogerthat {
   callbacks: RogerthatCallbacks;
   camera: RogerthatCamera;
   context: () => Promise<{ context: RogerthatContext | null }>;
-  features: RogerthatFeatures;
   /**
    * Receives a new result every time a badge is updated.
    * Replaces rogerthat.callbacks.badgeUpdated
@@ -327,7 +279,11 @@ export class Rogerthat {
   };
   system: RogerthatSystem;
   ui: RogerthatUI;
-  user: RogerthatUserInfo;
+  user: {
+    data: { [ key: string ]: any };
+    put: (data: any) => Promise<void>;
+    getProfile: (resolve: (result: RogerthatUserInfo) => void, reject?: (error: string) => void) => void;
+  } & RogerthatUserInfo; // accessing profile info this way is deprecated (since it isn't updated in realtime) and might be removed later
   util: RogerthatUtil;
   homeScreen: {
     getHomeScreenContent: (resolve: (result: HomeScreenContent) => void, reject: (rejectionReason: string) => void) => void;

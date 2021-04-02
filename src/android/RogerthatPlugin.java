@@ -71,7 +71,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.JSONValue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -141,6 +143,7 @@ public class RogerthatPlugin extends CordovaPlugin {
     private String homeScreenKey;
     private LiveData<HomeScreenContentResult> homeScreenLiveData = null;
     private Observer<HomeScreenContentResult> homeScreenObserver = null;
+    private final List<CallbackContext> userProfileCallbacks = new ArrayList<>();
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
@@ -238,6 +241,9 @@ public class RogerthatPlugin extends CordovaPlugin {
                 break;
             case "user_put":
                 putUserData(callbackContext, args);
+                break;
+            case "user_getProfile":
+                getUserProfile(callbackContext);
                 break;
             case "util_isConnectedToInternet":
                 isConnectedToInternet(callbackContext);
@@ -548,6 +554,24 @@ public class RogerthatPlugin extends CordovaPlugin {
         callbackContext.success(new JSONObject());
     }
 
+    private void getUserProfile(final CallbackContext callbackContext) {
+        userProfileCallbacks.add(callbackContext);
+        sendPluginResult(callbackContext, new JSONObject(getFriendsPlugin().getUserInfo()));
+    }
+
+    private void sendPluginResult(CallbackContext callbackContext, JSONObject result) {
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
+        pluginResult.setKeepCallback(true);
+        callbackContext.sendPluginResult(pluginResult);
+    }
+
+    private void notifyProfileChanges() {
+        JSONObject userInfo = new JSONObject(getFriendsPlugin().getUserInfo());
+        for (CallbackContext context : userProfileCallbacks) {
+            sendPluginResult(context, userInfo);
+        }
+    }
+
     private void isConnectedToInternet(final CallbackContext callbackContext) throws JSONException {
         NetworkConnectivityManager manager = getServiceBoundActivity().getMainService().getNetworkConnectivityManager();
         boolean wifiConnected = manager.isWifiConnected();
@@ -593,9 +617,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             JSONObject obj = new JSONObject();
             obj.put("callback", callback);
             obj.put("args", args);
-            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, obj);
-            pluginResult.setKeepCallback(true);
-            mCallbackContext.sendPluginResult(pluginResult);
+            sendPluginResult(mCallbackContext, obj);
         } catch (JSONException e) {
             L.e("JSONException... This should never happen", e);
         }
@@ -606,9 +628,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             JSONObject obj = new JSONObject();
             obj.put("callback", callback);
             obj.put("args", args);
-            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, obj);
-            pluginResult.setKeepCallback(true);
-            mCallbackContext.sendPluginResult(pluginResult);
+            sendPluginResult(mCallbackContext, obj);
         } catch (JSONException e) {
             L.e("JSONException... This should never happen", e);
         }
@@ -631,10 +651,7 @@ public class RogerthatPlugin extends CordovaPlugin {
             Map<String, Object> homeScreenData = homeScreenResult.component1();
             Error error = homeScreenResult.component2();
             if (error == null) {
-                JSONObject resultJson = new JSONObject(homeScreenData);
-                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, resultJson);
-                pluginResult.setKeepCallback(true);
-                callbackContext.sendPluginResult(pluginResult);
+                sendPluginResult(callbackContext, new JSONObject(homeScreenData));
             } else {
                 if (error instanceof UnsupportedHomeScreenVersion) {
                     String msg = getServiceBoundActivity().getString(R.string.homescreen_update_required);
@@ -661,6 +678,7 @@ public class RogerthatPlugin extends CordovaPlugin {
         MyIdentity identity = activity.getMainService().getIdentityStore().getIdentity();
         String key = String.format("%s/%s", identity.getCommunityId(), identity.getHomeScreenId());
         if (key.equals(this.homeScreenKey)) {
+            // Home screen community and id haven't changed, don't do anything
             return;
         }
         this.homeScreenKey = key;
@@ -745,18 +763,22 @@ public class RogerthatPlugin extends CordovaPlugin {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
+                if (action == null) {
+                    return;
+                }
                 String requestId = intent.getStringExtra(IntentResponseHandler.REQUEST_ID);
-                if (action == null || requestId == null) {
-                    return;
-                }
-                CallbackContext callbackContext = callbackMap.get(requestId);
-                if (callbackContext == null) {
-                    // Some other activity may have executed this, ignore
-                    return;
-                }
-                IJSONable response = RequestStore.getResponse(requestId);
-                if (response == null) {
-                    return;
+                CallbackContext callbackContext = null;
+                IJSONable response = null;
+                if (requestId != null) {
+                    callbackContext = callbackMap.get(requestId);
+                    if (callbackContext == null) {
+                        // Some other activity may have executed this, ignore
+                        return;
+                    }
+                    response = RequestStore.getResponse(requestId);
+                    if (response == null) {
+                        return;
+                    }
                 }
                 switch (action) {
                     case NewsPlugin.GET_NEWS_GROUP_SUCCESS:
@@ -773,6 +795,7 @@ public class RogerthatPlugin extends CordovaPlugin {
                         break;
                     case IdentityStore.IDENTITY_CHANGED_INTENT:
                         reloadHomeScreen();
+                        notifyProfileChanges();
                         break;
                 }
             }

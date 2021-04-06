@@ -1,48 +1,6 @@
 var exec = cordova.require("cordova/exec");
 var sha256 = require("./Sha256");
 
-if (typeof Object.assign !== 'function') {
-    // Must be writable: true, enumerable: false, configurable: true
-    Object.defineProperty(Object, "assign", {
-        value: function assign(target, varArgs) { // .length of function is 2
-            'use strict';
-            if (target === null || target === undefined) {
-                throw new TypeError('Cannot convert undefined or null to object');
-            }
-
-            var to = Object(target);
-
-            for (var index = 1; index < arguments.length; index++) {
-                var nextSource = arguments[index];
-
-                if (nextSource !== null && nextSource !== undefined) {
-                    for (var nextKey in nextSource) {
-                        // Avoid bugs when hasOwnProperty is shadowed
-                        if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-                            to[nextKey] = nextSource[nextKey];
-                        }
-                    }
-                }
-            }
-            return to;
-        },
-        writable: true,
-        configurable: true
-    });
-}
-
-var MAJOR_VERSION = 0;
-var MINOR_VERSION = 1;
-var PATCH_VERSION = 0;
-var FEATURE_CHECKING = 0;
-var FEATURE_SUPPORTED = 1;
-var FEATURE_NOT_SUPPORTED = 2;
-
-var PROXIMITY_UNKNOWN = 0;
-var PROXIMITY_IMMEDIATE = 1;
-var PROXIMITY_NEAR = 2;
-var PROXIMITY_FAR = 3;
-
 var ready = false;
 var apiResultReceivedCallbackSet = false;
 
@@ -63,29 +21,6 @@ var userCallbacks = {
 };
 
 var utils = {
-    backgroundSize: (function () {
-        var thisBody = document.documentElement || document.body, thisStyle = thisBody.style,
-            support = thisStyle.backgroundSize !== undefined;
-
-        return support;
-    })(),
-    checkCapabilities: function () {
-        // Test base64 url support
-        var callbackBase64URI = function () {
-            rogerthatPlugin.features.base64URI = this.width == 1 && this.height == 1 ? FEATURE_SUPPORTED : FEATURE_NOT_SUPPORTED;
-            if (rogerthatPlugin.features.callback !== undefined)
-                rogerthatPlugin.features.callback('base64URI');
-        };
-
-        var img = new Image();
-        img.onload = img.onerror = img.onabort = callbackBase64URI;
-        img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
-
-        // Test css3 support
-        rogerthatPlugin.features.backgroundSize = utils.backgroundSize ? FEATURE_SUPPORTED : FEATURE_NOT_SUPPORTED;
-        if (rogerthatPlugin.features.callback !== undefined)
-            rogerthatPlugin.features.callback('backgroundSize');
-    },
     exec: function (success, fail, action, args) {
         if (action !== 'log') {
             utils.logFunctionName("utils.exec -> " + action);
@@ -155,40 +90,70 @@ var utils = {
         }
     },
     setRogerthatData: function (info) {
-        Object.keys(info).forEach(function (key) {
-            if (info[key]) {
-                rogerthatPlugin[key] = info[key];
+        for (const key of Object.keys(info)) {
+            const data = info[key];
+            if (data) {
+                Object.assign(rogerthatPlugin[key], data);
             }
-        });
-
-        if (info.system === undefined) {
-            rogerthatPlugin.system.os = "unknown";
-            rogerthatPlugin.system.version = "unknown";
-            rogerthatPlugin.system.appVersion = "unknown";
         }
-
-        rogerthatPlugin.user.put = function (data) {
-            var crp = {};
-            if (data === undefined) {
-                crp.u = rogerthatPlugin.user.data;
-            } else {
-                Object.keys(data).forEach(function (key) {
-                    rogerthatPlugin.user.data[key] = data[key];
-                });
-
-                crp.smart = true;
-                crp.u = data;
-            }
-            return new Promise(function (resolve, reject) {
-                utils.exec(resolve, reject, "user_put", [crp]);
-            });
-        };
     }
 };
 
 function RogerthatPlugin() {
     patchConsole();
-
+    this.api = {
+        callbacks: apiCallbacksRegister,
+        call: function (method, params, tag, synchronous) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(resolve, reject, "api_call", [{method: method, params: params, tag: tag, synchronous: synchronous}]);
+            });
+        }
+    };
+    this.app = {
+        exit: function () {
+            utils.exec(null, null, "app_exit", []);
+        },
+        exitWithResult: function (result) {
+            utils.exec(null, null, "app_exitWithResult", [{"result": result}]);
+        }
+    };
+    this.camera = {
+        FRONT: "front",
+        BACK: "back",
+        startScanningQrCode: function (cameraType, successCallback, errorCallback) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "camera_startScanningQrCode", []);
+            });
+        },
+        stopScanningQrCode: function (cameraType, successCallback, errorCallback) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "camera_stopScanningQrCode", []);
+            });
+        }
+    };
+    this.context = function (successCallback, errorCallback) {
+        return new Promise(function (resolve, reject) {
+            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "context", []);
+        });
+    };
+    this.getBadges = function (onResult, onError) {
+        utils.exec(onResult, onError, "badges_list", []);
+    };
+    this.homeScreen = {
+        getHomeScreenContent: function (resolve, reject) {
+            // Not a promise since resolve may be called multiple times when the home screen is updated
+            utils.exec(resolve, reject, "homescreen_getHomeScreenContent", []);
+        }
+    };
+    this.message = {
+        open: function (messageKey, successCallback, errorCallback) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "message_open", [{"message_key": messageKey}]);
+            });
+        }
+    };
+    // Set via info call
+    this.menuItem = {};
     this.news = {
         getNewsGroup: function (request) {
             return new Promise(function (resolve, reject) {
@@ -204,9 +169,134 @@ function RogerthatPlugin() {
             return new Promise(function (resolve, reject) {
                 utils.exec(resolve, reject, "news_getNewsStreamItems", [request]);
             });
-        },
+        }
     };
-}
+    // Set via info call
+    this.service = {};
+    this.system = {
+        os: 'unknown',
+        version: 'unknown',
+        appVersion: 'unknown',
+        onBackendConnectivityChanged: function (successCallback, errorCallback) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "system_onBackendConnectivityChanged", []);
+            });
+        }
+    };
+    this.ui = {
+        hideKeyboard: function () {
+            return new Promise(function (resolve, reject) {
+                utils.exec(resolve, reject, "ui_hideKeyboard", []);
+            });
+        }
+    };
+    this.user = {
+        // Set via setInfo
+        data: {},
+        getProfile: function (resolve, reject) {
+            utils.exec(resolve, reject, "user_getProfile", []);
+        },
+        put: function (data) {
+            var crp = {};
+            if (data === undefined) {
+                crp.u = rogerthatPlugin.user.data;
+            } else {
+                Object.assign(this.user.data, data);
+                crp.smart = true;
+                crp.u = data;
+            }
+            return new Promise(function (resolve, reject) {
+                utils.exec(resolve, reject, "user_put", [crp]);
+            });
+        }
+    };
+    this.util = {
+        isConnectedToInternet: function (successCallback, errorCallback) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_isConnectedToInternet", []);
+            });
+        },
+        open: function (params, successCallback, errorCallback) {
+            var paramsCopy = Object.assign({}, params);
+            if (paramsCopy.action_type) {
+                if (paramsCopy.action_type === "click" || paramsCopy.action_type === "action") {
+                    // This should be handled higher up, not in this library.
+                    if (paramsCopy.action.length !== 64) {
+                        paramsCopy.action = sha256(paramsCopy.action);
+                        console.warn('`action` should be an sha256 hash');
+                    }
+                }
+            }
+            return new Promise(function (resolve, reject) {
+                utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_open", [paramsCopy]);
+            });
+        },
+        playAudio: function (url, successCallback, errorCallback) {
+            return new Promise(function (resolve, reject) {
+                utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_playAudio", [{"url": url}]);
+            });
+        },
+        translate: function (key, parameters) {
+            var language = rogerthatPlugin.user.language || rogerthatPlugin.util._translations.defaultLanguage;
+            var translation = undefined;
+            if (language != rogerthatPlugin.util._translations.defaultLanguage) {
+                var translationSet = rogerthatPlugin.util._translations.values[key];
+                if (translationSet) {
+                    translation = translationSet[language];
+                    if (translation === undefined) {
+                        if (language.indexOf('_') != -1) {
+                            language = language.split('_')[0];
+                            translation = translationSet[language];
+                        } else if (language.indexOf('-') != -1) {
+                            language = language.split('-')[0];
+                            translation = translationSet[language];
+                        }
+                    }
+                }
+            }
+
+            if (translation === undefined) {
+                // language is defaultLanguage / key is missing / key is not translated
+                translation = key;
+            }
+
+            if (parameters) {
+                for (const [param, value] of Object.entries(parameters)) {
+                    translation = translation.replace('%(' + param + ')s', value);
+                }
+            }
+            return translation;
+        },
+        uuid: function () {
+            var S4 = function () {
+                return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+            };
+            return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+        },
+        _translateHTML: function () {
+            var tags = document.getElementsByTagName('x-rogerthat-t');
+            for (var i = tags.length - 1; i >= 0; i--) {
+                var obj = tags[i];
+                var translatedString = rogerthatPlugin.util.translate(obj.innerHTML);
+                if (obj.outerHTML) {
+                    obj.outerHTML = translatedString;
+                } else {
+                    var tmpObj = document.createElement("div");
+                    tmpObj.innerHTML = '<!--THIS DATA SHOULD BE REPLACED-->';
+                    var objParent = obj.parentNode;
+                    objParent.replaceChild(tmpObj, obj);
+                    objParent.innerHTML = objParent.innerHTML.replace('<div><!--THIS DATA SHOULD BE REPLACED--></div>', translatedString);
+                }
+            }
+        },
+        _translations: {
+            defaultLanguage: "en",
+            values: {
+                // eg; "Name": { "fr": "Nom", "nl": "Naam" }
+            }
+        }
+    };
+};
 
 var apiCallbacksRegister = utils.generateCallbacksRegister(apiUserCallbacks);
 apiCallbacksRegister.resultReceived = function (callback) {
@@ -223,25 +313,6 @@ apiCallbacksRegister.resultReceived = function (callback) {
     utils.exec(null, null, "api_resultHandlerConfigured", []);
 };
 
-RogerthatPlugin.prototype.api = {
-    callbacks: apiCallbacksRegister,
-    call: function (method, params, tag, synchronous) {
-        return new Promise(function (resolve, reject) {
-            utils.exec(resolve, reject, "api_call", [{method: method, params: params, tag: tag, synchronous: synchronous}]);
-        });
-
-    }
-};
-
-RogerthatPlugin.prototype.app = {
-    exit: function () {
-        utils.exec(null, null, "app_exit", []);
-    },
-    exitWithResult: function (result) {
-        utils.exec(null, null, "app_exitWithResult", [{"result": result}]);
-    }
-};
-
 var callbacksRegister = utils.generateCallbacksRegister(userCallbacks);
 callbacksRegister.ready = function (callback) {
     userCallbacks.ready = function () {
@@ -252,81 +323,8 @@ callbacksRegister.ready = function (callback) {
     }
 };
 
-RogerthatPlugin.prototype.MAJOR_VERSION = MAJOR_VERSION;
-RogerthatPlugin.prototype.MINOR_VERSION = MINOR_VERSION;
-RogerthatPlugin.prototype.PATCH_VERSION = PATCH_VERSION;
-RogerthatPlugin.prototype.PROXIMITY_UNKNOWN = PROXIMITY_UNKNOWN;
-RogerthatPlugin.prototype.PROXIMITY_IMMEDIATE = PROXIMITY_IMMEDIATE;
-RogerthatPlugin.prototype.PROXIMITY_NEAR = PROXIMITY_NEAR;
-RogerthatPlugin.prototype.PROXIMITY_FAR = PROXIMITY_FAR;
-RogerthatPlugin.prototype.VERSION = MAJOR_VERSION + "." + MINOR_VERSION + "." + PATCH_VERSION;
-
 RogerthatPlugin.prototype.callbacks = callbacksRegister;
 
-RogerthatPlugin.prototype.camera = {
-    FRONT: "front",
-    BACK: "back",
-    startScanningQrCode: function (cameraType, successCallback, errorCallback) {
-        return new Promise(function (resolve, reject) {
-            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "camera_startScanningQrCode", []);
-        });
-    },
-    stopScanningQrCode: function (cameraType, successCallback, errorCallback) {
-        return new Promise(function (resolve, reject) {
-            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "camera_stopScanningQrCode", []);
-        });
-    }
-};
-
-RogerthatPlugin.prototype.context = function (successCallback, errorCallback) {
-    return new Promise(function (resolve, reject) {
-        utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "context", []);
-    });
-};
-
-RogerthatPlugin.prototype.features = {
-    FEATURE_CHECKING: FEATURE_CHECKING,
-    FEATURE_SUPPORTED: FEATURE_SUPPORTED,
-    FEATURE_NOT_SUPPORTED: FEATURE_NOT_SUPPORTED,
-    base64URI: FEATURE_CHECKING,
-    backgroundSize: FEATURE_CHECKING,
-    callback: undefined
-};
-
-RogerthatPlugin.prototype.getBadges = function (onResult, onError) {
-    utils.exec(onResult, onError, "badges_list", []);
-};
-
-RogerthatPlugin.prototype.message = {
-    open: function (messageKey, successCallback, errorCallback) {
-        return new Promise(function (resolve, reject) {
-            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "message_open", [{"message_key": messageKey}]);
-        });
-    }
-};
-
-// Set via info call
-RogerthatPlugin.prototype.menuItem = null;
-
-RogerthatPlugin.prototype.service = {};
-
-RogerthatPlugin.prototype.system = {
-    onBackendConnectivityChanged: function (successCallback, errorCallback) {
-        return new Promise(function (resolve, reject) {
-            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "system_onBackendConnectivityChanged", []);
-        });
-    }
-};
-
-RogerthatPlugin.prototype.ui = {
-    hideKeyboard: function () {
-        return new Promise(function (resolve, reject) {
-            utils.exec(resolve, reject, "ui_hideKeyboard", []);
-        });
-    }
-};
-
-RogerthatPlugin.prototype.user = {};
 
 function execCallback(promiseCallback, regularCallback) {
     return function (result) {
@@ -337,98 +335,6 @@ function execCallback(promiseCallback, regularCallback) {
         promiseCallback(result);
     };
 }
-
-RogerthatPlugin.prototype.util = {
-    isConnectedToInternet: function (successCallback, errorCallback) {
-        return new Promise(function (resolve, reject) {
-            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_isConnectedToInternet", []);
-        });
-    },
-    open: function (params, successCallback, errorCallback) {
-        var paramsCopy = Object.assign({}, params);
-        if (paramsCopy.action_type) {
-            if (paramsCopy.action_type === "click" || paramsCopy.action_type === "action") {
-                // This should be handled higher up, not in this library.
-                if (paramsCopy.action.length !== 64) {
-                    paramsCopy.action = sha256(paramsCopy.action);
-                    console.warn('`action` should be an sha256 hash');
-                }
-            }
-        }
-        return new Promise(function (resolve, reject) {
-            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_open", [paramsCopy]);
-        });
-    },
-    playAudio: function (url, successCallback, errorCallback) {
-        return new Promise(function (resolve, reject) {
-            utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_playAudio", [{"url": url}]);
-        });
-    },
-    translate: function (key, parameters) {
-        var language = rogerthatPlugin.user.language || rogerthatPlugin.util._translations.defaultLanguage;
-        var translation = undefined;
-        if (language != rogerthatPlugin.util._translations.defaultLanguage) {
-            var translationSet = rogerthatPlugin.util._translations.values[key];
-            if (translationSet) {
-                translation = translationSet[language];
-                if (translation === undefined) {
-                    if (language.indexOf('_') != -1) {
-                        language = language.split('_')[0];
-                        translation = translationSet[language];
-                    }
-                }
-            }
-        }
-
-        if (translation == undefined) {
-            // language is defaultLanguage / key is missing / key is not translated
-            translation = key;
-        }
-
-        if (parameters) {
-            $.each(parameters, function (param, value) {
-                translation = translation.replace('%(' + param + ')s', value);
-            });
-        }
-        return translation;
-    },
-    uuid: function () {
-        var S4 = function () {
-            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-        };
-        return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-    },
-    _translateHTML: function () {
-        var tags = document.getElementsByTagName('x-rogerthat-t');
-        for (var i = tags.length - 1; i >= 0; i--) {
-            var obj = tags[i];
-            var translatedString = rogerthatPlugin.util.translate(obj.innerHTML);
-            if (obj.outerHTML) {
-                obj.outerHTML = translatedString;
-            } else {
-                var tmpObj = document.createElement("div");
-                tmpObj.innerHTML = '<!--THIS DATA SHOULD BE REPLACED-->';
-                var objParent = obj.parentNode;
-                objParent.replaceChild(tmpObj, obj);
-                objParent.innerHTML = objParent.innerHTML.replace('<div><!--THIS DATA SHOULD BE REPLACED--></div>', translatedString);
-            }
-        }
-    },
-    _translations: {
-        defaultLanguage: "en",
-        values: {
-            // eg; "Name": { "fr": "Nom", "nl": "Naam" }
-        }
-    }
-};
-
-RogerthatPlugin.prototype.homeScreen = {
-    getHomeScreenContent: function (resolve, reject) {
-        // Not a promise since resolve may be called multiple times when the home screen is updated
-        utils.exec(resolve, reject, "homescreen_getHomeScreenContent", []);
-    }
-};
-
 
 function exceptionToObject(exception) {
     var result = {};
@@ -479,7 +385,7 @@ function windowErrorHandler(msg, url, line, column, errorObj) {
 if (typeof window !== 'undefined') {
     window.onerror = bind(this, windowErrorHandler);
 }
-
+    
 if (typeof rogerthat_translations !== "undefined") {
     RogerthatPlugin.prototype.util._translations = rogerthat_translations;
 }
@@ -553,6 +459,4 @@ function patchConsole() {
 
 var rogerthatPlugin = new RogerthatPlugin();
 module.exports = rogerthatPlugin;
-
-utils.checkCapabilities();
 utils.exec(utils.processCallbackResult, null, "start", []);

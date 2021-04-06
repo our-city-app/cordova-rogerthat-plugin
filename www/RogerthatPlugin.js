@@ -247,6 +247,9 @@ function RogerthatPlugin() {
                         if (language.indexOf('_') != -1) {
                             language = language.split('_')[0];
                             translation = translationSet[language];
+                        } else if (language.indexOf('-') != -1) {
+                            language = language.split('-')[0];
+                            translation = translationSet[language];
                         }
                     }
                 }

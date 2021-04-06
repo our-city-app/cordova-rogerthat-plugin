@@ -249,6 +249,13 @@
     [self.helper putUserData:[self getRequestParams:command]];
 }
 
+- (void)user_getProfile:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    [self.helper getUserProfileWithResultHandler:[self getUserGetProfileResultHandlerWithCommand:command]
+                                          params:[self getRequestParams:command]];
+}
+
 - (void)util_isConnectedToInternet:(CDVInvokedUrlCommand *)command
 {
     HERE();
@@ -305,6 +312,14 @@
     __weak __typeof__(self) weakSelf = self;
     return ^(NSDictionary *result, NSString *error) {
         [weakSelf sendDictionaryCallback:command.callbackId withResult:result withError:error];
+    };
+}
+
+- (MCTScreenBrandingUserGetProfileResultHandler)getUserGetProfileResultHandlerWithCommand:(CDVInvokedUrlCommand *)command
+{
+    __weak __typeof__(self) weakSelf = self;
+    return ^(NSDictionary *result) {
+        [weakSelf sendDictionaryCallback:command.callbackId withResult:result withError:nil];
     };
 }
 

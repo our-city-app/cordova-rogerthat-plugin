@@ -25,7 +25,7 @@ var utils = {
         if (action !== 'log') {
             utils.logFunctionName("utils.exec -> " + action);
         }
-        exec(this.getSuccessCallback(success, action), utils.getErrorCallback(fail, action), "RogerthatPlugin", action, args);
+        exec(utils.getSuccessCallback(success, action), utils.getErrorCallback(fail, action), "RogerthatPlugin", action, args);
     },
     generateCallbacksRegister: function (callbacks) {
         var callbacksRegister = {};
@@ -99,41 +99,25 @@ var utils = {
     }
 };
 
-var callbacksRegister = utils.generateCallbacksRegister(userCallbacks);
-callbacksRegister.ready = function (callback) {
-    userCallbacks.ready = function () {
-        callback();
-    };
-    if (ready) {
-        userCallbacks.ready();
-    }
-};
-
-class RogerthatPlugin {
-    api = {
+function RogerthatPlugin() {
+    patchConsole();
+    this.api = {
         callbacks: apiCallbacksRegister,
-        call(method, params, tag, synchronous) {
+        call: function (method, params, tag, synchronous) {
             return new Promise(function (resolve, reject) {
-                utils.exec(resolve, reject, "api_call", [{
-                    method: method,
-                    params: params,
-                    tag: tag,
-                    synchronous: synchronous
-                }]);
+                utils.exec(resolve, reject, "api_call", [{method: method, params: params, tag: tag, synchronous: synchronous}]);
             });
-
         }
     };
-    app = {
-        exit() {
+    this.app = {
+        exit: function () {
             utils.exec(null, null, "app_exit", []);
         },
-        exitWithResult(result) {
+        exitWithResult: function (result) {
             utils.exec(null, null, "app_exitWithResult", [{"result": result}]);
         }
     };
-    callbacks = callbacksRegister;
-    camera = {
+    this.camera = {
         FRONT: "front",
         BACK: "back",
         startScanningQrCode: function (cameraType, successCallback, errorCallback) {
@@ -147,52 +131,49 @@ class RogerthatPlugin {
             });
         }
     };
-
-    context(successCallback, errorCallback) {
+    this.context = function (successCallback, errorCallback) {
         return new Promise(function (resolve, reject) {
             utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "context", []);
         });
     };
-
-    getBadges(onResult, onError) {
+    this.getBadges = function (onResult, onError) {
         utils.exec(onResult, onError, "badges_list", []);
     };
-
-    homeScreen = {
-        getHomeScreenContent(resolve, reject) {
+    this.homeScreen = {
+        getHomeScreenContent: function (resolve, reject) {
             // Not a promise since resolve may be called multiple times when the home screen is updated
             utils.exec(resolve, reject, "homescreen_getHomeScreenContent", []);
         }
     };
-    message = {
-        open(messageKey, successCallback, errorCallback) {
+    this.message = {
+        open: function (messageKey, successCallback, errorCallback) {
             return new Promise(function (resolve, reject) {
                 utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "message_open", [{"message_key": messageKey}]);
             });
         }
     };
     // Set via info call
-    menuItem = {};
-    news = {
-        getNewsGroup(request) {
+    this.menuItem = {};
+    this.news = {
+        getNewsGroup: function (request) {
             return new Promise(function (resolve, reject) {
                 utils.exec(resolve, reject, "news_getNewsGroup", [request]);
             });
         },
-        getNewsGroups(request) {
+        getNewsGroups: function (request) {
             return new Promise(function (resolve, reject) {
                 utils.exec(resolve, reject, "news_getNewsGroups", [request]);
             });
         },
-        getNewsStreamItems(request) {
+        getNewsStreamItems: function (request) {
             return new Promise(function (resolve, reject) {
                 utils.exec(resolve, reject, "news_getNewsStreamItems", [request]);
             });
-        },
+        }
     };
     // Set via info call
-    service = {};
-    system = {
+    this.service = {};
+    this.system = {
         os: 'unknown',
         version: 'unknown',
         appVersion: 'unknown',
@@ -202,23 +183,23 @@ class RogerthatPlugin {
             });
         }
     };
-    ui = {
-        hideKeyboard() {
+    this.ui = {
+        hideKeyboard: function () {
             return new Promise(function (resolve, reject) {
                 utils.exec(resolve, reject, "ui_hideKeyboard", []);
             });
         }
     };
-    user = {
+    this.user = {
         // Set via setInfo
         data: {},
-        getProfile(resolve, reject) {
+        getProfile: function (resolve, reject) {
             utils.exec(resolve, reject, "user_getProfile", []);
         },
-        put(data) {
+        put: function (data) {
             var crp = {};
             if (data === undefined) {
-                crp.u = this.user.data;
+                crp.u = rogerthatPlugin.user.data;
             } else {
                 Object.assign(this.user.data, data);
                 crp.smart = true;
@@ -229,13 +210,13 @@ class RogerthatPlugin {
             });
         }
     };
-    util = {
-        isConnectedToInternet(successCallback, errorCallback) {
+    this.util = {
+        isConnectedToInternet: function (successCallback, errorCallback) {
             return new Promise(function (resolve, reject) {
                 utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_isConnectedToInternet", []);
             });
         },
-        open(params, successCallback, errorCallback) {
+        open: function (params, successCallback, errorCallback) {
             var paramsCopy = Object.assign({}, params);
             if (paramsCopy.action_type) {
                 if (paramsCopy.action_type === "click" || paramsCopy.action_type === "action") {
@@ -250,16 +231,16 @@ class RogerthatPlugin {
                 utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_open", [paramsCopy]);
             });
         },
-        playAudio(url, successCallback, errorCallback) {
+        playAudio: function (url, successCallback, errorCallback) {
             return new Promise(function (resolve, reject) {
                 utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_playAudio", [{"url": url}]);
             });
         },
-        translate(key, parameters) {
-            var language = rogerthatPlugin.user.language || this._translations.defaultLanguage;
+        translate: function (key, parameters) {
+            var language = rogerthatPlugin.user.language || rogerthatPlugin.util._translations.defaultLanguage;
             var translation = undefined;
-            if (language !== this._translations.defaultLanguage) {
-                var translationSet = this._translations.values[key];
+            if (language != rogerthatPlugin.util._translations.defaultLanguage) {
+                var translationSet = rogerthatPlugin.util._translations.values[key];
                 if (translationSet) {
                     translation = translationSet[language];
                     if (translation === undefined) {
@@ -283,17 +264,17 @@ class RogerthatPlugin {
             }
             return translation;
         },
-        uuid() {
+        uuid: function () {
             var S4 = function () {
                 return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
             };
             return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
         },
-        _translateHTML() {
+        _translateHTML: function () {
             var tags = document.getElementsByTagName('x-rogerthat-t');
             for (var i = tags.length - 1; i >= 0; i--) {
                 var obj = tags[i];
-                var translatedString = this.translate(obj.innerHTML);
+                var translatedString = rogerthatPlugin.util.translate(obj.innerHTML);
                 if (obj.outerHTML) {
                     obj.outerHTML = translatedString;
                 } else {
@@ -312,15 +293,7 @@ class RogerthatPlugin {
             }
         }
     };
-
-    constructor() {
-        patchConsole();
-        if (typeof rogerthat_translations !== "undefined") {
-            this.util._translations = rogerthat_translations;
-        }
-    }
-
-}
+};
 
 var apiCallbacksRegister = utils.generateCallbacksRegister(apiUserCallbacks);
 apiCallbacksRegister.resultReceived = function (callback) {
@@ -337,6 +310,19 @@ apiCallbacksRegister.resultReceived = function (callback) {
     utils.exec(null, null, "api_resultHandlerConfigured", []);
 };
 
+var callbacksRegister = utils.generateCallbacksRegister(userCallbacks);
+callbacksRegister.ready = function (callback) {
+    userCallbacks.ready = function () {
+        callback();
+    };
+    if (ready) {
+        userCallbacks.ready();
+    }
+};
+
+RogerthatPlugin.prototype.callbacks = callbacksRegister;
+
+
 function execCallback(promiseCallback, regularCallback) {
     return function (result) {
         if (regularCallback) {
@@ -346,7 +332,6 @@ function execCallback(promiseCallback, regularCallback) {
         promiseCallback(result);
     };
 }
-
 
 function exceptionToObject(exception) {
     var result = {};
@@ -397,11 +382,13 @@ function windowErrorHandler(msg, url, line, column, errorObj) {
 if (typeof window !== 'undefined') {
     window.onerror = bind(this, windowErrorHandler);
 }
-
-var rogerthatPlugin = new RogerthatPlugin();
+    
+if (typeof rogerthat_translations !== "undefined") {
+    RogerthatPlugin.prototype.util._translations = rogerthat_translations;
+}
 
 function getStackTrace(e) {
-    if (rogerthatPlugin.system.os === 'android') {
+    if (RogerthatPlugin.prototype.system !== undefined && RogerthatPlugin.prototype.system.os === 'android') {
         var stack = (e.stack + '\n').replace(/^\S[^\(]+?[\n$]/gm, '')
             .replace(/^\s+(at eval )?at\s+/gm, '')
             .replace(/^([^\(]+?)([\n$])/gm, '{anonymous}()@$1$2')
@@ -467,5 +454,6 @@ function patchConsole() {
     }
 }
 
+var rogerthatPlugin = new RogerthatPlugin();
 module.exports = rogerthatPlugin;
 utils.exec(utils.processCallbackResult, null, "start", []);

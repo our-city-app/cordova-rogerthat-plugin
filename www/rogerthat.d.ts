@@ -133,10 +133,6 @@ export interface RogerthatCallbacks {
    */
   badgeUpdated: (callback: (result: RogerthatBadge) => void) => void;
   /**
-   * The device its Internet connectivity has changed.
-   */
-  onBackendConnectivityChanged: (callback: (connectionStatus: InternetConnectionStatus) => void) => void;
-  /**
    * A QR code has been scanned as result of rogerthat.camera.startScanningQrCode
    * This method is called twice. If the smartphone is connected to the Internet,
    * the app will request the details of the scanned QR code.

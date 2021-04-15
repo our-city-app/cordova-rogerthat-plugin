@@ -231,12 +231,6 @@
                                               params:[self getRequestParams:command]];
 }
 
-- (void)system_onBackendConnectivityChanged:(CDVInvokedUrlCommand *)command
-{
-    HERE();
-    [self.helper registerBackendConnectivityChangesWithResultHandler:[self defaultResultHandlerWithCommand:command]];
-}
-
 - (void)ui_hideKeyboard:(CDVInvokedUrlCommand *)command
 {
     HERE();
@@ -428,12 +422,6 @@
 {
     T_UI();
     return YES;
-}
-
-- (void)backendConnectivityChanged:(BOOL)connected
-{
-    T_UI();
-    [self sendCallback:@"onBackendConnectivityChanged" withArguments:@(connected)];
 }
 
 - (void)onJSResultWithRequestId:(NSString *)requestId result:(NSDictionary *)result error:(NSDictionary *)error

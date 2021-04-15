@@ -12,7 +12,6 @@ var apiUserCallbacks = {
 };
 
 var userCallbacks = {
-    onBackendConnectivityChanged: _dummy,
     qrCodeScanned: _dummy,
     ready: _dummy,
     serviceDataUpdated: _dummy,
@@ -70,9 +69,6 @@ var utils = {
 
         } else if (result.callback === "badgeUpdated") {
             userCallbacks.badgeUpdated(result.args);
-
-        } else if (result.callback === "onBackendConnectivityChanged") {
-            userCallbacks.onBackendConnectivityChanged(result.args);
 
         } else if (result.callback === "qrCodeScanned") {
             userCallbacks.qrCodeScanned(result.args);
@@ -176,12 +172,7 @@ function RogerthatPlugin() {
     this.system = {
         os: 'unknown',
         version: 'unknown',
-        appVersion: 'unknown',
-        onBackendConnectivityChanged: function (successCallback, errorCallback) {
-            return new Promise(function (resolve, reject) {
-                utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "system_onBackendConnectivityChanged", []);
-            });
-        }
+        appVersion: 'unknown'
     };
     this.ui = {
         hideKeyboard: function () {

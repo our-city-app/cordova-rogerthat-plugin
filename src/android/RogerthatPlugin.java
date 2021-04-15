@@ -57,7 +57,6 @@ import com.mobicage.rogerthat.util.system.SafeRunnable;
 import com.mobicage.rpc.IJSONable;
 import com.mobicage.rpc.IncompleteMessageException;
 import com.mobicage.rpc.IntentResponseHandler;
-import com.mobicage.rpc.config.CloudConstants;
 import com.mobicage.to.news.GetNewsGroupRequestTO;
 import com.mobicage.to.news.GetNewsGroupsRequestTO;
 import com.mobicage.to.news.GetNewsStreamItemsRequestTO;
@@ -93,7 +92,6 @@ public class RogerthatPlugin extends CordovaPlugin {
     private CallbackContext mCallbackContext = null;
 
     private boolean mApiResultHandlerSet = false;
-    private boolean mIsListeningBacklogConnectivityChanged = false;
     private boolean hasInitializedBadges = false;
 
     private CordovaRogerthatInterface mRogerthatInterface = null;
@@ -128,11 +126,6 @@ public class RogerthatPlugin extends CordovaPlugin {
         @Override
         public void qrCodeScanned(Map<String, Object> result) {
             sendCallbackUpdate("qrCodeScanned", new JSONObject(result));
-        }
-
-        @Override
-        public void onBackendConnectivityChanged(boolean connected) {
-            sendCallbackUpdate("onBackendConnectivityChanged", connected);
         }
 
         @Override
@@ -233,9 +226,6 @@ public class RogerthatPlugin extends CordovaPlugin {
             case "news_getNewsStreamItems":
                 getNewsStreamItems(callbackContext, new GetNewsStreamItemsRequestTO(JsonUtils.toMap(args)));
                 break;
-            case "system_onBackendConnectivityChanged":
-                onBackendConnectivityChanged(callbackContext);
-                break;
             case "ui_hideKeyboard":
                 hideKeyboard(callbackContext);
                 break;
@@ -312,9 +302,6 @@ public class RogerthatPlugin extends CordovaPlugin {
 
 
     public void onDestroy() {
-        if (mIsListeningBacklogConnectivityChanged) {
-            mActionScreenUtils.stopBacklogListener();
-        }
         mActionScreenUtils.stop();
         getServiceBoundActivity().unregisterReceiver(mBroadcastReceiver);
         if (mPoker != null) {
@@ -519,17 +506,6 @@ public class RogerthatPlugin extends CordovaPlugin {
         } catch (JSONException je) {
             L.e("JSONException... This should never happen", je);
             callbackContext.error("Could not process json...");
-        }
-    }
-
-    private void onBackendConnectivityChanged(final CallbackContext callbackContext) throws JSONException {
-        JSONObject obj = new JSONObject();
-        obj.put("connected", getServiceBoundActivity().getMainService().isBacklogConnected());
-        callbackContext.success(obj);
-
-        if (!mIsListeningBacklogConnectivityChanged && CloudConstants.USE_XMPP_KICK_CHANNEL) {
-            mActionScreenUtils.startBacklogListener();
-            mIsListeningBacklogConnectivityChanged = true;
         }
     }
 

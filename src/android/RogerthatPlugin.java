@@ -218,13 +218,13 @@ public class RogerthatPlugin extends CordovaPlugin {
                 openMessage(callbackContext, args);
                 break;
             case "news_getNewsGroup":
-                getNewsGroup(callbackContext, new GetNewsGroupRequestTO(JsonUtils.toMap(args)));
+                getNewsGroup(callbackContext, GetNewsGroupRequestTO.Companion.fromJSONMap(JsonUtils.toMap(args)));
                 break;
             case "news_getNewsGroups":
-                getNewsGroups(callbackContext, new GetNewsGroupsRequestTO(JsonUtils.toMap(args)));
+                getNewsGroups(callbackContext, GetNewsGroupsRequestTO.Companion.fromJSONMap(JsonUtils.toMap(args)));
                 break;
             case "news_getNewsStreamItems":
-                getNewsStreamItems(callbackContext, new GetNewsStreamItemsRequestTO(JsonUtils.toMap(args)));
+                getNewsStreamItems(callbackContext, GetNewsStreamItemsRequestTO.Companion.fromJSONMap(JsonUtils.toMap(args)));
                 break;
             case "ui_hideKeyboard":
                 hideKeyboard(callbackContext);
@@ -369,6 +369,14 @@ public class RogerthatPlugin extends CordovaPlugin {
         final String method = JsonUtils.optString(args, "method", null);
         final String params = JsonUtils.optString(args, "params", null);
         final String tag = JsonUtils.optString(args, "tag", null);
+        if (method == null) {
+            callbackContext.error("'method' is a mandatory parameter");
+            return;
+        }
+        if (tag == null) {
+            callbackContext.error("'tag' is a mandatory parameter");
+            return;
+        }
         final boolean synchronous = args.optBoolean("synchronous", true);
 
         getFriendsPlugin().sendApiCall(mRogerthatInterface.getServiceEmail(), mRogerthatInterface.getItemTagHash(), method, params, tag, synchronous, callbackContext);

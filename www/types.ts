@@ -196,7 +196,7 @@ export interface AckMessageResponseTO {
 }
 
 export interface AddProfileAddressRequestTO {
-  geo_location: GeoPointTO | null;
+  geo_location: GeoPointTO;
   bus_nr: string | null;
   city: string | null;
   distance: number;
@@ -208,7 +208,7 @@ export interface AddProfileAddressRequestTO {
 }
 
 export interface AddProfileAddressResponseTO {
-  geo_location: GeoPointTO | null;
+  geo_location: GeoPointTO;
   bus_nr: string | null;
   city: string | null;
   distance: number;
@@ -216,45 +216,45 @@ export interface AddProfileAddressResponseTO {
   label: string | null;
   street_name: string | null;
   type: number;
-  uid: string | null;
+  uid: string;
   zip_code: string | null;
 }
 
 export interface AddProfilePhoneNumberRequestTO {
   label: string | null;
-  number: string | null;
+  number: string;
   type: number;
 }
 
 export interface AddProfilePhoneNumberResponseTO {
   label: string | null;
-  number: string | null;
+  number: string;
   type: number;
-  uid: string | null;
+  uid: string;
 }
 
 export interface AdvancedOrderCategory {
   items: AdvancedOrderItem[];
-  id: string | null;
+  id: string;
   name: string | null;
 }
 
 export interface AdvancedOrderFormMessageTO {
   attachments: AttachmentTO[];
-  form: AdvancedOrderFormTO | null;
-  member: MemberStatusTO | null;
+  form: AdvancedOrderFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -264,7 +264,7 @@ export interface AdvancedOrderFormMessageTO {
 }
 
 export interface AdvancedOrderFormTO {
-  widget: AdvancedOrderTO | null;
+  widget: AdvancedOrderTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -278,7 +278,7 @@ export interface AdvancedOrderFormTO {
 export interface AdvancedOrderItem {
   description: string | null;
   has_price: boolean;
-  id: string | null;
+  id: string;
   image_url: string | null;
   name: string | null;
   step: number;
@@ -300,25 +300,8 @@ export interface AdvancedOrderWidgetResultTO {
   currency: string | null;
 }
 
-export interface AppPaymentProviderTO {
-  asset_types: string[];
-  background_color: string | null;
-  black_white_logo: string | null;
-  button_color: string | null;
-  currencies: string[];
-  description: string | null;
-  embedded_app_id: string | null;
-  enabled: boolean;
-  id: string | null;
-  logo_url: string | null;
-  name: string | null;
-  oauth_authorize_url: string | null;
-  text_color: string | null;
-  version: number;
-}
-
 export interface AppSearchSuggestionActionTO {
-  action: string | null;
+  action: string;
   description: string | null;
   icon: string | null;
   title: string | null;
@@ -339,20 +322,20 @@ export interface AttachmentTO {
 
 export interface AutoCompleteFormMessageTO {
   attachments: AttachmentTO[];
-  form: AutoCompleteFormTO | null;
-  member: MemberStatusTO | null;
+  form: AutoCompleteFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -362,7 +345,7 @@ export interface AutoCompleteFormMessageTO {
 }
 
 export interface AutoCompleteFormTO {
-  widget: AutoCompleteTO | null;
+  widget: AutoCompleteTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -383,23 +366,15 @@ export interface AutoCompleteTO {
 }
 
 export interface BaseMediaTO {
-  content: string | null;
+  content: string;
   thumbnail_url: string | null;
-  type: string | null;
+  type: string;
 }
 
 export interface BasePaymentMethod {
   amount: number;
   currency: string | null;
   precision: number;
-}
-
-export interface BecameFriendsRequestTO {
-  friend: FriendRelationTO | null;
-  user: string | null;
-}
-
-export interface BecameFriendsResponseTO {
 }
 
 export interface BreakFriendshipRequestTO {
@@ -426,18 +401,9 @@ export interface ButtonTO {
   ui_flags: number;
 }
 
-export interface CancelPaymentRequestTO {
-  transaction_id: string | null;
-}
-
-export interface CancelPaymentResponseTO {
-  error: ErrorPaymentTO | null;
-  success: boolean;
-}
-
 export interface ChangeMembersOfConversationRequestTO {
   emails: string[];
-  parent_message_key: string | null;
+  parent_message_key: string;
   type: string | null;
 }
 
@@ -469,27 +435,14 @@ export interface ConversationDeletedResponseTO {
 }
 
 export interface ConversationMemberTO {
-  avatar_url: string | null;
-  email: string | null;
-  name: string | null;
-  permission: string | null;
+  avatar_url: string;
+  email: string;
+  name: string;
+  permission: string;
 }
 
 export interface CoordsListTO {
   coords: GeoPointTO[];
-}
-
-export interface CreateAssetRequestTO {
-  currency: string | null;
-  iban: string | null;
-  provider_id: string | null;
-  type: string | null;
-}
-
-export interface CreateAssetResponseTO {
-  error: ErrorPaymentTO | null;
-  result: PaymentProviderAssetTO | null;
-  success: boolean;
 }
 
 export interface CreateJobChatRequestTO {
@@ -508,38 +461,22 @@ export interface CreateNotificationRequestTO {
 export interface CreateNotificationResponseTO {
 }
 
-export interface CreateTransactionRequestTO {
-  params: string | null;
-  provider_id: string | null;
-}
-
-export interface CreateTransactionResponseTO {
-  error: ErrorPaymentTO | null;
-  result: CreateTransactionResultTO | null;
-  success: boolean;
-}
-
-export interface CreateTransactionResultTO {
-  params: string | null;
-  transaction_id: string | null;
-}
-
 export interface DateSelectFormMessageTO {
   attachments: AttachmentTO[];
-  form: DateSelectFormTO | null;
-  member: MemberStatusTO | null;
+  form: DateSelectFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -549,7 +486,7 @@ export interface DateSelectFormMessageTO {
 }
 
 export interface DateSelectFormTO {
-  widget: DateSelectTO | null;
+  widget: DateSelectTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -576,7 +513,7 @@ export interface DatetimeComponentTO {
   validators: FormValidatorTO[];
   description: string | null;
   format: string | null;
-  id: string | null;
+  id: string;
   sensitive: boolean;
   title: string | null;
   readonly type: FormComponentType.DATETIME;
@@ -600,7 +537,7 @@ export interface DeleteConversationResponseTO {
 }
 
 export interface DeleteGroupRequestTO {
-  guid: string | null;
+  guid: string;
 }
 
 export interface DeleteGroupResponseTO {
@@ -645,7 +582,7 @@ export interface EditProfileResponseTO {
 
 export interface EmbeddedAppTO {
   description: string | null;
-  name: string | null;
+  name: string;
   serving_url: string | null;
   title: string | null;
   types: string[];
@@ -655,17 +592,11 @@ export interface EmbeddedAppTO {
 
 export interface EndMessageFlowRequestTO {
   message_flow_run_id: string | null;
-  parent_message_key: string | null;
+  parent_message_key: string;
   wait_for_followup: boolean;
 }
 
 export interface EndMessageFlowResponseTO {
-}
-
-export interface ErrorPaymentTO {
-  code: string | null;
-  data: string | null;
-  message: string | null;
 }
 
 export interface ErrorTO {
@@ -682,13 +613,6 @@ export interface ExpandableListSectionItemTO {
   readonly type: MapListSectionItemType.EXPANDABLE;
 }
 
-export interface FacebookRogerthatProfileMatchTO {
-  fbId: string | null;
-  fbName: string | null;
-  fbPicture: string | null;
-  rtId: string | null;
-}
-
 export interface FileComponentFileTO {
   file_type: string | null;
   name: string | null;
@@ -699,7 +623,7 @@ export interface FileComponentTO {
   validators: FormValidatorTO[];
   description: string | null;
   file_types: string[];
-  id: string | null;
+  id: string;
   sensitive: boolean;
   title: string | null;
   readonly type: FormComponentType.FILE;
@@ -722,14 +646,6 @@ export interface FindRogerthatUsersViaEmailResponseTO {
   matched_addresses: string[];
 }
 
-export interface FindRogerthatUsersViaFacebookRequestTO {
-  access_token: string | null;
-}
-
-export interface FindRogerthatUsersViaFacebookResponseTO {
-  matches: FacebookRogerthatProfileMatchTO[];
-}
-
 export interface FindServiceCategoryTO {
   items: FindServiceItemTO[];
   category: string | null;
@@ -742,7 +658,7 @@ export interface FindServiceItemTO {
   description: string | null;
   description_branding: string | null;
   detail_text: string | null;
-  email: string | null;
+  email: string;
   name: string | null;
   qualified_identifier: string | null;
 }
@@ -795,19 +711,19 @@ export interface FormFlowStepTO {
 
 export interface FormMessageTO {
   attachments: AttachmentTO[];
-  form: FormTO | null;
-  member: MemberStatusTO | null;
+  form: FormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -818,7 +734,7 @@ export interface FormMessageTO {
 }
 
 export interface FormResult {
-  result: WidgetResult | null;
+  result: WidgetResult;
   type: string | null;
 }
 
@@ -843,7 +759,7 @@ export interface FormSectionValueTO {
 }
 
 export interface FormTO {
-  widget: Widget | null;
+  widget: Widget;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -872,29 +788,22 @@ export interface FriendCategoryTO {
   name: string | null;
 }
 
-export interface FriendRelationTO {
-  avatarId: number;
-  email: string | null;
-  name: string | null;
-  type: number;
-}
-
 export interface FriendSelectFormMessageTO {
   attachments: AttachmentTO[];
-  form: FriendSelectFormTO | null;
-  member: MemberStatusTO | null;
+  form: FriendSelectFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -904,7 +813,7 @@ export interface FriendSelectFormMessageTO {
 }
 
 export interface FriendSelectFormTO {
-  widget: FriendSelectTO | null;
+  widget: FriendSelectTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -930,7 +839,7 @@ export interface FriendTO {
   contentBrandingHash: string | null;
   description: string | null;
   descriptionBranding: string | null;
-  email: string | null;
+  email: string;
   existence: number;
   flags: number;
   generation: number;
@@ -951,20 +860,20 @@ export interface FriendTO {
 
 export interface GPSLocationFormMessageTO {
   attachments: AttachmentTO[];
-  form: GPSLocationFormTO | null;
-  member: MemberStatusTO | null;
+  form: GPSLocationFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -974,7 +883,7 @@ export interface GPSLocationFormMessageTO {
 }
 
 export interface GPSLocationFormTO {
-  widget: GPSLocationTO | null;
+  widget: GPSLocationTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -1013,9 +922,9 @@ export interface GetAppAssetRequestTO {
 }
 
 export interface GetAppAssetResponseTO {
-  kind: string | null;
+  kind: string;
   scale_x: number;
-  url: string | null;
+  url: string;
 }
 
 export interface GetAppSearchSuggestionsRequestTO {
@@ -1040,20 +949,20 @@ export interface GetCategoryRequestTO {
 }
 
 export interface GetCategoryResponseTO {
-  category: FriendCategoryTO | null;
+  category: FriendCategoryTO;
 }
 
 export interface GetConversationAvatarRequestTO {
-  avatar_hash: string | null;
-  thread_key: string | null;
+  avatar_hash: string;
+  thread_key: string;
 }
 
 export interface GetConversationAvatarResponseTO {
-  avatar: string | null;
+  avatar: string;
 }
 
 export interface GetConversationMemberMatchesRequestTO {
-  parent_message_key: string | null;
+  parent_message_key: string;
 }
 
 export interface GetConversationMemberMatchesResponseTO {
@@ -1062,7 +971,7 @@ export interface GetConversationMemberMatchesResponseTO {
 
 export interface GetConversationMembersRequestTO {
   cursor: string | null;
-  parent_message_key: string | null;
+  parent_message_key: string;
   search_string: string | null;
 }
 
@@ -1081,11 +990,11 @@ export interface GetConversationResponseTO {
 }
 
 export interface GetConversationStatisticsRequestTO {
-  parent_message_key: string | null;
+  parent_message_key: string;
 }
 
 export interface GetConversationStatisticsResponseTO {
-  members: ChatMemberStatisticsTO | null;
+  members: ChatMemberStatisticsTO;
   permission: string | null;
 }
 
@@ -1095,7 +1004,7 @@ export interface GetEmbeddedAppRequestTO {
 
 export interface GetEmbeddedAppResponseTO {
   description: string | null;
-  name: string | null;
+  name: string;
   serving_url: string | null;
   title: string | null;
   types: string[];
@@ -1104,7 +1013,6 @@ export interface GetEmbeddedAppResponseTO {
 }
 
 export interface GetEmbeddedAppsRequestTO {
-  type: string | null;
 }
 
 export interface GetEmbeddedAppsResponseTO {
@@ -1152,12 +1060,12 @@ export interface GetFriendResponseTO {
 }
 
 export interface GetGroupAvatarRequestTO {
-  avatar_hash: string | null;
+  avatar_hash: string;
   size: number;
 }
 
 export interface GetGroupAvatarResponseTO {
-  avatar: string | null;
+  avatar: string;
 }
 
 export interface GetGroupsRequestTO {
@@ -1188,7 +1096,7 @@ export interface GetIdentityRequestTO {
 }
 
 export interface GetIdentityResponseTO {
-  identity: IdentityTO | null;
+  identity: IdentityTO;
   shortUrl: string | null;
 }
 
@@ -1230,7 +1138,7 @@ export interface GetJobsRequestTO {
 }
 
 export interface GetJobsResponseTO {
-  info: JobsInfoTO | null;
+  info: JobsInfoTO;
   items: JobOfferTO[];
   cursor: string | null;
   has_more: boolean;
@@ -1239,7 +1147,7 @@ export interface GetJobsResponseTO {
 
 export interface GetMapItemDetailsRequestTO {
   ids: string[];
-  tag: string | null;
+  tag: string;
 }
 
 export interface GetMapItemDetailsResponseTO {
@@ -1247,12 +1155,12 @@ export interface GetMapItemDetailsResponseTO {
 }
 
 export interface GetMapItemsRequestTO {
-  coords: GeoPointTO | null;
+  coords: GeoPointTO;
   search: MapSearchTO | null;
   cursor: string | null;
   distance: number;
   filter: string | null;
-  tag: string | null;
+  tag: string;
 }
 
 export interface GetMapItemsResponseTO {
@@ -1263,16 +1171,16 @@ export interface GetMapItemsResponseTO {
 }
 
 export interface GetMapRequestTO {
-  tag: string | null;
+  tag: string;
 }
 
 export interface GetMapResponseTO {
   action_chips: MapActionChipTO[];
   addresses: ProfileAddressTO[];
   announcement: MapAnnouncementTO | null;
-  base_urls: MapBaseUrlsTO | null;
+  base_urls: MapBaseUrlsTO;
   buttons: MapButtonTO[];
-  defaults: MapDefaultsTO | null;
+  defaults: MapDefaultsTO;
   filters: MapFilterTO[];
   notifications: MapNotificationsTO | null;
   empty_text: string | null;
@@ -1281,11 +1189,11 @@ export interface GetMapResponseTO {
 }
 
 export interface GetMapSearchSuggestionsRequestTO {
-  coords: GeoPointTO | null;
+  coords: GeoPointTO;
   search: MapSearchTO | null;
   distance: number;
   filter: string | null;
-  tag: string | null;
+  tag: string;
 }
 
 export interface GetMapSearchSuggestionsResponseTO {
@@ -1308,7 +1216,7 @@ export interface GetNewsGroupRequestTO {
 }
 
 export interface GetNewsGroupResponseTO {
-  group: NewsGroupTO | null;
+  group: NewsGroupTO;
 }
 
 export interface GetNewsGroupServicesRequestTO {
@@ -1347,7 +1255,7 @@ export interface GetNewsStreamFilterTO {
 }
 
 export interface GetNewsStreamItemsRequestTO {
-  filter: GetNewsStreamFilterTO | null;
+  filter: GetNewsStreamFilterTO;
   cursor: string | null;
   news_ids: number[];
 }
@@ -1356,63 +1264,6 @@ export interface GetNewsStreamItemsResponseTO {
   items: NewsStreamItemTO[];
   cursor: string | null;
   group_id: string | null;
-}
-
-export interface GetPaymentAssetsRequestTO {
-  provider_id: string | null;
-}
-
-export interface GetPaymentAssetsResponseTO {
-  assets: PaymentProviderAssetTO[];
-}
-
-export interface GetPaymentMethodsRequestTO {
-  base_method: BasePaymentMethod | null;
-  methods: PaymentMethodTO[];
-  service: string | null;
-  test_mode: boolean;
-}
-
-export interface GetPaymentMethodsResponseTO {
-  methods: PaymentProviderMethodsTO[];
-}
-
-export interface GetPaymentProfileRequestTO {
-  provider_id: string | null;
-}
-
-export interface GetPaymentProfileResponseTO {
-  first_name: string | null;
-  last_name: string | null;
-}
-
-export interface GetPaymentProvidersRequestTO {
-}
-
-export interface GetPaymentProvidersResponseTO {
-  payment_providers: AppPaymentProviderTO[];
-}
-
-export interface GetPaymentTransactionsRequestTO {
-  asset_id: string | null;
-  cursor: string | null;
-  provider_id: string | null;
-  type: string | null;
-}
-
-export interface GetPaymentTransactionsResponseTO {
-  transactions: PaymentProviderTransactionTO[];
-  cursor: string | null;
-}
-
-export interface GetPendingPaymentDetailsRequestTO {
-  transaction_id: string | null;
-}
-
-export interface GetPendingPaymentDetailsResponseTO {
-  error: ErrorPaymentTO | null;
-  result: PendingPaymentDetailsTO | null;
-  success: boolean;
 }
 
 export interface GetProfileAddressesRequestTO {
@@ -1431,7 +1282,7 @@ export interface GetProfilePhoneNumbersResponseTO {
 
 export interface GetSavedMapItemsRequestTO {
   cursor: string | null;
-  tag: string | null;
+  tag: string;
 }
 
 export interface GetSavedMapItemsResponseTO {
@@ -1473,18 +1324,6 @@ export interface GetStaticFlowResponseTO {
   staticFlow: string | null;
 }
 
-export interface GetTargetInfoRequestTO {
-  currency: string | null;
-  provider_id: string | null;
-  target: string | null;
-}
-
-export interface GetTargetInfoResponseTO {
-  error: ErrorPaymentTO | null;
-  result: TargetInfoTO | null;
-  success: boolean;
-}
-
 export interface GetUserInfoRequestTO {
   allow_cross_app: boolean;
   code: string | null;
@@ -1514,9 +1353,9 @@ export interface GetUserLinkResponseTO {
 
 export interface GroupTO {
   avatar_hash: string | null;
-  guid: string | null;
+  guid: string;
   members: string[];
-  name: string | null;
+  name: string;
 }
 
 export interface HeartBeatRequestTO {
@@ -1550,8 +1389,8 @@ export interface HeartBeatResponseTO {
 }
 
 export interface HomeScreenTO {
-  id: string | null;
-  name: string | null;
+  id: string;
+  name: string;
 }
 
 export interface IdentityTO {
@@ -1574,7 +1413,7 @@ export interface IdentityTO {
 }
 
 export interface IdentityUpdateRequestTO {
-  identity: IdentityTO | null;
+  identity: IdentityTO;
 }
 
 export interface IdentityUpdateResponseTO {
@@ -1595,8 +1434,8 @@ export interface InviteFriendResponseTO {
 }
 
 export interface JSEmbeddingItemTO {
-  hash: string | null;
-  name: string | null;
+  hash: string;
+  name: string;
 }
 
 export interface JobChatAnonymousTO {
@@ -1624,8 +1463,8 @@ export interface JobCriteriaNotificationsTO {
 
 export interface JobKeyLabelTO {
   enabled: boolean;
-  key: string | null;
-  label: string | null;
+  key: string;
+  label: string;
 }
 
 export interface JobOfferChatActionTO {
@@ -1658,14 +1497,14 @@ export interface JobOfferLocationTO {
 }
 
 export interface JobOfferOpenActionTO {
-  action: string | null;
+  action: string;
   icon: string | null;
   label: string | null;
   readonly type: JobOfferActionType.OPEN;
 }
 
 export interface JobOfferProviderTO {
-  image_url: string | null;
+  image_url: string;
 }
 
 export interface JobOfferSourceTO {
@@ -1677,11 +1516,11 @@ export interface JobOfferSourceTO {
 
 export interface JobOfferTO {
   actions: JobOfferActionTO[];
-  contract: JobOfferContractTO | null;
-  employer: JobOfferEmployerTO | null;
-  function: JobOfferFunctionTO | null;
-  location: JobOfferLocationTO | null;
-  source: JobOfferSourceTO | null;
+  contract: JobOfferContractTO;
+  employer: JobOfferEmployerTO;
+  function: JobOfferFunctionTO;
+  location: JobOfferLocationTO;
+  source: JobOfferSourceTO;
   details: string | null;
   job_id: number;
   timestamp: number;
@@ -1709,7 +1548,7 @@ export interface LatLonTO {
 }
 
 export interface LineStringGeometryTO {
-  line: CoordsListTO | null;
+  line: CoordsListTO;
   color: string | null;
   readonly type: MapGeometryType.LINE_STRING;
 }
@@ -1718,7 +1557,7 @@ export interface LinkListSectionItemTO {
   external: boolean;
   request_user_link: boolean;
   style: number;
-  url: string | null;
+  url: string;
   icon: string | null;
   icon_color: string | null;
   title: string | null;
@@ -1732,7 +1571,7 @@ export interface ListSectionTO {
 }
 
 export interface ListStreetsRequestTO {
-  zip_code: string | null;
+  zip_code: string;
 }
 
 export interface ListStreetsResponseTO {
@@ -1749,7 +1588,7 @@ export interface ListZipCodesResponseTO {
 export interface LocationComponentTO {
   validators: FormValidatorTO[];
   description: string | null;
-  id: string | null;
+  id: string;
   sensitive: boolean;
   title: string | null;
   readonly type: FormComponentType.LOCATION;
@@ -1781,18 +1620,6 @@ export interface LockMessageResponseTO {
   members: MemberStatusTO[];
 }
 
-export interface LogErrorRequestTO {
-  description: string | null;
-  errorMessage: string | null;
-  mobicageVersion: string | null;
-  platform: number;
-  platformVersion: string | null;
-  timestamp: number;
-}
-
-export interface LogErrorResponseTO {
-}
-
 export interface LogInvitationSecretSentRequestTO {
   phone_number: string | null;
   secret: string | null;
@@ -1812,7 +1639,7 @@ export interface MapBaseUrlsTO {
 }
 
 export interface MapButtonTO {
-  action: string | null;
+  action: string;
   color: string | null;
   icon: string | null;
   service: string | null;
@@ -1820,7 +1647,7 @@ export interface MapButtonTO {
 }
 
 export interface MapDefaultsTO {
-  coords: GeoPointTO | null;
+  coords: GeoPointTO;
   distance: number;
   filter: string | null;
   max_distance: number;
@@ -1832,14 +1659,14 @@ export interface MapFilterTO {
 }
 
 export interface MapIconTO {
-  color: string | null;
-  id: string | null;
+  color: string;
+  id: string;
 }
 
 export interface MapItemDetailsTO {
   geometry: MapGeometryTO[];
   sections: MapSectionTO[];
-  id: string | null;
+  id: string;
 }
 
 export interface MapItemLineTextPartTO {
@@ -1853,12 +1680,12 @@ export interface MapItemLineTextTO {
 }
 
 export interface MapItemTO {
-  coords: GeoPointTO | null;
-  icon: MapIconTO | null;
+  coords: GeoPointTO;
+  icon: MapIconTO;
   lines: MapItemLineTO[];
   description: string | null;
-  id: string | null;
-  title: string | null;
+  id: string;
+  title: string;
 }
 
 export interface MapNotificationsTO {
@@ -1866,13 +1693,13 @@ export interface MapNotificationsTO {
 }
 
 export interface MapSearchSuggestionItemTO {
-  id: string | null;
-  text: string | null;
+  id: string;
+  text: string;
   readonly type: MapSearchSuggestionType.ITEM;
 }
 
 export interface MapSearchSuggestionKeywordTO {
-  text: string | null;
+  text: string;
   readonly type: MapSearchSuggestionType.KEYWORD;
 }
 
@@ -1883,8 +1710,8 @@ export interface MapSearchTO {
 export interface MapVoteOptionTO {
   color: string | null;
   count: number;
-  icon: string | null;
-  id: string | null;
+  icon: string;
+  id: string;
   selected: boolean;
   title: string | null;
 }
@@ -1921,15 +1748,15 @@ export interface MaxValidatorTO {
 
 export interface MediaSectionTO {
   items: BaseMediaTO[];
-  ratio: SizeTO | null;
+  ratio: SizeTO;
   readonly type: MapSectionType.MEDIA;
 }
 
 export interface MediaTO {
-  content: string | null;
+  content: string;
   height: number;
   thumbnail_url: string | null;
-  type: string | null;
+  type: string;
   width: number;
 }
 
@@ -1937,7 +1764,7 @@ export interface MemberStatusTO {
   acked_timestamp: number;
   button_id: string | null;
   custom_reply: string | null;
-  member: string | null;
+  member: string;
   received_timestamp: number;
   status: number;
 }
@@ -1947,8 +1774,8 @@ export interface MemberStatusUpdateRequestTO {
   button_id: string | null;
   custom_reply: string | null;
   flags: number;
-  member: string | null;
-  message: string | null;
+  member: string;
+  message: string;
   parent_message: string | null;
   received_timestamp: number;
   status: number;
@@ -1990,7 +1817,7 @@ export interface MessageFlowFinishedResponseTO {
 }
 
 export interface MessageFlowMemberResultRequestTO {
-  run: JsMessageFlowMemberRunTO | null;
+  run: JsMessageFlowMemberRunTO;
   email_admins: boolean;
   emails: string[];
   end_id: string | null;
@@ -2017,7 +1844,7 @@ export interface MessageFlowStepTO {
 export interface MessageLockedRequestTO {
   members: MemberStatusTO[];
   dirty_behavior: number;
-  message_key: string | null;
+  message_key: string;
   parent_message_key: string | null;
 }
 
@@ -2036,11 +1863,11 @@ export interface MessageTO {
   default_sticky: boolean;
   dismiss_button_ui_flags: number;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -2089,7 +1916,7 @@ export interface MultiSelectComponentTO {
   choices: ValueTO[];
   validators: FormValidatorTO[];
   description: string | null;
-  id: string | null;
+  id: string;
   sensitive: boolean;
   title: string | null;
   readonly type: FormComponentType.MULTI_SELECT;
@@ -2103,20 +1930,20 @@ export interface MultiSelectComponentValueTO {
 
 export interface MultiSelectFormMessageTO {
   attachments: AttachmentTO[];
-  form: MultiSelectFormTO | null;
-  member: MemberStatusTO | null;
+  form: MultiSelectFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -2126,7 +1953,7 @@ export interface MultiSelectFormMessageTO {
 }
 
 export interface MultiSelectFormTO {
-  widget: MultiSelectTO | null;
+  widget: MultiSelectTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -2176,20 +2003,20 @@ export interface MyDigiPassEidProfile {
 
 export interface MyDigiPassFormMessageTO {
   attachments: AttachmentTO[];
-  form: MyDigiPassFormTO | null;
-  member: MemberStatusTO | null;
+  form: MyDigiPassFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -2199,7 +2026,7 @@ export interface MyDigiPassFormMessageTO {
 }
 
 export interface MyDigiPassFormTO {
-  widget: MyDigiPassTO | null;
+  widget: MyDigiPassTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -2234,7 +2061,7 @@ export interface MyDigiPassWidgetResultTO {
 }
 
 export interface NewAdvancedOrderFormRequestTO {
-  form_message: AdvancedOrderFormMessageTO | null;
+  form_message: AdvancedOrderFormMessageTO;
 }
 
 export interface NewAdvancedOrderFormResponseTO {
@@ -2242,7 +2069,7 @@ export interface NewAdvancedOrderFormResponseTO {
 }
 
 export interface NewAutoCompleteFormRequestTO {
-  form_message: AutoCompleteFormMessageTO | null;
+  form_message: AutoCompleteFormMessageTO;
 }
 
 export interface NewAutoCompleteFormResponseTO {
@@ -2250,7 +2077,7 @@ export interface NewAutoCompleteFormResponseTO {
 }
 
 export interface NewDateSelectFormRequestTO {
-  form_message: DateSelectFormMessageTO | null;
+  form_message: DateSelectFormMessageTO;
 }
 
 export interface NewDateSelectFormResponseTO {
@@ -2259,7 +2086,7 @@ export interface NewDateSelectFormResponseTO {
 
 export interface NewFlowMessageRequestTO {
   form_result: FormResult | null;
-  message: NewFlowMessageTO | null;
+  message: NewFlowMessageTO;
   message_flow_run_id: string | null;
   step_id: string | null;
 }
@@ -2268,7 +2095,7 @@ export interface NewFlowMessageResponseTO {
 }
 
 export interface NewFriendSelectFormRequestTO {
-  form_message: FriendSelectFormMessageTO | null;
+  form_message: FriendSelectFormMessageTO;
 }
 
 export interface NewFriendSelectFormResponseTO {
@@ -2276,7 +2103,7 @@ export interface NewFriendSelectFormResponseTO {
 }
 
 export interface NewGPSLocationFormRequestTO {
-  form_message: GPSLocationFormMessageTO | null;
+  form_message: GPSLocationFormMessageTO;
 }
 
 export interface NewGPSLocationFormResponseTO {
@@ -2292,7 +2119,7 @@ export interface NewJobsResponseTO {
 }
 
 export interface NewMessageRequestTO {
-  message: MessageTO | null;
+  message: MessageTO;
 }
 
 export interface NewMessageResponseTO {
@@ -2300,7 +2127,7 @@ export interface NewMessageResponseTO {
 }
 
 export interface NewMultiSelectFormRequestTO {
-  form_message: MultiSelectFormMessageTO | null;
+  form_message: MultiSelectFormMessageTO;
 }
 
 export interface NewMultiSelectFormResponseTO {
@@ -2308,7 +2135,7 @@ export interface NewMultiSelectFormResponseTO {
 }
 
 export interface NewMyDigiPassFormRequestTO {
-  form_message: MyDigiPassFormMessageTO | null;
+  form_message: MyDigiPassFormMessageTO;
 }
 
 export interface NewMyDigiPassFormResponseTO {
@@ -2316,7 +2143,7 @@ export interface NewMyDigiPassFormResponseTO {
 }
 
 export interface NewOauthFormRequestTO {
-  form_message: OauthFormMessageTO | null;
+  form_message: OauthFormMessageTO;
 }
 
 export interface NewOauthFormResponseTO {
@@ -2324,7 +2151,7 @@ export interface NewOauthFormResponseTO {
 }
 
 export interface NewOpenIdFormRequestTO {
-  form_message: OpenIdFormMessageTO | null;
+  form_message: OpenIdFormMessageTO;
 }
 
 export interface NewOpenIdFormResponseTO {
@@ -2332,7 +2159,7 @@ export interface NewOpenIdFormResponseTO {
 }
 
 export interface NewPayFormRequestTO {
-  form_message: PayFormMessageTO | null;
+  form_message: PayFormMessageTO;
 }
 
 export interface NewPayFormResponseTO {
@@ -2340,7 +2167,7 @@ export interface NewPayFormResponseTO {
 }
 
 export interface NewPhotoUploadFormRequestTO {
-  form_message: PhotoUploadFormMessageTO | null;
+  form_message: PhotoUploadFormMessageTO;
 }
 
 export interface NewPhotoUploadFormResponseTO {
@@ -2348,7 +2175,7 @@ export interface NewPhotoUploadFormResponseTO {
 }
 
 export interface NewRangeSliderFormRequestTO {
-  form_message: RangeSliderFormMessageTO | null;
+  form_message: RangeSliderFormMessageTO;
 }
 
 export interface NewRangeSliderFormResponseTO {
@@ -2356,7 +2183,7 @@ export interface NewRangeSliderFormResponseTO {
 }
 
 export interface NewSignFormRequestTO {
-  form_message: SignFormMessageTO | null;
+  form_message: SignFormMessageTO;
 }
 
 export interface NewSignFormResponseTO {
@@ -2364,7 +2191,7 @@ export interface NewSignFormResponseTO {
 }
 
 export interface NewSingleSelectFormRequestTO {
-  form_message: SingleSelectFormMessageTO | null;
+  form_message: SingleSelectFormMessageTO;
 }
 
 export interface NewSingleSelectFormResponseTO {
@@ -2372,7 +2199,7 @@ export interface NewSingleSelectFormResponseTO {
 }
 
 export interface NewSingleSliderFormRequestTO {
-  form_message: SingleSliderFormMessageTO | null;
+  form_message: SingleSliderFormMessageTO;
 }
 
 export interface NewSingleSliderFormResponseTO {
@@ -2380,7 +2207,7 @@ export interface NewSingleSliderFormResponseTO {
 }
 
 export interface NewTextBlockFormRequestTO {
-  form_message: TextBlockFormMessageTO | null;
+  form_message: TextBlockFormMessageTO;
 }
 
 export interface NewTextBlockFormResponseTO {
@@ -2388,7 +2215,7 @@ export interface NewTextBlockFormResponseTO {
 }
 
 export interface NewTextLineFormRequestTO {
-  form_message: TextLineFormMessageTO | null;
+  form_message: TextLineFormMessageTO;
 }
 
 export interface NewTextLineFormResponseTO {
@@ -2415,10 +2242,10 @@ export interface NewsGroupRowTO {
 }
 
 export interface NewsGroupSectionTO {
-  filter: GetNewsStreamFilterTO | null;
+  filter: GetNewsStreamFilterTO;
   items: NewsStreamItemTO[];
   group_id: string | null;
-  placeholder_image: string | null;
+  placeholder_image: string;
   readonly type: MapSectionType.NEWS_GROUP;
 }
 
@@ -2427,41 +2254,41 @@ export interface NewsGroupTO {
   layout: NewsGroupLayoutTO | null;
   services: NewsSenderTO[];
   tabs: NewsGroupTabInfoTO[];
-  key: string | null;
+  key: string;
   name: string | null;
 }
 
 export interface NewsGroupTabInfoTO {
-  key: string | null;
+  key: string;
   name: string | null;
   notifications: number;
 }
 
 export interface NewsItemSectionTO {
-  item: NewsStreamItemTO | null;
+  item: NewsStreamItemTO;
   group_id: string | null;
-  placeholder_image: string | null;
+  placeholder_image: string;
   readonly type: MapSectionType.NEWS_ITEM;
 }
 
 export interface NewsSectionTO {
-  filter: GetNewsStreamFilterTO | null;
+  filter: GetNewsStreamFilterTO;
   limit: number;
-  placeholder_image: string | null;
+  placeholder_image: string;
   readonly type: MapSectionType.NEWS;
 }
 
 export interface NewsSenderTO {
   avatar_id: number;
-  avatar_url: string | null;
-  email: string | null;
-  name: string | null;
+  avatar_url: string;
+  email: string;
+  name: string;
 }
 
 export interface NewsStreamItemTO {
   buttons: NewsActionButtonTO[];
   media: MediaTO | null;
-  sender: NewsSenderTO | null;
+  sender: NewsSenderTO;
   actions: number;
   blocked: boolean;
   disabled: boolean;
@@ -2492,26 +2319,26 @@ export interface NextActionSubmitTO {
 }
 
 export interface NextActionURLTO {
-  url: string | null;
+  url: string;
   readonly type: NextActionType.URL;
 }
 
 export interface OauthFormMessageTO {
   attachments: AttachmentTO[];
-  form: OauthFormTO | null;
-  member: MemberStatusTO | null;
+  form: OauthFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -2521,7 +2348,7 @@ export interface OauthFormMessageTO {
 }
 
 export interface OauthFormTO {
-  widget: OauthTO | null;
+  widget: OauthTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -2547,20 +2374,20 @@ export interface OpenIdAddressTO {
 
 export interface OpenIdFormMessageTO {
   attachments: AttachmentTO[];
-  form: OpenIdFormTO | null;
-  member: MemberStatusTO | null;
+  form: OpenIdFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -2570,7 +2397,7 @@ export interface OpenIdFormMessageTO {
 }
 
 export interface OpenIdFormTO {
-  widget: OpenIdTO | null;
+  widget: OpenIdTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -2604,17 +2431,17 @@ export interface OpeningHourExceptionTO {
   periods: OpeningPeriodTO[];
   description: string | null;
   description_color: string | null;
-  end_date: string | null;
-  start_date: string | null;
+  end_date: string;
+  start_date: string;
 }
 
 export interface OpeningHourTO {
   day: number;
-  time: string | null;
+  time: string;
 }
 
 export interface OpeningHoursListSectionItemTO {
-  opening_hours: OpeningInfoTO | null;
+  opening_hours: OpeningInfoTO;
   icon: string | null;
   icon_color: string | null;
   title: string | null;
@@ -2622,8 +2449,8 @@ export interface OpeningHoursListSectionItemTO {
 }
 
 export interface OpeningHoursSectionItemTO {
-  opening_hours: OpeningHoursTO | null;
-  timezone: string | null;
+  opening_hours: OpeningHoursTO;
+  timezone: string;
   icon: string | null;
   icon_color: string | null;
   title: string | null;
@@ -2651,7 +2478,7 @@ export interface OpeningInfoTO {
 
 export interface OpeningPeriodTO {
   close: OpeningHourTO | null;
-  open: OpeningHourTO | null;
+  open: OpeningHourTO;
   description: string | null;
   description_color: string | null;
 }
@@ -2664,20 +2491,20 @@ export interface ParagraphComponentTO {
 
 export interface PayFormMessageTO {
   attachments: AttachmentTO[];
-  form: PayFormTO | null;
-  member: MemberStatusTO | null;
+  form: PayFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -2687,7 +2514,7 @@ export interface PayFormMessageTO {
 }
 
 export interface PayFormTO {
-  widget: PayTO | null;
+  widget: PayTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -2696,13 +2523,6 @@ export interface PayFormTO {
   positive_button_ui_flags: number;
   positive_confirmation: string | null;
   type: string | null;
-}
-
-export interface PayMethodTO {
-  amount: number;
-  currency: string | null;
-  precision: number;
-  target: string | null;
 }
 
 export interface PayTO {
@@ -2721,18 +2541,6 @@ export interface PayWidgetResultTO {
   transaction_id: string | null;
 }
 
-export interface PaymentAssetBalanceTO {
-  amount: number;
-  description: string | null;
-  precision: number;
-}
-
-export interface PaymentAssetRequiredActionTO {
-  action: string | null;
-  data: string | null;
-  description: string | null;
-}
-
 export interface PaymentMethod {
   amount: number;
   calculate_amount: boolean;
@@ -2742,84 +2550,22 @@ export interface PaymentMethod {
   target: string | null;
 }
 
-export interface PaymentMethodTO {
-  amount: number;
-  calculate_amount: boolean;
-  currency: string | null;
-  precision: number;
-  provider_id: string | null;
-  target: string | null;
-}
-
-export interface PaymentProviderAssetTO {
-  available_balance: PaymentAssetBalanceTO | null;
-  required_action: PaymentAssetRequiredActionTO | null;
-  total_balance: PaymentAssetBalanceTO | null;
-  currency: string | null;
-  enabled: boolean;
-  has_balance: boolean;
-  has_transactions: boolean;
-  id: string | null;
-  name: string | null;
-  provider_id: string | null;
-  type: string | null;
-  verified: boolean;
-}
-
-export interface PaymentProviderMethodsTO {
-  embedded_app: EmbeddedAppTO | null;
-  methods: PayMethodTO[];
-  provider: AppPaymentProviderTO | null;
-}
-
-export interface PaymentProviderTransactionTO {
-  amount: number;
-  currency: string | null;
-  from_asset_id: string | null;
-  id: string | null;
-  memo: string | null;
-  name: string | null;
-  precision: number;
-  timestamp: number;
-  to_asset_id: string | null;
-  type: string | null;
-}
-
-export interface PendingPaymentDetailsTO {
-  assets: PaymentProviderAssetTO[];
-  provider: AppPaymentProviderTO | null;
-  receiver: UserDetailsTO | null;
-  receiver_asset: PaymentProviderAssetTO | null;
-  amount: number;
-  currency: string | null;
-  memo: string | null;
-  precision: number;
-  status: string | null;
-  timestamp: number;
-  transaction_id: string | null;
-}
-
-export interface PendingPaymentTO {
-  status: string | null;
-  transaction_id: string | null;
-}
-
 export interface PhotoUploadFormMessageTO {
   attachments: AttachmentTO[];
-  form: PhotoUploadFormTO | null;
-  member: MemberStatusTO | null;
+  form: PhotoUploadFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -2829,7 +2575,7 @@ export interface PhotoUploadFormMessageTO {
 }
 
 export interface PhotoUploadFormTO {
-  widget: PhotoUploadTO | null;
+  widget: PhotoUploadTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -2892,7 +2638,7 @@ export interface PressMenuIconResponseTO {
 }
 
 export interface ProfileAddressTO {
-  geo_location: GeoPointTO | null;
+  geo_location: GeoPointTO;
   bus_nr: string | null;
   city: string | null;
   distance: number;
@@ -2900,15 +2646,15 @@ export interface ProfileAddressTO {
   label: string | null;
   street_name: string | null;
   type: number;
-  uid: string | null;
+  uid: string;
   zip_code: string | null;
 }
 
 export interface ProfilePhoneNumberTO {
   label: string | null;
-  number: string | null;
+  number: string;
   type: number;
-  uid: string | null;
+  uid: string;
 }
 
 export interface PublicKeyTO {
@@ -2924,7 +2670,7 @@ export interface PushNotificationSettingsTO {
 
 export interface PutGroupRequestTO {
   avatar: string | null;
-  guid: string | null;
+  guid: string;
   members: string[];
   name: string | null;
 }
@@ -2935,20 +2681,20 @@ export interface PutGroupResponseTO {
 
 export interface RangeSliderFormMessageTO {
   attachments: AttachmentTO[];
-  form: RangeSliderFormTO | null;
-  member: MemberStatusTO | null;
+  form: RangeSliderFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -2958,7 +2704,7 @@ export interface RangeSliderFormMessageTO {
 }
 
 export interface RangeSliderFormTO {
-  widget: RangeSliderTO | null;
+  widget: RangeSliderTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -2986,20 +2732,6 @@ export interface ReceiveApiCallResultRequestTO {
 }
 
 export interface ReceiveApiCallResultResponseTO {
-}
-
-export interface ReceivePaymentRequestTO {
-  amount: number;
-  asset_id: string | null;
-  memo: string | null;
-  precision: number;
-  provider_id: string | null;
-}
-
-export interface ReceivePaymentResponseTO {
-  error: ErrorPaymentTO | null;
-  result: PendingPaymentTO | null;
-  success: boolean;
 }
 
 export interface RegexValidatorTO {
@@ -3033,33 +2765,33 @@ export interface SaveJobsCriteriaResponseTO {
 }
 
 export interface SaveJobsCriteriaTO {
-  location: JobCriteriaLocationTO | null;
-  notifications: JobCriteriaNotificationsTO | null;
+  location: JobCriteriaLocationTO;
+  notifications: JobCriteriaNotificationsTO;
   contract_types: string[];
   job_domains: string[];
   keywords: string[];
 }
 
 export interface SaveMapItemVoteRequestTO {
-  item_id: string | null;
-  option_id: string | null;
-  tag: string | null;
-  vote_id: string | null;
+  item_id: string;
+  option_id: string;
+  tag: string;
+  vote_id: string;
 }
 
 export interface SaveMapItemVoteResponseTO {
   options: MapVoteOptionTO[];
-  item_id: string | null;
-  vote_id: string | null;
+  item_id: string;
+  vote_id: string;
 }
 
 export interface SaveMapNotificationsRequestTO {
-  notifications: MapNotificationsTO | null;
-  tag: string | null;
+  notifications: MapNotificationsTO;
+  tag: string;
 }
 
 export interface SaveMapNotificationsResponseTO {
-  notifications: MapNotificationsTO | null;
+  notifications: MapNotificationsTO;
   message: string | null;
 }
 
@@ -3088,7 +2820,7 @@ export interface SaveSettingsRequest {
 }
 
 export interface SaveSettingsResponse {
-  settings: SettingsTO | null;
+  settings: SettingsTO;
 }
 
 export interface SearchSuggestionTO {
@@ -3105,9 +2837,9 @@ export interface SendApiCallCallbackResultTO {
 export interface SendApiCallRequestTO {
   hashed_tag: string | null;
   id: number;
-  method: string | null;
+  method: string;
   params: string | null;
-  service: string | null;
+  service: string;
   synchronous: boolean;
 }
 
@@ -3120,7 +2852,7 @@ export interface SendMessageRequestTO {
   buttons: ButtonTO[];
   embedded_app: MessageEmbeddedAppTO | null;
   flags: number;
-  key: string | null;
+  key: string;
   members: string[];
   message: string | null;
   parent_key: string | null;
@@ -3177,18 +2909,11 @@ export interface ServiceMenuTO {
 }
 
 export interface SetHomeScreenRequestTO {
-  id: string | null;
+  id: string;
 }
 
 export interface SetHomeScreenResponseTO {
-  id: string | null;
-}
-
-export interface SetMobilePhoneNumberRequestTO {
-  phoneNumber: string | null;
-}
-
-export interface SetMobilePhoneNumberResponseTO {
+  id: string;
 }
 
 export interface SettingsTO {
@@ -3221,20 +2946,20 @@ export interface ShareServiceResponseTO {
 
 export interface SignFormMessageTO {
   attachments: AttachmentTO[];
-  form: SignFormTO | null;
-  member: MemberStatusTO | null;
+  form: SignFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -3244,7 +2969,7 @@ export interface SignFormMessageTO {
 }
 
 export interface SignFormTO {
-  widget: SignTO | null;
+  widget: SignTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -3264,7 +2989,7 @@ export interface SignTO {
 }
 
 export interface SignWidgetResultTO {
-  public_key: PublicKeyTO | null;
+  public_key: PublicKeyTO;
   payload_signature: string | null;
   total_signature: string | null;
 }
@@ -3273,7 +2998,7 @@ export interface SingleSelectComponentTO {
   choices: ValueTO[];
   validators: FormValidatorTO[];
   description: string | null;
-  id: string | null;
+  id: string;
   sensitive: boolean;
   title: string | null;
   readonly type: FormComponentType.SINGLE_SELECT;
@@ -3287,20 +3012,20 @@ export interface SingleSelectComponentValueTO {
 
 export interface SingleSelectFormMessageTO {
   attachments: AttachmentTO[];
-  form: SingleSelectFormTO | null;
-  member: MemberStatusTO | null;
+  form: SingleSelectFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -3310,7 +3035,7 @@ export interface SingleSelectFormMessageTO {
 }
 
 export interface SingleSelectFormTO {
-  widget: SingleSelectTO | null;
+  widget: SingleSelectTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -3328,20 +3053,20 @@ export interface SingleSelectTO {
 
 export interface SingleSliderFormMessageTO {
   attachments: AttachmentTO[];
-  form: SingleSliderFormTO | null;
-  member: MemberStatusTO | null;
+  form: SingleSliderFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -3351,7 +3076,7 @@ export interface SingleSliderFormMessageTO {
 }
 
 export interface SingleSliderFormTO {
-  widget: SingleSliderTO | null;
+  widget: SingleSliderTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -3379,7 +3104,7 @@ export interface SizeTO {
 export interface StartChatRequestTO {
   avatar: string | null;
   emails: string[];
-  key: string | null;
+  key: string;
   topic: string | null;
 }
 
@@ -3394,9 +3119,9 @@ export interface StartFlowRequestTO {
   flow_params: string | null;
   message_flow_run_id: string | null;
   parent_message_key: string | null;
-  service: string | null;
-  static_flow: string | null;
-  static_flow_hash: string | null;
+  service: string;
+  static_flow: string;
+  static_flow_hash: string;
 }
 
 export interface StartFlowResponseTO {
@@ -3634,16 +3359,6 @@ export interface SubmitTextLineFormResponseTO {
   result: number;
 }
 
-export interface TargetInfoAssetTO {
-  id: string | null;
-  type: string | null;
-}
-
-export interface TargetInfoTO {
-  assets: TargetInfoAssetTO[];
-  name: string | null;
-}
-
 export interface TestFormRequestTO {
   id: number;
   version: number;
@@ -3660,20 +3375,20 @@ export interface TextAnnouncementTO {
 
 export interface TextBlockFormMessageTO {
   attachments: AttachmentTO[];
-  form: TextBlockFormTO | null;
-  member: MemberStatusTO | null;
+  form: TextBlockFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -3683,7 +3398,7 @@ export interface TextBlockFormMessageTO {
 }
 
 export interface TextBlockFormTO {
-  widget: TextBlockTO | null;
+  widget: TextBlockTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -3704,7 +3419,7 @@ export interface TextBlockTO {
 export interface TextInputComponentTO {
   validators: FormValidatorTO[];
   description: string | null;
-  id: string | null;
+  id: string;
   keyboard_type: string | null;
   multiline: boolean;
   placeholder: string | null;
@@ -3721,20 +3436,20 @@ export interface TextInputComponentValueTO {
 
 export interface TextLineFormMessageTO {
   attachments: AttachmentTO[];
-  form: TextLineFormTO | null;
-  member: MemberStatusTO | null;
+  form: TextLineFormTO;
+  member: MemberStatusTO;
   alert_flags: number;
   branding: string | null;
   context: string | null;
   default_priority: number;
   default_sticky: boolean;
   flags: number;
-  key: string | null;
+  key: string;
   message: string | null;
   message_type: number;
   parent_key: string | null;
   priority: number;
-  sender: string | null;
+  sender: string;
   threadTimestamp: number;
   thread_avatar_hash: string | null;
   thread_background_color: string | null;
@@ -3744,7 +3459,7 @@ export interface TextLineFormMessageTO {
 }
 
 export interface TextLineFormTO {
-  widget: TextLineTO | null;
+  widget: TextLineTO;
   javascript_validation: string | null;
   negative_button: string | null;
   negative_button_ui_flags: number;
@@ -3776,8 +3491,8 @@ export interface Thumbnail {
 
 export interface ToggleListSectionItemTO {
   filled: boolean;
-  id: string | null;
-  state: string | null;
+  id: string;
+  state: string;
   icon: string | null;
   icon_color: string | null;
   title: string | null;
@@ -3785,21 +3500,21 @@ export interface ToggleListSectionItemTO {
 }
 
 export interface ToggleMapItemRequestTO {
-  item_id: string | null;
-  state: string | null;
-  tag: string | null;
-  toggle_id: string | null;
+  item_id: string;
+  state: string;
+  tag: string;
+  toggle_id: string;
 }
 
 export interface ToggleMapItemResponseTO {
-  toggle_item: ToggleListSectionItemTO | null;
+  toggle_item: ToggleListSectionItemTO;
   item_id: string | null;
 }
 
 export interface TransferCompletedRequestTO {
-  message_key: string | null;
+  message_key: string;
   parent_message_key: string | null;
-  result_url: string | null;
+  result_url: string;
 }
 
 export interface TransferCompletedResponseTO {
@@ -3834,9 +3549,9 @@ export interface UpdateAdvancedOrderFormResponseTO {
 }
 
 export interface UpdateAppAssetRequestTO {
-  kind: string | null;
+  kind: string;
   scale_x: number;
-  url: string | null;
+  url: string;
 }
 
 export interface UpdateAppAssetResponseTO {
@@ -3873,7 +3588,7 @@ export interface UpdateBadgeCountResponseTO {
 
 export interface UpdateChatRequestTO {
   avatar: string | null;
-  parent_message_key: string | null;
+  parent_message_key: string;
   topic: string | null;
 }
 
@@ -3895,7 +3610,7 @@ export interface UpdateDateSelectFormResponseTO {
 
 export interface UpdateEmbeddedAppRequestTO {
   description: string | null;
-  name: string | null;
+  name: string;
   serving_url: string | null;
   title: string | null;
   types: string[];
@@ -3914,7 +3629,7 @@ export interface UpdateEmbeddedAppsResponseTO {
 }
 
 export interface UpdateFriendRequestTO {
-  friend: FriendTO | null;
+  friend: FriendTO;
   generation: number;
   status: number;
 }
@@ -3975,13 +3690,13 @@ export interface UpdateJSEmbeddingResponseTO {
 }
 
 export interface UpdateMessageEmbeddedAppRequestTO {
-  embedded_app: MessageEmbeddedAppTO | null;
+  embedded_app: MessageEmbeddedAppTO;
   message_key: string | null;
   parent_message_key: string | null;
 }
 
 export interface UpdateMessageEmbeddedAppResponseTO {
-  embedded_app: MessageEmbeddedAppTO | null;
+  embedded_app: MessageEmbeddedAppTO;
   message_key: string | null;
   parent_message_key: string | null;
 }
@@ -4069,68 +3784,6 @@ export interface UpdatePayFormRequestTO {
 export interface UpdatePayFormResponseTO {
 }
 
-export interface UpdatePaymentAssetRequestTO {
-  available_balance: PaymentAssetBalanceTO | null;
-  required_action: PaymentAssetRequiredActionTO | null;
-  total_balance: PaymentAssetBalanceTO | null;
-  currency: string | null;
-  enabled: boolean;
-  has_balance: boolean;
-  has_transactions: boolean;
-  id: string | null;
-  name: string | null;
-  provider_id: string | null;
-  type: string | null;
-  verified: boolean;
-}
-
-export interface UpdatePaymentAssetResponseTO {
-}
-
-export interface UpdatePaymentAssetsRequestTO {
-  assets: PaymentProviderAssetTO[];
-  provider_ids: string[];
-}
-
-export interface UpdatePaymentAssetsResponseTO {
-}
-
-export interface UpdatePaymentProviderRequestTO {
-  asset_types: string[];
-  background_color: string | null;
-  black_white_logo: string | null;
-  button_color: string | null;
-  currencies: string[];
-  description: string | null;
-  embedded_app_id: string | null;
-  enabled: boolean;
-  id: string | null;
-  logo_url: string | null;
-  name: string | null;
-  oauth_authorize_url: string | null;
-  text_color: string | null;
-  version: number;
-}
-
-export interface UpdatePaymentProviderResponseTO {
-}
-
-export interface UpdatePaymentProvidersRequestTO {
-  payment_providers: AppPaymentProviderTO[];
-  provider_ids: string[];
-}
-
-export interface UpdatePaymentProvidersResponseTO {
-}
-
-export interface UpdatePaymentStatusRequestTO {
-  status: string | null;
-  transaction_id: string | null;
-}
-
-export interface UpdatePaymentStatusResponseTO {
-}
-
 export interface UpdatePhotoUploadFormRequestTO {
   result: UnicodeWidgetResultTO | null;
   acked_timestamp: number;
@@ -4145,7 +3798,7 @@ export interface UpdatePhotoUploadFormResponseTO {
 }
 
 export interface UpdateProfileAddressRequestTO {
-  geo_location: GeoPointTO | null;
+  geo_location: GeoPointTO;
   bus_nr: string | null;
   city: string | null;
   distance: number;
@@ -4153,12 +3806,12 @@ export interface UpdateProfileAddressRequestTO {
   label: string | null;
   street_name: string | null;
   type: number;
-  uid: string | null;
+  uid: string;
   zip_code: string | null;
 }
 
 export interface UpdateProfileAddressResponseTO {
-  geo_location: GeoPointTO | null;
+  geo_location: GeoPointTO;
   bus_nr: string | null;
   city: string | null;
   distance: number;
@@ -4166,22 +3819,22 @@ export interface UpdateProfileAddressResponseTO {
   label: string | null;
   street_name: string | null;
   type: number;
-  uid: string | null;
+  uid: string;
   zip_code: string | null;
 }
 
 export interface UpdateProfilePhoneNumberRequestTO {
   label: string | null;
-  number: string | null;
+  number: string;
   type: number;
-  uid: string | null;
+  uid: string;
 }
 
 export interface UpdateProfilePhoneNumberResponseTO {
   label: string | null;
-  number: string | null;
+  number: string;
   type: number;
-  uid: string | null;
+  uid: string;
 }
 
 export interface UpdateRangeSliderFormRequestTO {
@@ -4198,7 +3851,7 @@ export interface UpdateRangeSliderFormResponseTO {
 }
 
 export interface UpdateSettingsRequestTO {
-  settings: SettingsTO | null;
+  settings: SettingsTO;
 }
 
 export interface UpdateSettingsResponseTO {
@@ -4273,8 +3926,8 @@ export interface UpdateUserDataRequestTO {
   app_data: string | null;
   data: string | null;
   keys: string[];
-  service: string | null;
-  type: string | null;
+  service: string;
+  type: string;
   user_data: string | null;
   values: string[];
 }
@@ -4285,7 +3938,7 @@ export interface UpdateUserDataResponseTO {
 export interface UploadChunkRequestTO {
   chunk: string | null;
   content_type: string | null;
-  message_key: string | null;
+  message_key: string;
   number: number;
   parent_message_key: string | null;
   photo_hash: string | null;
@@ -4294,14 +3947,6 @@ export interface UploadChunkRequestTO {
 }
 
 export interface UploadChunkResponseTO {
-}
-
-export interface UserDetailsTO {
-  app_id: string | null;
-  avatar_url: string | null;
-  email: string | null;
-  language: string | null;
-  name: string | null;
 }
 
 export interface UserScannedRequestTO {
@@ -4317,29 +3962,18 @@ export interface ValueTO {
   next_action: NextActionTO | null;
   image_url: string | null;
   label: string | null;
-  value: string | null;
-}
-
-export interface VerifyPaymentAssetRequestTO {
-  asset_id: string | null;
-  code: string | null;
-  provider_id: string | null;
-}
-
-export interface VerifyPaymentAssetResponseTO {
-  error: ErrorPaymentTO | null;
-  success: boolean;
+  value: string;
 }
 
 export interface VoteSectionTO {
   options: MapVoteOptionTO[];
-  id: string | null;
+  id: string;
   readonly type: MapSectionType.VOTE;
 }
 
 export interface WeekDayTextTO {
   lines: MapItemLineTextPartTO[];
-  day: string | null;
+  day: string;
 }
 
 export interface Widget {
@@ -4349,6 +3983,6 @@ export interface WidgetResult {
 }
 
 export interface ZipCodeTO {
-  name: string | null;
-  zip_code: string | null;
+  name: string;
+  zip_code: string;
 }

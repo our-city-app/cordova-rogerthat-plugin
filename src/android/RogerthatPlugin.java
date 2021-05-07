@@ -410,12 +410,6 @@ public class RogerthatPlugin extends CordovaPlugin {
     }
 
     private void exitAppWithResult(final CallbackContext callbackContext, final JSONObject args) {
-        final String result = JsonUtils.optString(args, "result", null);
-        if (result != null) {
-            Intent resultIntent = new Intent(ActionScreenActivity.EXIT_APP);
-            resultIntent.putExtra(ActionScreenActivity.EXIT_APP_RESULT, result);
-            getServiceBoundActivity().setResult(Activity.RESULT_OK, resultIntent);
-        }
         getServiceBoundActivity().finish();
         callbackContext.success(new JSONObject());
     }

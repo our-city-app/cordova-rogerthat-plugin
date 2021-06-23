@@ -17,796 +17,813 @@
  *
  * @@license_version:1.6@@
  */
+package com.mobicage.rogerthat.cordova
 
-package com.mobicage.rogerthat.cordova;
+import android.Manifest
+import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.net.Uri
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.mobicage.api.news.Rpc.getNewsStreamItems
+import com.mobicage.rogerth.at.R
+import com.mobicage.rogerthat.BarcodeScanningActivity
+import com.mobicage.rogerthat.IdentityStore
+import com.mobicage.rogerthat.ServiceBoundActivity
+import com.mobicage.rogerthat.home.HomeScreenContentResult
+import com.mobicage.rogerthat.home.HomeScreenViewModel
+import com.mobicage.rogerthat.home.UnsupportedHomeScreenVersion
+import com.mobicage.rogerthat.plugins.friends.FriendsPlugin
+import com.mobicage.rogerthat.plugins.friends.Poker
+import com.mobicage.rogerthat.plugins.friends.ServiceApiCallbackResult
+import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemInfo
+import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin
+import com.mobicage.rogerthat.plugins.news.NewsPlugin
+import com.mobicage.rogerthat.plugins.scan.ScanCommunication
+import com.mobicage.rogerthat.plugins.scan.ScanTabActivity
+import com.mobicage.rogerthat.plugins.system.SystemPlugin
+import com.mobicage.rogerthat.util.ActionScreenUtils
+import com.mobicage.rogerthat.util.JsonUtils
+import com.mobicage.rogerthat.util.RequestStore
+import com.mobicage.rogerthat.util.logging.L
+import com.mobicage.rogerthat.util.system.SafeRunnable
+import com.mobicage.rpc.IJSONable
+import com.mobicage.rpc.IncompleteMessageException
+import com.mobicage.rpc.IntentResponseHandler
+import com.mobicage.to.news.GetNewsGroupRequestTO
+import com.mobicage.to.news.GetNewsGroupsRequestTO
+import com.mobicage.to.news.GetNewsStreamItemsRequestTO
+import com.mobicage.to.news.GetNewsStreamItemsResponseTO
+import com.mobicage.to.system.GetUserInformationRequestTO
+import com.mobicage.to.system.GetUserInformationResponseTO
+import org.apache.cordova.CallbackContext
+import org.apache.cordova.CordovaPlugin
+import org.apache.cordova.PluginResult
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
+import org.json.simple.JSONValue
+import java.util.*
 
-
-import android.Manifest;
-import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-
-import com.mobicage.rogerth.at.R;
-import com.mobicage.rogerthat.BarcodeScanningActivity;
-import com.mobicage.rogerthat.IdentityStore;
-import com.mobicage.rogerthat.MyIdentity;
-import com.mobicage.rogerthat.ServiceBoundActivity;
-import com.mobicage.rogerthat.home.HomeScreenContentResult;
-import com.mobicage.rogerthat.home.HomeScreenViewModel;
-import com.mobicage.rogerthat.home.UnsupportedHomeScreenVersion;
-import com.mobicage.rogerthat.plugins.friends.ActionScreenActivity;
-import com.mobicage.rogerthat.plugins.friends.FriendsPlugin;
-import com.mobicage.rogerthat.plugins.friends.Poker;
-import com.mobicage.rogerthat.plugins.friends.ServiceApiCallbackResult;
-import com.mobicage.rogerthat.plugins.friends.ServiceMenuItemInfo;
-import com.mobicage.rogerthat.plugins.messaging.Message;
-import com.mobicage.rogerthat.plugins.messaging.MessagingPlugin;
-import com.mobicage.rogerthat.plugins.news.NewsPlugin;
-import com.mobicage.rogerthat.plugins.scan.ScanCommunication;
-import com.mobicage.rogerthat.plugins.scan.ScanTabActivity;
-import com.mobicage.rogerthat.util.ActionScreenUtils;
-import com.mobicage.rogerthat.util.JsonUtils;
-import com.mobicage.rogerthat.util.RequestStore;
-import com.mobicage.rogerthat.util.logging.L;
-import com.mobicage.rogerthat.util.net.NetworkConnectivityManager;
-import com.mobicage.rogerthat.util.system.SafeRunnable;
-import com.mobicage.rpc.IJSONable;
-import com.mobicage.rpc.IncompleteMessageException;
-import com.mobicage.rpc.IntentResponseHandler;
-import com.mobicage.to.news.GetNewsGroupRequestTO;
-import com.mobicage.to.news.GetNewsGroupsRequestTO;
-import com.mobicage.to.news.GetNewsStreamItemsRequestTO;
-import com.mobicage.to.news.GetNewsStreamItemsResponseTO;
-
-import org.apache.cordova.CallbackContext;
-import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.PluginResult;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.simple.JSONValue;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
-
-public class RogerthatPlugin extends CordovaPlugin {
-
-    private boolean mQRCodeScannerOpen = false;
-    private final int PERMISSION_REQUEST_CAMERA = 1;
-
-    private CallbackContext mCallbackContext = null;
-
-    private boolean mApiResultHandlerSet = false;
-    private boolean hasInitializedBadges = false;
-
-    private CordovaRogerthatInterface mRogerthatInterface = null;
-    private ActionScreenUtils mActionScreenUtils = null;
-    private ScanCommunication mScanCommunication = null;
-
-    private static final String POKE = "poke://";
-    private Poker<ServiceBoundActivity> mPoker;
-
-    protected final static String[] permissions = {Manifest.permission.CAMERA};
-
-    private BroadcastReceiver mBroadcastReceiver;
-    private Map<String, CallbackContext> callbackMap = new HashMap<>();
-    private ActionScreenUtils.IntentCallback mIntentCallback = new ActionScreenUtils.IntentCallback() {
-        @Override
-        public boolean apiResult(ServiceApiCallbackResult result) {
-            return deliverApiResult(result);
-        }
-
-        @Override
-        public void userDataUpdated(String userData) {
-            Map<String, Object> jsonMap = userData == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(userData);
-            sendCallbackUpdate("userDataUpdated", new JSONObject(jsonMap));
-        }
-
-        @Override
-        public void serviceDataUpdated(String serviceData) {
-            Map<String, Object> jsonMap = serviceData == null ? new HashMap<String, Object>() : (Map<String, Object>) JSONValue.parse(serviceData);
-            sendCallbackUpdate("serviceDataUpdated", new JSONObject(jsonMap));
-        }
-
-        @Override
-        public void qrCodeScanned(Map<String, Object> result) {
-            sendCallbackUpdate("qrCodeScanned", new JSONObject(result));
-        }
-
-        @Override
-        public void badgeUpdated(Map<String, Object> params) {
-            sendCallbackUpdate("badgeUpdated", new JSONObject(params));
-        }
-    };
-    private String homeScreenKey;
-    private LiveData<HomeScreenContentResult> homeScreenLiveData = null;
-    private Observer<HomeScreenContentResult> homeScreenObserver = null;
-    private final List<CallbackContext> userProfileCallbacks = new ArrayList<>();
-
-    @Override
-    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
-        if (!"log".equals(action)) {
-            L.i("RogerthatPlugin.execute '" + action + "'");
-        }
-        cordova.getActivity().runOnUiThread(() -> {
-            try {
-                if (action == null) {
-                    callbackContext.error("Cannot execute 'null' action");
-                    return;
-                }
-                processAction(action, callbackContext, args.optJSONObject(0));
-            } catch (Exception e) {
-                L.bug(e);
-                callbackContext.error(e.getMessage());
+class RogerthatPlugin : CordovaPlugin() {
+    private var mQRCodeScannerOpen = false
+    private var mCallbackContext: CallbackContext? = null
+    private var mApiResultHandlerSet = false
+    private var hasInitializedBadges = false
+    private lateinit var rogerthatInterface: CordovaRogerthatInterface
+    private lateinit var mActionScreenUtils: ActionScreenUtils
+    private var mScanCommunication: ScanCommunication? = null
+    private var mPoker: Poker<ServiceBoundActivity>? = null
+    private var mBroadcastReceiver: BroadcastReceiver? = null
+    private val callbackMap: MutableMap<String, CallbackContext> = HashMap()
+    private val mIntentCallback: ActionScreenUtils.IntentCallback =
+        object : ActionScreenUtils.IntentCallback {
+            override fun apiResult(result: ServiceApiCallbackResult): Boolean {
+                return deliverApiResult(result)
             }
-        });
-        return true;
+
+            override fun userDataUpdated(userData: String?) {
+                val jsonMap =
+                    if (userData == null) HashMap() else (JSONValue.parse(userData) as Map<String?, Any?>)
+                sendCallbackUpdate("userDataUpdated", JSONObject(jsonMap))
+            }
+
+            override fun serviceDataUpdated(serviceData: String?) {
+                val jsonMap =
+                    if (serviceData == null) HashMap() else (JSONValue.parse(serviceData) as Map<String?, Any?>)
+                sendCallbackUpdate("serviceDataUpdated", JSONObject(jsonMap))
+            }
+
+            override fun qrCodeScanned(result: Map<String, Any>) {
+                sendCallbackUpdate("qrCodeScanned", JSONObject(result))
+            }
+
+            override fun badgeUpdated(params: Map<String, Any>) {
+                sendCallbackUpdate("badgeUpdated", JSONObject(params))
+            }
+        }
+    private var homeScreenKey: String? = null
+    private var homeScreenLiveData: LiveData<HomeScreenContentResult>? = null
+    private var homeScreenObserver: Observer<HomeScreenContentResult>? = null
+    private val userProfileCallbacks: MutableList<CallbackContext> = ArrayList()
+    private val userInformationCallbacks: MutableList<CallbackContext> = ArrayList()
+    private var cachedUserInformation: GetUserInformationResponseTO? = null
+    override fun execute(
+        action: String,
+        args: JSONArray,
+        callbackContext: CallbackContext
+    ): Boolean {
+        if ("log" != action) {
+            L.i("RogerthatPlugin.execute '$action'")
+        }
+        cordova.activity.runOnUiThread {
+            try {
+                processAction(action, callbackContext, args.optJSONObject(0))
+            } catch (e: Exception) {
+                L.bug(e)
+                callbackContext.error(e.message)
+            }
+        }
+        return true
     }
 
-    private void processAction(String action, CallbackContext callbackContext, JSONObject args) throws JSONException, IncompleteMessageException {
-        if (args == null) {
-            args = new JSONObject();
-        }
-        switch (processAction(action)) {
-            case "start":
+    @Throws(JSONException::class, IncompleteMessageException::class)
+    private fun processAction(action: String, callbackContext: CallbackContext, args: JSONObject?) {
+        val args = args ?: JSONObject()
+        when (processAction(action)) {
+            "start" -> {
                 if (mCallbackContext != null) {
-                    callbackContext.error("RogerthatPlugin already running.");
-                    return;
+                    callbackContext.error("RogerthatPlugin already running.")
+                    return
                 }
-                mCallbackContext = callbackContext;
-
-                mActionScreenUtils.start(mIntentCallback);
-
-                PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
-                pluginResult.setKeepCallback(true);
-                mCallbackContext.sendPluginResult(pluginResult);
-
-                setInfo();
-                setBadges();
-
-                break;
-            case "log":
-                log(args);
-                callbackContext.success(new JSONObject());
-                break;
-            case "api_call":
-                sendApiCall(callbackContext, args);
-
-                break;
-            case "api_resultHandlerConfigured":
-                mApiResultHandlerSet = true;
-                mActionScreenUtils.deliverAllApiResults();
-                callbackContext.success(new JSONObject());
-
-                break;
-            case "app_exit":
-                exitApp(callbackContext);
-
-                break;
-            case "app_exitWithResult":
-                exitAppWithResult(callbackContext, args);
-                break;
-            case "camera_startScanningQrCode":
-                startScanningQrCode(callbackContext);
-                break;
-            case "camera_stopScanningQrCode":
-                stopScanningQrCode(callbackContext);
-
-                break;
-            case "context":
-                getContext(callbackContext);
-                break;
-            case "badges_list":
-                getBadges(callbackContext);
-                break;
-            case "message_open":
-                openMessage(callbackContext, args);
-                break;
-            case "news_getNewsGroup":
-                getNewsGroup(callbackContext, GetNewsGroupRequestTO.Companion.fromJSONMap(JsonUtils.toMap(args)));
-                break;
-            case "news_getNewsGroups":
-                getNewsGroups(callbackContext, GetNewsGroupsRequestTO.Companion.fromJSONMap(JsonUtils.toMap(args)));
-                break;
-            case "news_getNewsStreamItems":
-                getNewsStreamItems(callbackContext, GetNewsStreamItemsRequestTO.Companion.fromJSONMap(JsonUtils.toMap(args)));
-                break;
-            case "ui_hideKeyboard":
-                hideKeyboard(callbackContext);
-                break;
-            case "user_put":
-                putUserData(callbackContext, args);
-                break;
-            case "user_getProfile":
-                getUserProfile(callbackContext);
-                break;
-            case "util_isConnectedToInternet":
-                isConnectedToInternet(callbackContext);
-                break;
-            case "util_open":
-                openActivity(callbackContext, args);
-                break;
-            case "util_playAudio":
-                playAudio(callbackContext, args);
-                break;
-            case "homescreen_getHomeScreenContent":
-                getHomeScreen(callbackContext, args);
-                break;
-            default:
-                L.e("RogerthatPlugin.execute did not match '" + action + "'");
-                callbackContext.error("RogerthatPlugin doesn't know how to execute this action.");
-                break;
+                mCallbackContext = callbackContext
+                mActionScreenUtils.start(mIntentCallback)
+                val pluginResult = PluginResult(PluginResult.Status.NO_RESULT)
+                pluginResult.keepCallback = true
+                callbackContext.sendPluginResult(pluginResult)
+                setInfo()
+                setBadges()
+            }
+            "log" -> {
+                log(args)
+                callbackContext.success(JSONObject())
+            }
+            "api_call" -> sendApiCall(callbackContext, args)
+            "api_resultHandlerConfigured" -> {
+                mApiResultHandlerSet = true
+                mActionScreenUtils.deliverAllApiResults()
+                callbackContext.success(JSONObject())
+            }
+            "app_exit" -> exitApp(callbackContext)
+            "app_exitWithResult" -> exitAppWithResult(callbackContext, args)
+            "camera_startScanningQrCode" -> startScanningQrCode(callbackContext)
+            "camera_stopScanningQrCode" -> stopScanningQrCode(callbackContext)
+            "context" -> getContext(callbackContext)
+            "badges_list" -> getBadges(callbackContext)
+            "message_open" -> openMessage(callbackContext, args)
+            "news_getNewsGroup" -> getNewsGroup(
+                callbackContext, GetNewsGroupRequestTO.fromJSONMap(
+                    JsonUtils.toMap(args)
+                )
+            )
+            "news_getNewsGroups" -> getNewsGroups(
+                callbackContext, GetNewsGroupsRequestTO.fromJSONMap(
+                    JsonUtils.toMap(args)
+                )
+            )
+            "news_getNewsStreamItems" -> getNewsStreamItems(
+                callbackContext, GetNewsStreamItemsRequestTO.fromJSONMap(
+                    JsonUtils.toMap(args)
+                )
+            )
+            "ui_hideKeyboard" -> hideKeyboard(callbackContext)
+            "user_put" -> putUserData(callbackContext, args)
+            "user_getProfile" -> getUserProfile(callbackContext)
+            "user_getUserInformation" -> getUserInformation(
+                callbackContext, GetUserInformationRequestTO.fromJSONMap(
+                    JsonUtils.toMap(args)
+                )
+            )
+            "util_isConnectedToInternet" -> isConnectedToInternet(callbackContext)
+            "util_open" -> openActivity(callbackContext, args)
+            "util_playAudio" -> playAudio(callbackContext, args)
+            "homescreen_getHomeScreenContent" -> getHomeScreen(callbackContext, args)
+            else -> {
+                L.e("RogerthatPlugin.execute did not match '$action'")
+                callbackContext.error("RogerthatPlugin doesn't know how to execute this action.")
+            }
         }
     }
 
-    private String processAction(String action) {
-        return action;
+    private fun processAction(action: String): String {
+        return action
     }
 
-    private void getNewsGroup(CallbackContext callbackContext, GetNewsGroupRequestTO request) {
-        callbackMap.put(getNewsPlugin().getNewsGroup(request), callbackContext);
+    private fun getNewsGroup(callbackContext: CallbackContext, request: GetNewsGroupRequestTO) {
+        callbackMap[getNewsPlugin().getNewsGroup(request)] = callbackContext
     }
 
-    private void getNewsGroups(CallbackContext callbackContext, GetNewsGroupsRequestTO request) {
-        callbackMap.put(getNewsPlugin().getNewsGroups(), callbackContext);
+    private fun getNewsGroups(callbackContext: CallbackContext, request: GetNewsGroupsRequestTO) {
+        callbackMap[getNewsPlugin().getNewsGroups()] = callbackContext
     }
 
-    private void getNewsStreamItems(CallbackContext callbackContext, GetNewsStreamItemsRequestTO request) {
-        String requestId = UUID.randomUUID().toString();
-        IntentResponseHandler<GetNewsStreamItemsResponseTO> handler = new IntentResponseHandler<>(NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS, NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED, requestId);
-        callbackMap.put(requestId, callbackContext);
-        com.mobicage.api.news.Rpc.getNewsStreamItems(handler, request, true);
+    private fun getNewsStreamItems(
+        callbackContext: CallbackContext,
+        request: GetNewsStreamItemsRequestTO
+    ) {
+        val requestId = UUID.randomUUID().toString()
+        val handler = IntentResponseHandler<GetNewsStreamItemsResponseTO>(
+            NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS,
+            NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED,
+            requestId
+        )
+        callbackMap[requestId] = callbackContext
+        getNewsStreamItems(handler, request, true)
     }
 
-    public Boolean shouldAllowRequest(String url) {
-        final String lowerCaseUrl = url.toLowerCase();
-        if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")) {
-            return true;
-        }
-
-        return super.shouldAllowRequest(url);
+    override fun shouldAllowRequest(url: String): Boolean {
+        val lowerCaseUrl = url.lowercase()
+        return if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")) {
+            true
+        } else super.shouldAllowRequest(url)
     }
 
-    public boolean onOverrideUrlLoading(String url) {
-        L.i("Branding is loading url: " + url);
-        Uri uri = Uri.parse(url);
-        String lowerCaseUrl = url.toLowerCase();
+    override fun onOverrideUrlLoading(url: String): Boolean {
+        L.i("Branding is loading url: $url")
+        val uri = Uri.parse(url)
+        val lowerCaseUrl = url.lowercase()
         if (lowerCaseUrl.startsWith(POKE)) {
-            String tag = url.substring(POKE.length());
-            poke(tag);
-            return true;
+            val tag = url.substring(POKE.length)
+            poke(tag)
+            return true
         } else if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")
-                || lowerCaseUrl.startsWith("tel") || lowerCaseUrl.startsWith("sms") || lowerCaseUrl.startsWith("mailto")) {
-            CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
-            CustomTabsIntent customTabsIntent = customTabsBuilder.build();
-            customTabsIntent.launchUrl(cordova.getActivity(), uri);
-            return true;
+            || lowerCaseUrl.startsWith("tel") || lowerCaseUrl.startsWith("sms") || lowerCaseUrl.startsWith(
+                "mailto"
+            )
+        ) {
+            val customTabsBuilder = CustomTabsIntent.Builder()
+            val customTabsIntent = customTabsBuilder.build()
+            customTabsIntent.launchUrl(cordova.activity, uri)
+            return true
         }
-        return super.onOverrideUrlLoading(url);
+        return super.onOverrideUrlLoading(url)
     }
 
-
-    public void onDestroy() {
-        mActionScreenUtils.stop();
-        getServiceBoundActivity().unregisterReceiver(mBroadcastReceiver);
-        if (mPoker != null) {
-            mPoker.stop();
-        }
+    override fun onDestroy() {
+        mActionScreenUtils.stop()
+        getServiceBoundActivity().unregisterReceiver(mBroadcastReceiver)
+        mPoker?.stop()
     }
 
-    private void returnArgsMissing(final CallbackContext callbackContext) {
-        callbackContext.error("User did not specify data to encode");
+    private fun returnArgsMissing(callbackContext: CallbackContext) {
+        callbackContext.error("User did not specify data to encode")
     }
 
-    private void setInfo() {
-        CordovaRogerthatInterface rtInterface = getRogerthatInterface();
-        String label = rtInterface.getItemLabel();
-        String hash = rtInterface.getItemTagHash();
-        ServiceMenuItemInfo menuItem;
-        if (hash == null && label == null) {
-            menuItem = null;
+    private fun setInfo() {
+        val label = rogerthatInterface.getItemLabel()
+        val hash = rogerthatInterface.getItemTagHash()
+        val menuItem: ServiceMenuItemInfo? = if (hash == null && label == null) {
+            null
         } else {
-            menuItem = new ServiceMenuItemInfo(label, hash);
+            ServiceMenuItemInfo(label, hash)
         }
-        Map<String, Object> info = getFriendsPlugin().getRogerthatUserAndServiceInfo(
-                rtInterface.getServiceEmail(), rtInterface.getServiceFriend(), menuItem);
-        sendCallbackUpdate("setInfo", new JSONObject(info));
+        val info: Map<String, Any?> = getFriendsPlugin().getRogerthatUserAndServiceInfo(
+            rogerthatInterface.getServiceEmail(),
+            rogerthatInterface.getServiceFriend(),
+            menuItem
+        )
+        sendCallbackUpdate("setInfo", JSONObject(info))
     }
 
     /**
      * To be removed
      *
-     * @deprecated use getBadges instead
      */
-    private void setBadges() {
+    @Deprecated("use getBadges instead")
+    private fun setBadges() {
         if (hasInitializedBadges) {
-            L.d("Not initialising badges, they were already initialized");
-            return;
+            L.d("Not initialising badges, they were already initialized")
+            return
         }
-        hasInitializedBadges = true;
-        ServiceBoundActivity activity = getServiceBoundActivity();
-        activity.getMainService().getBadgesStore().observe(activity, badges -> {
-            for (Map.Entry<String, Integer> entry : badges.entrySet()) {
-                Map<String, Object> params = new HashMap<>();
-                params.put("key", entry.getKey());
-                params.put("count", entry.getValue());
-                mIntentCallback.badgeUpdated(params);
+        hasInitializedBadges = true
+        val activity = getServiceBoundActivity()
+        activity.mainService.badgesStore.observe(activity, { badges: Map<String, Int> ->
+            for ((key, value) in badges) {
+                val params: MutableMap<String, Any> = HashMap()
+                params["key"] = key
+                params["count"] = value
+                mIntentCallback.badgeUpdated(params)
             }
-        });
+        })
     }
 
-    private void log(final JSONObject args) {
-        final String errorMessage = JsonUtils.optString(args, "e", null);
-        final String message = JsonUtils.optString(args, "m", null);
+    private fun log(args: JSONObject) {
+        val errorMessage = JsonUtils.optString(args, "e", null)
+        val message = JsonUtils.optString(args, "m", null)
         if (errorMessage != null) {
-            mActionScreenUtils.logError(mRogerthatInterface.getServiceEmail(), mRogerthatInterface.getItemLabel(),
-                    mRogerthatInterface.getItemCoords(), errorMessage);
+            mActionScreenUtils.logError(
+                rogerthatInterface.getServiceEmail(), rogerthatInterface.getItemLabel(),
+                rogerthatInterface.getItemCoords(), errorMessage
+            )
         } else {
-            L.i("[BRANDING] " + message);
+            L.i("[BRANDING] $message")
         }
     }
 
-    private void sendApiCall(final CallbackContext callbackContext, final JSONObject args) {
+    private fun sendApiCall(callbackContext: CallbackContext, args: JSONObject?) {
         if (args == null) {
-            returnArgsMissing(callbackContext);
-            return;
+            returnArgsMissing(callbackContext)
+            return
         }
-        final String method = JsonUtils.optString(args, "method", null);
-        final String params = JsonUtils.optString(args, "params", null);
-        final String tag = JsonUtils.optString(args, "tag", null);
+        val method = JsonUtils.optString(args, "method", null)
+        val params = JsonUtils.optString(args, "params", null)
+        val tag = JsonUtils.optString(args, "tag", null)
         if (method == null) {
-            callbackContext.error("'method' is a mandatory parameter");
-            return;
+            callbackContext.error("'method' is a mandatory parameter")
+            return
         }
         if (tag == null) {
-            callbackContext.error("'tag' is a mandatory parameter");
-            return;
+            callbackContext.error("'tag' is a mandatory parameter")
+            return
         }
-        final boolean synchronous = args.optBoolean("synchronous", true);
-
-        getFriendsPlugin().sendApiCall(mRogerthatInterface.getServiceEmail(), mRogerthatInterface.getItemTagHash(), method, params, tag, synchronous, callbackContext);
+        val synchronous = args.optBoolean("synchronous", true)
+        getFriendsPlugin().sendApiCall(
+            rogerthatInterface.getServiceEmail()!!,
+            rogerthatInterface.getItemTagHash(),
+            method,
+            params,
+            tag,
+            synchronous,
+            callbackContext
+        )
         // Callback will be called with the response in case of synchronous calls
         if (!synchronous) {
-            callbackContext.success(new JSONObject());
+            callbackContext.success(JSONObject())
         }
     }
 
-    private boolean deliverApiResult(ServiceApiCallbackResult r) {
+    private fun deliverApiResult(r: ServiceApiCallbackResult): Boolean {
         if (!mApiResultHandlerSet) {
-            L.i("apiCallResultHandler not set, thus not delivering any api call responses.");
-            return false;
+            L.i("apiCallResultHandler not set, thus not delivering any api call responses.")
+            return false
         }
         try {
-            JSONObject obj = new JSONObject();
-            obj.put("method", r.method);
-            obj.put("result", r.result);
-            obj.put("error", r.error);
-            obj.put("tag", r.tag);
-            sendCallbackUpdate("apiResult", obj);
-        } catch (JSONException e) {
-            L.e("JSONException... This should never happen", e);
+            val obj = JSONObject()
+            obj.put("method", r.method)
+            obj.put("result", r.result)
+            obj.put("error", r.error)
+            obj.put("tag", r.tag)
+            sendCallbackUpdate("apiResult", obj)
+        } catch (e: JSONException) {
+            L.e("JSONException... This should never happen", e)
         }
-        return true;
+        return true
     }
 
-    private void exitApp(final CallbackContext callbackContext) {
-        getServiceBoundActivity().finish();
-        callbackContext.success(new JSONObject());
+    private fun exitApp(callbackContext: CallbackContext) {
+        getServiceBoundActivity().finish()
+        callbackContext.success(JSONObject())
     }
 
-    private void exitAppWithResult(final CallbackContext callbackContext, final JSONObject args) {
-        getServiceBoundActivity().finish();
-        callbackContext.success(new JSONObject());
+    private fun exitAppWithResult(callbackContext: CallbackContext, args: JSONObject) {
+        getServiceBoundActivity().finish()
+        callbackContext.success(JSONObject())
     }
 
-    private void startScanningQrCode(final CallbackContext callbackContext) {
-        ServiceBoundActivity activity = getServiceBoundActivity();
+    private fun startScanningQrCode(callbackContext: CallbackContext) {
+        val activity = getServiceBoundActivity()
         if (mQRCodeScannerOpen) {
-            error(callbackContext, "camera_was_already_open", activity.getString(R.string.camera_was_already_open));
-            return;
+            error(
+                callbackContext,
+                "camera_was_already_open",
+                activity.getString(R.string.camera_was_already_open)
+            )
+            return
         }
-
-        int cameraPermission = ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA);
+        val cameraPermission =
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
         if (cameraPermission != PackageManager.PERMISSION_GRANTED) {
-            final SafeRunnable continueRunnable = new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    startScanningQrCode(callbackContext);
-                }
-            };
-            final SafeRunnable cancelRunnable = new SafeRunnable() {
-                @Override
-                protected void safeRun() throws Exception {
-                    error(callbackContext, "camera_permission_was_not_granted",
-                            activity.getString(R.string.camera_permission_was_not_granted));
-                }
-            };
-            if (getServiceBoundActivity().askPermissionIfNeeded(Manifest.permission.CAMERA, PERMISSION_REQUEST_CAMERA,
-                    continueRunnable, cancelRunnable))
-                return;
-        }
-
-        mQRCodeScannerOpen = true;
-
-        final Intent intent = new Intent(getServiceBoundActivity(), BarcodeScanningActivity.class);
-        this.cordova.startActivityForResult(this, intent, ScanTabActivity.QR_SCAN_RESULT);
-
-        callbackContext.success(new JSONObject());
-    }
-
-    private void stopScanningQrCode(final CallbackContext callbackContext) {
-        mQRCodeScannerOpen = false;
-        Intent intent = new Intent(BarcodeScanningActivity.FINISH_INTENT);
-        cordova.getActivity().sendBroadcast(intent);
-        callbackContext.success(new JSONObject());
-    }
-
-    private void getContext(final CallbackContext callbackContext) throws JSONException {
-        JSONObject obj = new JSONObject();
-        String context = mRogerthatInterface.getOpenContext();
-        obj.put("context", context == null ? new JSONObject() : new JSONObject(context));
-        callbackContext.success(obj);
-    }
-
-    private void getBadges(final CallbackContext callbackContext) {
-        ServiceBoundActivity activity = getServiceBoundActivity();
-        activity.getMainService().getBadgesStore().observe(activity, badges -> {
-            // Convert map to array
-            JSONArray badgesArray = new JSONArray();
-            for (Map.Entry<String, Integer> thing : badges.entrySet()) {
-                JSONObject obj = new JSONObject();
-                try {
-                    obj.put("key", thing.getKey());
-                    obj.put("count", thing.getValue());
-                    badgesArray.put(obj);
-                } catch (JSONException e) {
-                    L.bug(e);
+            val continueRunnable: SafeRunnable = object : SafeRunnable() {
+                @Throws(Exception::class)
+                override fun safeRun() {
+                    startScanningQrCode(callbackContext)
                 }
             }
-            callbackContext.success(badgesArray);
-        });
+            val cancelRunnable: SafeRunnable = object : SafeRunnable() {
+                @Throws(Exception::class)
+                override fun safeRun() {
+                    error(
+                        callbackContext, "camera_permission_was_not_granted",
+                        activity.getString(R.string.camera_permission_was_not_granted)
+                    )
+                }
+            }
+            if (getServiceBoundActivity().askPermissionIfNeeded(
+                    Manifest.permission.CAMERA, Companion.PERMISSION_REQUEST_CAMERA,
+                    continueRunnable, cancelRunnable
+                )
+            ) return
+        }
+        mQRCodeScannerOpen = true
+        val intent = Intent(getServiceBoundActivity(), BarcodeScanningActivity::class.java)
+        cordova.startActivityForResult(this, intent, ScanTabActivity.QR_SCAN_RESULT)
+        callbackContext.success(JSONObject())
     }
 
-    private void openMessage(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+    private fun stopScanningQrCode(callbackContext: CallbackContext) {
+        mQRCodeScannerOpen = false
+        val intent = Intent(BarcodeScanningActivity.FINISH_INTENT)
+        cordova.activity.sendBroadcast(intent)
+        callbackContext.success(JSONObject())
+    }
+
+    @Throws(JSONException::class)
+    private fun getContext(callbackContext: CallbackContext) {
+        val obj = JSONObject()
+        val context = rogerthatInterface.getOpenContext()
+        obj.put("context", if (context == null) JSONObject() else JSONObject(context))
+        callbackContext.success(obj)
+    }
+
+    private fun getBadges(callbackContext: CallbackContext) {
+        val activity = getServiceBoundActivity()
+        activity.mainService.badgesStore.observe(
+            activity,
+            { badges: Map<String, Int> ->
+                // Convert map to array
+                val badgesArray = JSONArray()
+                for ((key, value) in badges) {
+                    val obj = JSONObject()
+                    try {
+                        obj.put("key", key)
+                        obj.put("count", value)
+                        badgesArray.put(obj)
+                    } catch (e: JSONException) {
+                        L.bug(e)
+                    }
+                }
+                callbackContext.success(badgesArray)
+            })
+    }
+
+    @Throws(JSONException::class)
+    private fun openMessage(callbackContext: CallbackContext, args: JSONObject?) {
         if (args == null) {
-            returnArgsMissing(callbackContext);
-            return;
+            returnArgsMissing(callbackContext)
+            return
         }
-        final String messageKey = JsonUtils.optString(args, "message_key", null);
-        final Message message = getMessagingPlugin().getStore().getMessageByKey(messageKey, true);
+        val messageKey = JsonUtils.optString(args, "message_key", null)
+        val message = getMessagingPlugin().getStore().getMessageByKey(messageKey, true)
         if (message == null) {
-            JSONObject obj = new JSONObject();
-            obj.put("type", "MessageNotFound");
-            callbackContext.error(obj);
-            return;
+            val obj = JSONObject()
+            obj.put("type", "MessageNotFound")
+            callbackContext.error(obj)
+            return
         }
-        getMessagingPlugin().showMessage(getServiceBoundActivity(), message, false, null, false);
-        callbackContext.success(new JSONObject());
+        getMessagingPlugin().showMessage(getServiceBoundActivity(), message, false, null, false)
+        callbackContext.success(JSONObject())
     }
 
-    private void error(final CallbackContext callbackContext, String code, String errorMessage) {
+    private fun error(callbackContext: CallbackContext?, code: String, errorMessage: String) {
         try {
-            JSONObject obj = new JSONObject();
-            obj.put("code", code);
-            obj.put("message", errorMessage);
-            callbackContext.error(obj);
-        } catch (JSONException je) {
-            L.e("JSONException... This should never happen", je);
-            callbackContext.error("Could not process json...");
+            val obj = JSONObject()
+            obj.put("code", code)
+            obj.put("message", errorMessage)
+            callbackContext?.error(obj)
+        } catch (je: JSONException) {
+            L.e("JSONException... This should never happen", je)
+            callbackContext?.error("Could not process json...")
         }
     }
 
-    private void hideKeyboard(final CallbackContext callbackContext) {
-        mActionScreenUtils.hideKeyboard(getServiceBoundActivity().getCurrentFocus().getWindowToken());
-        callbackContext.success(new JSONObject());
+    private fun hideKeyboard(callbackContext: CallbackContext) {
+        mActionScreenUtils.hideKeyboard(getServiceBoundActivity().currentFocus!!.windowToken)
+        callbackContext.success(JSONObject())
     }
 
-    private void putUserData(final CallbackContext callbackContext, final JSONObject args) {
+    private fun putUserData(callbackContext: CallbackContext, args: JSONObject?) {
         if (args == null) {
-            returnArgsMissing(callbackContext);
-            return;
+            returnArgsMissing(callbackContext)
+            return
         }
-        final String data = JsonUtils.optString(args, "u", null);
-        boolean smart = args.optBoolean("smart", false);
-        String serviceEmail = mRogerthatInterface.getServiceEmail();
+        val data = JsonUtils.optString(args, "u", null)
+        val smart = args.optBoolean("smart", false)
+        val serviceEmail = rogerthatInterface.getServiceEmail()
         if (serviceEmail == null) {
-            callbackContext.error("User data cannot be saved from a service-independent context");
-            return;
+            callbackContext.error("User data cannot be saved from a service-independent context")
+            return
         }
-        getFriendsPlugin().putUserData(serviceEmail, data, smart);
-        callbackContext.success(new JSONObject());
+        getFriendsPlugin().putUserData(serviceEmail, data, smart)
+        callbackContext.success(JSONObject())
     }
 
-    private void getUserProfile(final CallbackContext callbackContext) {
-        userProfileCallbacks.add(callbackContext);
-        sendPluginResult(callbackContext, new JSONObject(getFriendsPlugin().getUserInfo()));
+    private fun getUserProfile(callbackContext: CallbackContext) {
+        userProfileCallbacks.add(callbackContext)
+        sendPluginResult(callbackContext, JSONObject(getFriendsPlugin().userInfo))
     }
 
-    private void sendPluginResult(CallbackContext callbackContext, JSONObject result) {
-        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
-        pluginResult.setKeepCallback(true);
-        callbackContext.sendPluginResult(pluginResult);
+    private fun getUserInformation(
+        callbackContext: CallbackContext,
+        request: GetUserInformationRequestTO
+    ) {
+        if (cachedUserInformation != null) {
+            sendPluginResult(callbackContext, JSONObject(cachedUserInformation!!.toJSONMap()))
+        } else {
+            getSystemPlugin().getUserInformation(request)
+        }
+        userInformationCallbacks.add(callbackContext)
     }
 
-    private void notifyProfileChanges() {
-        JSONObject userInfo = new JSONObject(getFriendsPlugin().getUserInfo());
-        for (CallbackContext context : userProfileCallbacks) {
-            sendPluginResult(context, userInfo);
+    private fun sendPluginResult(callbackContext: CallbackContext?, result: JSONObject) {
+        val pluginResult = PluginResult(PluginResult.Status.OK, result)
+        pluginResult.keepCallback = true
+        callbackContext!!.sendPluginResult(pluginResult)
+    }
+
+    private fun notifyProfileChanges() {
+        val userInfo = JSONObject(getFriendsPlugin().userInfo)
+        for (context in userProfileCallbacks) {
+            sendPluginResult(context, userInfo)
         }
     }
 
-    private void isConnectedToInternet(final CallbackContext callbackContext) throws JSONException {
-        NetworkConnectivityManager manager = getServiceBoundActivity().getMainService().getNetworkConnectivityManager();
-        boolean wifiConnected = manager.isWifiConnected();
-        JSONObject obj = new JSONObject();
-        obj.put("connectedToWifi", wifiConnected);
-        obj.put("connected", wifiConnected || manager.isMobileDataConnected());
-        callbackContext.success(obj);
+    @Throws(JSONException::class)
+    private fun isConnectedToInternet(callbackContext: CallbackContext) {
+        val manager = getServiceBoundActivity().mainService.networkConnectivityManager
+        val wifiConnected = manager.isWifiConnected
+        val obj = JSONObject()
+        obj.put("connectedToWifi", wifiConnected)
+        obj.put("connected", wifiConnected || manager.isMobileDataConnected)
+        callbackContext.success(obj)
     }
 
-    private void openActivity(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+    @Throws(JSONException::class)
+    private fun openActivity(callbackContext: CallbackContext, args: JSONObject?) {
         if (args == null) {
-            returnArgsMissing(callbackContext);
-            return;
+            returnArgsMissing(callbackContext)
+            return
         }
-        final String actionType = JsonUtils.optString(args, "action_type", null);
-        final String action = JsonUtils.optString(args, "action", null);
-        final String title = JsonUtils.optString(args, "title", null);
-        final String service = JsonUtils.optString(args, "service", null);
-        final JSONObject activityParams = args.optJSONObject("params");
-
-        String errorMessage = mActionScreenUtils.openActivity(actionType, action, title, service,
-                activityParams == null ? null : JsonUtils.toMap(activityParams));
+        val actionType = JsonUtils.optString(args, "action_type", null)
+        val action = JsonUtils.optString(args, "action", null)
+        val title = JsonUtils.optString(args, "title", null)
+        val service = JsonUtils.optString(args, "service", null)
+        val activityParams = args.optJSONObject("params")
+        val errorMessage = mActionScreenUtils.openActivity(
+            actionType, action, title, service,
+            if (activityParams == null) null else JsonUtils.toMap(activityParams)
+        )
         if (errorMessage != null) {
-            error(callbackContext, "unknown_error_occurred", errorMessage);
-            return;
+            error(callbackContext, "unknown_error_occurred", errorMessage)
+            return
         }
-        callbackContext.success(new JSONObject());
+        callbackContext.success(JSONObject())
     }
 
-    private void playAudio(final CallbackContext callbackContext, final JSONObject args) throws JSONException {
+    @Throws(JSONException::class)
+    private fun playAudio(callbackContext: CallbackContext, args: JSONObject?) {
         if (args == null) {
-            returnArgsMissing(callbackContext);
-            return;
+            returnArgsMissing(callbackContext)
+            return
         }
-        final String url = JsonUtils.optString(args, "url", null);
-        String fileOnDisk = "file://" + mRogerthatInterface.getFilePath() + "/" + url;
-        mActionScreenUtils.playAudio(fileOnDisk);
-        callbackContext.success(new JSONObject());
+        val url = JsonUtils.optString(args, "url", null)
+        val fileOnDisk = "file://" + rogerthatInterface.getFilePath() + "/" + url
+        mActionScreenUtils.playAudio(fileOnDisk)
+        callbackContext.success(JSONObject())
     }
 
-    private void sendCallbackUpdate(String callback, boolean args) {
+    private fun sendCallbackUpdate(callback: String, args: Boolean) {
         try {
-            JSONObject obj = new JSONObject();
-            obj.put("callback", callback);
-            obj.put("args", args);
-            sendPluginResult(mCallbackContext, obj);
-        } catch (JSONException e) {
-            L.e("JSONException... This should never happen", e);
+            val obj = JSONObject()
+            obj.put("callback", callback)
+            obj.put("args", args)
+            sendPluginResult(mCallbackContext, obj)
+        } catch (e: JSONException) {
+            L.e("JSONException... This should never happen", e)
         }
     }
 
-    private void sendCallbackUpdate(String callback, JSONObject args) {
+    private fun sendCallbackUpdate(callback: String, args: JSONObject) {
         try {
-            JSONObject obj = new JSONObject();
-            obj.put("callback", callback);
-            obj.put("args", args);
-            sendPluginResult(mCallbackContext, obj);
-        } catch (JSONException e) {
-            L.e("JSONException... This should never happen", e);
+            val obj = JSONObject()
+            obj.put("callback", callback)
+            obj.put("args", args)
+            sendPluginResult(mCallbackContext, obj)
+        } catch (e: JSONException) {
+            L.e("JSONException... This should never happen", e)
         }
     }
 
-    private void poke(String tag) {
+    private fun poke(tag: String) {
         if (mPoker == null) {
-            mPoker = new Poker<>(getServiceBoundActivity(), mRogerthatInterface.getServiceEmail());
+            mPoker = Poker(getServiceBoundActivity(), rogerthatInterface.getServiceEmail()!!)
         }
-
-        mPoker.poke(tag, null);
+        mPoker!!.poke(tag, null)
     }
 
-    private void getHomeScreen(CallbackContext callbackContext, JSONObject args) {
-        if (this.homeScreenObserver != null) {
-            callbackContext.error("You can only call getHomeScreen once");
-            return;
+    private fun getHomeScreen(callbackContext: CallbackContext, args: JSONObject) {
+        if (homeScreenObserver != null) {
+            callbackContext.error("You can only call getHomeScreen once")
+            return
         }
-        this.homeScreenObserver = homeScreenResult -> {
-            Map<String, Object> homeScreenData = homeScreenResult.component1();
-            Error error = homeScreenResult.component2();
+        homeScreenObserver = Observer { (homeScreenData, error) ->
             if (error == null) {
-                sendPluginResult(callbackContext, new JSONObject(homeScreenData));
+                sendPluginResult(callbackContext, JSONObject(homeScreenData))
             } else {
-                if (error instanceof UnsupportedHomeScreenVersion) {
-                    String msg = getServiceBoundActivity().getString(R.string.homescreen_update_required);
-                    callbackContext.error(msg);
+                if (error is UnsupportedHomeScreenVersion) {
+                    val msg =
+                        getServiceBoundActivity().getString(R.string.homescreen_update_required)
+                    callbackContext.error(msg)
                 } else {
-                    callbackContext.error(error.getMessage());
+                    callbackContext.error(error.message)
                 }
             }
-        };
-        reloadHomeScreen();
-    }
-
-    private LiveData<HomeScreenContentResult> doGetHomeScreen(Long communityId, String homeScreenId) {
-        HomeScreenViewModel model = new ViewModelProvider(getServiceBoundActivity()).get(HomeScreenViewModel.class);
-        return model.getHomeScreenContent(communityId, homeScreenId);
-    }
-
-    private void reloadHomeScreen() {
-        if (this.homeScreenObserver == null) {
-            L.d("Not loading homeScreen: no observer set");
-            return;
         }
-        ServiceBoundActivity activity = getServiceBoundActivity();
-        MyIdentity identity = activity.getMainService().getIdentityStore().getIdentity();
-        String key = String.format("%s/%s", identity.getCommunityId(), identity.getHomeScreenId());
-        if (key.equals(this.homeScreenKey)) {
+        reloadHomeScreen()
+    }
+
+    private fun doGetHomeScreen(
+        communityId: Long,
+        homeScreenId: String
+    ): LiveData<HomeScreenContentResult> {
+        val model = ViewModelProvider(getServiceBoundActivity()).get(
+            HomeScreenViewModel::class.java
+        )
+        return model.getHomeScreenContent(communityId, homeScreenId)
+    }
+
+    private fun reloadHomeScreen() {
+        if (homeScreenObserver == null) {
+            L.d("Not loading homeScreen: no observer set")
+            return
+        }
+        val activity = getServiceBoundActivity()
+        val identity = activity.mainService.identityStore!!.getIdentity()
+        val key = String.format("%s/%s", identity.communityId, identity.homeScreenId)
+        if (key == homeScreenKey) {
             // Home screen community and id haven't changed, don't do anything
-            return;
+            return
         }
-        this.homeScreenKey = key;
-        if (this.homeScreenLiveData != null) {
-            this.homeScreenLiveData.removeObserver(this.homeScreenObserver);
+        homeScreenKey = key
+        if (homeScreenLiveData != null) {
+            homeScreenLiveData!!.removeObserver(homeScreenObserver!!)
         }
-        LiveData<HomeScreenContentResult> liveData = doGetHomeScreen(identity.getCommunityId(), identity.getHomeScreenId());
-        liveData.observe(activity, this.homeScreenObserver);
-        this.homeScreenLiveData = liveData;
+        val liveData = doGetHomeScreen(identity.communityId, identity.homeScreenId)
+        liveData.observe(activity, homeScreenObserver!!)
+        homeScreenLiveData = liveData
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        L.i("RogerthatPlugin.onActivityResult requestCode -> " + requestCode);
+    private fun refreshPersonalInfo() {
+        if (userInformationCallbacks.isNotEmpty()) {
+            getSystemPlugin().getUserInformation(GetUserInformationRequestTO())
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent) {
+        L.i("RogerthatPlugin.onActivityResult requestCode -> $requestCode")
         if (requestCode == ScanTabActivity.QR_SCAN_RESULT) {
-            mQRCodeScannerOpen = false;
+            mQRCodeScannerOpen = false
             if (resultCode == Activity.RESULT_OK) {
-                final String rawScanResult = intent.getStringExtra(BarcodeScanningActivity.RAW_VALUE);
+                val rawScanResult = intent.getStringExtra(BarcodeScanningActivity.RAW_VALUE)
                 try {
                     if (rawScanResult != null) {
-                        L.i("Scanned QR code: " + rawScanResult);
-                        JSONObject result = new JSONObject();
-                        result.put("content", rawScanResult);
-                        if (rawScanResult.toLowerCase(Locale.US).startsWith("http://")
-                                || rawScanResult.toLowerCase(Locale.US).startsWith("https://")) {
+                        L.i("Scanned QR code: $rawScanResult")
+                        val result = JSONObject()
+                        result.put("content", rawScanResult)
+                        if (rawScanResult.lowercase(Locale.US).startsWith("http://")
+                            || rawScanResult.lowercase(Locale.US).startsWith("https://")
+                        ) {
                             if (mScanCommunication == null) {
-                                mScanCommunication = new ScanCommunication(getServiceBoundActivity().getMainService());
+                                mScanCommunication =
+                                    ScanCommunication(getServiceBoundActivity().mainService)
                             }
-                            mScanCommunication.resolveUrl(rawScanResult);
-                            result.put("status", "resolving");
-
+                            mScanCommunication!!.resolveUrl(rawScanResult)
+                            result.put("status", "resolving")
                         } else {
-                            result.put("status", "resolved");
+                            result.put("status", "resolved")
                         }
-                        sendCallbackUpdate("qrCodeScanned", result);
-
+                        sendCallbackUpdate("qrCodeScanned", result)
                     } else {
-                        JSONObject obj = new JSONObject();
-                        obj.put("status", "error");
-                        obj.put("content", "An unknown error has occurred");
-
-                        sendCallbackUpdate("qrCodeScanned", obj);
+                        val obj = JSONObject()
+                        obj.put("status", "error")
+                        obj.put("content", "An unknown error has occurred")
+                        sendCallbackUpdate("qrCodeScanned", obj)
                     }
-                } catch (JSONException e) {
-                    L.e("JSONException... This should never happen", e);
+                } catch (e: JSONException) {
+                    L.e("JSONException... This should never happen", e)
                 }
             }
         }
-        super.onActivityResult(requestCode, resultCode, intent);
+        super.onActivityResult(requestCode, resultCode, intent)
     }
 
-    protected void pluginInitialize() {
-        setRogerthatInterface();
-        mBroadcastReceiver = getBroadcastReceiver();
-        getServiceBoundActivity().registerReceiver(mBroadcastReceiver, getIntentFilter());
+    override fun pluginInitialize() {
+        setRogerthatInterface()
+        mBroadcastReceiver = getBroadcastReceiver()
+        getServiceBoundActivity().registerReceiver(mBroadcastReceiver, getIntentFilter())
     }
 
-    private ServiceBoundActivity getServiceBoundActivity() {
-        Activity activity = cordova.getActivity();
-        if (activity instanceof ServiceBoundActivity) {
-            return (ServiceBoundActivity) activity;
+    private fun getServiceBoundActivity(): ServiceBoundActivity {
+        val activity = cordova.activity
+        if (activity is ServiceBoundActivity) {
+            return activity
         }
-        String msg = String.format("Expected activity using RogerthatPlugin to inherit from ServiceBoundActivity: %s", activity.toString());
-        L.bug(msg);
-        throw new RuntimeException(msg);
+        val msg = String.format(
+            "Expected activity using RogerthatPlugin to inherit from ServiceBoundActivity: %s",
+            activity.toString()
+        )
+        L.bug(msg)
+        throw RuntimeException(msg)
     }
 
-    private IntentFilter getIntentFilter() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(NewsPlugin.GET_NEWS_GROUP_SUCCESS);
-        filter.addAction(NewsPlugin.GET_NEWS_GROUP_FAILED);
-        filter.addAction(NewsPlugin.GET_NEWS_GROUPS_SUCCESS);
-        filter.addAction(NewsPlugin.GET_NEWS_GROUPS_FAILED);
-        filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS);
-        filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED);
-        filter.addAction(IdentityStore.IDENTITY_CHANGED_INTENT);
-        return filter;
+    private fun getIntentFilter(): IntentFilter {
+        val filter = IntentFilter()
+        filter.addAction(NewsPlugin.GET_NEWS_GROUP_SUCCESS)
+        filter.addAction(NewsPlugin.GET_NEWS_GROUP_FAILED)
+        filter.addAction(NewsPlugin.GET_NEWS_GROUPS_SUCCESS)
+        filter.addAction(NewsPlugin.GET_NEWS_GROUPS_FAILED)
+        filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS)
+        filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED)
+        filter.addAction(IdentityStore.IDENTITY_CHANGED_INTENT)
+        filter.addAction(SystemPlugin.GET_USER_INFORMATION_SUCCESS)
+        filter.addAction(SystemPlugin.GET_USER_INFORMATION_FAILED)
+        filter.addAction(SystemPlugin.ADD_ADDRESSES_SUCCESS)
+        filter.addAction(SystemPlugin.EDIT_ADDRESSES_SUCCESS)
+        filter.addAction(SystemPlugin.DELETE_ADDRESSES_SUCCESS)
+        filter.addAction(SystemPlugin.ADD_PHONE_NUMBERS_SUCCESS)
+        filter.addAction(SystemPlugin.EDIT_PHONE_NUMBERS_SUCCESS)
+        filter.addAction(SystemPlugin.DELETE_PHONE_NUMBERS_SUCCESS)
+        return filter
     }
 
-    private BroadcastReceiver getBroadcastReceiver() {
-        return new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (action == null) {
-                    return;
-                }
-                String requestId = intent.getStringExtra(IntentResponseHandler.REQUEST_ID);
-                CallbackContext callbackContext = null;
-                IJSONable response = null;
-                if (requestId != null) {
-                    callbackContext = callbackMap.get(requestId);
-                    if (callbackContext == null) {
-                        // Some other activity may have executed this, ignore
-                        return;
-                    }
-                    response = RequestStore.getResponse(requestId);
-                    if (response == null) {
-                        return;
-                    }
-                }
-                switch (action) {
-                    case NewsPlugin.GET_NEWS_GROUP_SUCCESS:
-                    case NewsPlugin.GET_NEWS_GROUPS_SUCCESS:
-                    case NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS:
-                        callbackContext.success(new JSONObject(response.toJSONMap()));
-                        break;
-                    case NewsPlugin.GET_NEWS_GROUP_FAILED:
-                    case NewsPlugin.GET_NEWS_GROUPS_FAILED:
-                    case NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED:
-                        Exception err = (Exception) intent.getSerializableExtra(IntentResponseHandler.ERROR);
-                        L.e(err);
-                        error(callbackContext, "unknown", getServiceBoundActivity().getString(R.string.unknown_error_occurred));
-                        break;
-                    case IdentityStore.IDENTITY_CHANGED_INTENT:
-                        reloadHomeScreen();
-                        notifyProfileChanges();
-                        break;
+    // Some other activity may have executed this, ignore
+    private fun getBroadcastReceiver(): BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action ?: return
+            val requestId = intent.getStringExtra(IntentResponseHandler.REQUEST_ID)
+            var callbackContext: CallbackContext? = null
+            var response: IJSONable? = null
+            if (requestId != null) {
+                callbackContext = callbackMap[requestId]
+                response = RequestStore.getResponse(requestId)
+                if (response == null) {
+                    return
                 }
             }
-        };
-    }
-
-    private void setRogerthatInterface() {
-        Activity activity = cordova.getActivity();
-        if (activity instanceof CordovaRogerthatInterface) {
-            mRogerthatInterface = (CordovaRogerthatInterface) activity;
-        } else if (activity instanceof CordovaRogerthatInterfaceGetter) {
-            mRogerthatInterface = ((CordovaRogerthatInterfaceGetter) activity).getRogerthatCordovaInterface();
+            when (action) {
+                NewsPlugin.GET_NEWS_GROUP_SUCCESS,
+                NewsPlugin.GET_NEWS_GROUPS_SUCCESS,
+                NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS,
+                SystemPlugin.GET_USER_INFORMATION_SUCCESS -> {
+                    val successObj = JSONObject(response!!.toJSONMap())
+                    cachedUserInformation = response as GetUserInformationResponseTO
+                    for (callback in userInformationCallbacks) {
+                        sendPluginResult(callback, successObj)
+                    }
+                }
+                NewsPlugin.GET_NEWS_GROUP_FAILED,
+                NewsPlugin.GET_NEWS_GROUPS_FAILED,
+                NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED,
+                SystemPlugin.GET_USER_INFORMATION_FAILED -> {
+                    val err =
+                        intent.getSerializableExtra(IntentResponseHandler.ERROR) as Exception
+                    L.e(err)
+                    error(
+                        callbackContext,
+                        "unknown",
+                        getServiceBoundActivity().getString(R.string.unknown_error_occurred)
+                    )
+                }
+                IdentityStore.IDENTITY_CHANGED_INTENT -> {
+                    reloadHomeScreen()
+                    notifyProfileChanges()
+                }
+                SystemPlugin.ADD_ADDRESSES_SUCCESS,
+                SystemPlugin.EDIT_ADDRESSES_SUCCESS,
+                SystemPlugin.DELETE_ADDRESSES_SUCCESS,
+                SystemPlugin.ADD_PHONE_NUMBERS_SUCCESS,
+                SystemPlugin.EDIT_PHONE_NUMBERS_SUCCESS,
+                SystemPlugin.DELETE_PHONE_NUMBERS_SUCCESS -> refreshPersonalInfo()
+            }
         }
-        mActionScreenUtils = new ActionScreenUtils(getServiceBoundActivity(),
-                mRogerthatInterface.getServiceEmail(),
-                mRogerthatInterface.getItemTagHash(),
-                true);
     }
 
-    private CordovaRogerthatInterface getRogerthatInterface() {
-        return mRogerthatInterface;
+    private fun setRogerthatInterface() {
+        val activity = cordova.activity
+        if (activity is CordovaRogerthatInterface) {
+            rogerthatInterface = activity
+        } else if (activity is CordovaRogerthatInterfaceGetter) {
+            rogerthatInterface =
+                (activity as CordovaRogerthatInterfaceGetter).getRogerthatCordovaInterface()
+        }
+        mActionScreenUtils = ActionScreenUtils(
+            getServiceBoundActivity(),
+            rogerthatInterface.getServiceEmail(),
+            rogerthatInterface.getItemTagHash(),
+            true
+        )
     }
 
-    private NewsPlugin getNewsPlugin() {
-        return getServiceBoundActivity().getMainService().getPlugin(NewsPlugin.class);
-    }
+    private fun getNewsPlugin() =
+        getServiceBoundActivity().mainService.getPlugin(NewsPlugin::class.java)
 
-    private FriendsPlugin getFriendsPlugin() {
-        return getServiceBoundActivity().getMainService().getPlugin(FriendsPlugin.class);
-    }
+    private fun getFriendsPlugin() =
+        getServiceBoundActivity().mainService.getPlugin(FriendsPlugin::class.java)
 
-    private MessagingPlugin getMessagingPlugin() {
-        return getServiceBoundActivity().getMainService().getPlugin(MessagingPlugin.class);
-    }
+    private fun getMessagingPlugin() =
+        getServiceBoundActivity().mainService.getPlugin(MessagingPlugin::class.java)
 
+    private fun getSystemPlugin() =
+        getServiceBoundActivity().mainService.getPlugin(SystemPlugin::class.java)
+
+    companion object {
+        private const val POKE = "poke://"
+        private const val PERMISSION_REQUEST_CAMERA = 1
+    }
 }

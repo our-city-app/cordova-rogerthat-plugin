@@ -16,7 +16,7 @@
         </feature>
       </config-file>
 
-      <source-file src="src/android/RogerthatPlugin.java" target-dir="src/com/mobicage/rogerthat/cordova" />
+      <source-file src="src/android/RogerthatPlugin.kt" target-dir="src/com/mobicage/rogerthat/cordova" />
     </platform>
 
     <platform name="ios">

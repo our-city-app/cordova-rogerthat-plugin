@@ -1273,6 +1273,13 @@ export interface GetProfileAddressesResponseTO {
   items: ProfileAddressTO[];
 }
 
+export interface GetProfileEmailsRequestTO {
+}
+
+export interface GetProfileEmailsResponseTO {
+  items: ProfileEmailTO[];
+}
+
 export interface GetProfilePhoneNumbersRequestTO {
 }
 
@@ -1341,6 +1348,15 @@ export interface GetUserInfoResponseTO {
   profileData: string | null;
   qualifiedIdentifier: string | null;
   type: number;
+}
+
+export interface GetUserInformationRequestTO {
+}
+
+export interface GetUserInformationResponseTO {
+  addresses: ProfileAddressTO[];
+  emails: ProfileEmailTO[];
+  phone_numbers: ProfilePhoneNumberTO[];
 }
 
 export interface GetUserLinkRequestTO {
@@ -2650,6 +2666,13 @@ export interface ProfileAddressTO {
   zip_code: string | null;
 }
 
+export interface ProfileEmailTO {
+  label: string | null;
+  type: number;
+  uid: string;
+  value: string;
+}
+
 export interface ProfilePhoneNumberTO {
   label: string | null;
   number: string;
@@ -3926,7 +3949,7 @@ export interface UpdateUserDataRequestTO {
   data: string | null;
   keys: string[];
   service: string;
-  type: string;
+  type: string | null;
   user_data: string | null;
   values: string[];
 }

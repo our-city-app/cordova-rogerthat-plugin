@@ -61,7 +61,6 @@ var utils = {
         if (result.callback === "setInfo") {
             ready = true;
             utils.setRogerthatData(result.args);
-            rogerthatPlugin.util._translateHTML();
             userCallbacks.ready();
 
         } else if (result.callback === "apiResult") {
@@ -227,67 +226,14 @@ function RogerthatPlugin() {
                 utils.exec(execCallback(resolve, successCallback), execCallback(reject, errorCallback), "util_playAudio", [{"url": url}]);
             });
         },
-        translate: function (key, parameters) {
-            var language = rogerthatPlugin.user.language || rogerthatPlugin.util._translations.defaultLanguage;
-            var translation = undefined;
-            if (language != rogerthatPlugin.util._translations.defaultLanguage) {
-                var translationSet = rogerthatPlugin.util._translations.values[key];
-                if (translationSet) {
-                    translation = translationSet[language];
-                    if (translation === undefined) {
-                        if (language.indexOf('_') != -1) {
-                            language = language.split('_')[0];
-                            translation = translationSet[language];
-                        } else if (language.indexOf('-') != -1) {
-                            language = language.split('-')[0];
-                            translation = translationSet[language];
-                        }
-                    }
-                }
-            }
-
-            if (translation === undefined) {
-                // language is defaultLanguage / key is missing / key is not translated
-                translation = key;
-            }
-
-            if (parameters) {
-                for (const [param, value] of Object.entries(parameters)) {
-                    translation = translation.replace('%(' + param + ')s', value);
-                }
-            }
-            return translation;
-        },
         uuid: function () {
             var S4 = function () {
                 return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
             };
             return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
         },
-        _translateHTML: function () {
-            var tags = document.getElementsByTagName('x-rogerthat-t');
-            for (var i = tags.length - 1; i >= 0; i--) {
-                var obj = tags[i];
-                var translatedString = rogerthatPlugin.util.translate(obj.innerHTML);
-                if (obj.outerHTML) {
-                    obj.outerHTML = translatedString;
-                } else {
-                    var tmpObj = document.createElement("div");
-                    tmpObj.innerHTML = '<!--THIS DATA SHOULD BE REPLACED-->';
-                    var objParent = obj.parentNode;
-                    objParent.replaceChild(tmpObj, obj);
-                    objParent.innerHTML = objParent.innerHTML.replace('<div><!--THIS DATA SHOULD BE REPLACED--></div>', translatedString);
-                }
-            }
-        },
-        _translations: {
-            defaultLanguage: "en",
-            values: {
-                // eg; "Name": { "fr": "Nom", "nl": "Naam" }
-            }
-        }
     };
-};
+}
 
 var apiCallbacksRegister = utils.generateCallbacksRegister(apiUserCallbacks);
 apiCallbacksRegister.resultReceived = function (callback) {
@@ -376,10 +322,6 @@ function windowErrorHandler(msg, url, line, column, errorObj) {
 if (typeof window !== 'undefined') {
     window.onerror = bind(this, windowErrorHandler);
 }
-    
-if (typeof rogerthat_translations !== "undefined") {
-    RogerthatPlugin.prototype.util._translations = rogerthat_translations;
-}
 
 function getStackTrace(e) {
     if (RogerthatPlugin.prototype.system !== undefined && RogerthatPlugin.prototype.system.os === 'android') {
@@ -430,7 +372,7 @@ function patchConsole() {
 
 
     function intercept(method) {
-        var original = newConsole[method]
+        var original = newConsole[method];
         newConsole[method] = function () {
             if (method === 'error') {
                 logErrorToApp(arguments);

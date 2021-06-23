@@ -78,13 +78,6 @@ export interface InternetConnectionStatus {
   connectedToWifi?: boolean;
 }
 
-interface Translations {
-  /**
-   * Example: { 'name': {'nl': 'Naam', 'en': 'Name'} }
-   */
-  [ key: string ]: { [ key: string ]: string };
-}
-
 export interface OpenParams {
   action_type?: string | null;
   action: string;
@@ -94,8 +87,6 @@ export interface OpenParams {
 }
 
 export interface RogerthatUtil {
-  _translateHTML: () => void;
-  _translations: { defaultLanguage: string; values: Translations };
   isConnectedToInternet: () => Promise<InternetConnectionStatus>
   open: (params: OpenParams) => Promise<void>;
 
@@ -103,7 +94,6 @@ export interface RogerthatUtil {
    * Play a sound file which is located in the branding zip
    */
   playAudio: (path: string) => Promise<void>;
-  translate: (key: string, parameters: any) => string;
   /**
    * Generate a random UUID
    */

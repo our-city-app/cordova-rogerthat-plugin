@@ -2932,7 +2932,6 @@ export interface SettingsTO {
   useGPSBattery: boolean;
   useGPSCharging: boolean;
   version: number;
-  wifiOnlyDownloads: boolean;
   xmppReconnectInterval: number;
 }
 

@@ -108,9 +108,6 @@ function RogerthatPlugin() {
         exit: function () {
             utils.exec(null, null, "app_exit", []);
         },
-        exitWithResult: function (result) {
-            utils.exec(null, null, "app_exitWithResult", [{"result": result}]);
-        }
     };
     this.camera = {
         FRONT: "front",

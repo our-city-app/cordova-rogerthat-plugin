@@ -10,6 +10,8 @@ import {
   GetNewsGroupsResponseTO,
   GetNewsStreamItemsRequestTO,
   GetNewsStreamItemsResponseTO,
+  GetUserInformationRequestTO,
+  GetUserInformationResponseTO,
   MapSectionTO,
   MessageEmbeddedAppTO,
 } from './types';
@@ -173,7 +175,6 @@ export interface RogerthatMenuItem {
 
 export interface RogerthatApp {
   exit: () => void;
-  exitWithResult: (result: string) => void;
 }
 
 
@@ -269,6 +270,11 @@ export class Rogerthat {
     data: { [ key: string ]: any };
     put: (data: any) => Promise<void>;
     getProfile: (resolve: (result: RogerthatUserInfo) => void, reject?: (error: string) => void) => void;
+    getUserInformation: (
+      request: GetUserInformationRequestTO,
+      resolve: (result: GetUserInformationResponseTO) => void,
+      reject?: (error: string) => void,
+    ) => void;
   } & RogerthatUserInfo; // accessing profile info this way is deprecated (since it isn't updated in realtime) and might be removed later
   util: RogerthatUtil;
   homeScreen: {

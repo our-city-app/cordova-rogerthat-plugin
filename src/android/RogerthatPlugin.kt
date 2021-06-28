@@ -58,7 +58,6 @@ import com.mobicage.rpc.IJSONable
 import com.mobicage.rpc.IncompleteMessageException
 import com.mobicage.rpc.IntentResponseHandler
 import com.mobicage.to.news.GetNewsGroupRequestTO
-import com.mobicage.to.news.GetNewsGroupsRequestTO
 import com.mobicage.to.news.GetNewsStreamItemsRequestTO
 import com.mobicage.to.news.GetNewsStreamItemsResponseTO
 import com.mobicage.to.system.GetUserInformationRequestTO
@@ -72,6 +71,7 @@ import org.json.JSONObject
 import org.json.simple.JSONValue
 import java.util.*
 
+@Suppress("UNCHECKED_CAST")
 class RogerthatPlugin : CordovaPlugin() {
     private var mQRCodeScannerOpen = false
     private var mCallbackContext: CallbackContext? = null
@@ -91,13 +91,13 @@ class RogerthatPlugin : CordovaPlugin() {
 
             override fun userDataUpdated(userData: String?) {
                 val jsonMap =
-                    if (userData == null) HashMap() else (JSONValue.parse(userData) as Map<String?, Any?>)
+                    if (userData == null) HashMap() else (JSONValue.parse(userData) as Map<String, Any?>)
                 sendCallbackUpdate("userDataUpdated", JSONObject(jsonMap))
             }
 
             override fun serviceDataUpdated(serviceData: String?) {
                 val jsonMap =
-                    if (serviceData == null) HashMap() else (JSONValue.parse(serviceData) as Map<String?, Any?>)
+                    if (serviceData == null) HashMap() else (JSONValue.parse(serviceData) as Map<String, Any?>)
                 sendCallbackUpdate("serviceDataUpdated", JSONObject(jsonMap))
             }
 
@@ -135,8 +135,12 @@ class RogerthatPlugin : CordovaPlugin() {
     }
 
     @Throws(JSONException::class, IncompleteMessageException::class)
-    private fun processAction(action: String, callbackContext: CallbackContext, args: JSONObject?) {
-        val args = args ?: JSONObject()
+    private fun processAction(
+        action: String,
+        callbackContext: CallbackContext,
+        arguments: JSONObject?
+    ) {
+        val args = arguments ?: JSONObject()
         when (processAction(action)) {
             "start" -> {
                 if (mCallbackContext != null) {
@@ -162,7 +166,6 @@ class RogerthatPlugin : CordovaPlugin() {
                 callbackContext.success(JSONObject())
             }
             "app_exit" -> exitApp(callbackContext)
-            "app_exitWithResult" -> exitAppWithResult(callbackContext, args)
             "camera_startScanningQrCode" -> startScanningQrCode(callbackContext)
             "camera_stopScanningQrCode" -> stopScanningQrCode(callbackContext)
             "context" -> getContext(callbackContext)
@@ -173,11 +176,7 @@ class RogerthatPlugin : CordovaPlugin() {
                     JsonUtils.toMap(args)
                 )
             )
-            "news_getNewsGroups" -> getNewsGroups(
-                callbackContext, GetNewsGroupsRequestTO.fromJSONMap(
-                    JsonUtils.toMap(args)
-                )
-            )
+            "news_getNewsGroups" -> getNewsGroups(callbackContext)
             "news_getNewsStreamItems" -> getNewsStreamItems(
                 callbackContext, GetNewsStreamItemsRequestTO.fromJSONMap(
                     JsonUtils.toMap(args)
@@ -194,7 +193,7 @@ class RogerthatPlugin : CordovaPlugin() {
             "util_isConnectedToInternet" -> isConnectedToInternet(callbackContext)
             "util_open" -> openActivity(callbackContext, args)
             "util_playAudio" -> playAudio(callbackContext, args)
-            "homescreen_getHomeScreenContent" -> getHomeScreen(callbackContext, args)
+            "homescreen_getHomeScreenContent" -> getHomeScreen(callbackContext)
             else -> {
                 L.e("RogerthatPlugin.execute did not match '$action'")
                 callbackContext.error("RogerthatPlugin doesn't know how to execute this action.")
@@ -210,7 +209,7 @@ class RogerthatPlugin : CordovaPlugin() {
         callbackMap[getNewsPlugin().getNewsGroup(request)] = callbackContext
     }
 
-    private fun getNewsGroups(callbackContext: CallbackContext, request: GetNewsGroupsRequestTO) {
+    private fun getNewsGroups(callbackContext: CallbackContext) {
         callbackMap[getNewsPlugin().getNewsGroups()] = callbackContext
     }
 
@@ -372,11 +371,6 @@ class RogerthatPlugin : CordovaPlugin() {
         callbackContext.success(JSONObject())
     }
 
-    private fun exitAppWithResult(callbackContext: CallbackContext, args: JSONObject) {
-        getServiceBoundActivity().finish()
-        callbackContext.success(JSONObject())
-    }
-
     private fun startScanningQrCode(callbackContext: CallbackContext) {
         val activity = getServiceBoundActivity()
         if (mQRCodeScannerOpen) {
@@ -513,6 +507,10 @@ class RogerthatPlugin : CordovaPlugin() {
         callbackContext: CallbackContext,
         request: GetUserInformationRequestTO
     ) {
+        if (!rogerthatInterface.isEmbeddedApp()) {
+            callbackContext.error("getUserInformation can only be called from embedded apps")
+            return
+        }
         if (cachedUserInformation != null) {
             sendPluginResult(callbackContext, JSONObject(cachedUserInformation!!.toJSONMap()))
         } else {
@@ -607,14 +605,14 @@ class RogerthatPlugin : CordovaPlugin() {
         mPoker!!.poke(tag, null)
     }
 
-    private fun getHomeScreen(callbackContext: CallbackContext, args: JSONObject) {
+    private fun getHomeScreen(callbackContext: CallbackContext) {
         if (homeScreenObserver != null) {
             callbackContext.error("You can only call getHomeScreen once")
             return
         }
         homeScreenObserver = Observer { (homeScreenData, error) ->
             if (error == null) {
-                sendPluginResult(callbackContext, JSONObject(homeScreenData))
+                sendPluginResult(callbackContext, JSONObject(homeScreenData as MutableMap<*, *>))
             } else {
                 if (error is UnsupportedHomeScreenVersion) {
                     val msg =

@@ -112,9 +112,10 @@ class RogerthatPlugin : CordovaPlugin() {
     private var homeScreenKey: String? = null
     private var homeScreenLiveData: LiveData<HomeScreenContentResult>? = null
     private var homeScreenObserver: Observer<HomeScreenContentResult>? = null
-    private val userProfileCallbacks: MutableList<CallbackContext> = ArrayList()
-    private val userInformationCallbacks: MutableList<CallbackContext> = ArrayList()
+    private val userProfileCallbacks = mutableListOf<CallbackContext>()
+    private val userInformationCallbacks = mutableListOf<CallbackContext>()
     private var cachedUserInformation: GetUserInformationResponseTO? = null
+
     override fun execute(
         action: String,
         args: JSONArray,
@@ -746,19 +747,15 @@ class RogerthatPlugin : CordovaPlugin() {
             val action = intent.action ?: return
             val requestId = intent.getStringExtra(IntentResponseHandler.REQUEST_ID)
             var callbackContext: CallbackContext? = null
-            var response: IJSONable? = null
             if (requestId != null) {
                 callbackContext = callbackMap[requestId]
-                response = RequestStore.getResponse(requestId)
-                if (response == null) {
-                    return
-                }
             }
             when (action) {
                 NewsPlugin.GET_NEWS_GROUP_SUCCESS,
                 NewsPlugin.GET_NEWS_GROUPS_SUCCESS,
                 NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS,
                 SystemPlugin.GET_USER_INFORMATION_SUCCESS -> {
+                    val response = RequestStore.getResponse(requestId)
                     val successObj = JSONObject(response!!.toJSONMap())
                     cachedUserInformation = response as GetUserInformationResponseTO
                     for (callback in userInformationCallbacks) {

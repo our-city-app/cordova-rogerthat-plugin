@@ -115,7 +115,7 @@ class RogerthatPlugin : CordovaPlugin() {
     override fun execute(
         action: String,
         args: JSONArray,
-        callbackContext: CallbackContext
+        callbackContext: CallbackContext,
     ): Boolean {
         if ("log" != action) {
             L.i("RogerthatPlugin.execute '$action'")
@@ -135,7 +135,7 @@ class RogerthatPlugin : CordovaPlugin() {
     private fun processAction(
         action: String,
         callbackContext: CallbackContext,
-        arguments: JSONObject?
+        arguments: JSONObject?,
     ) {
         val args = arguments ?: JSONObject()
         when (processAction(action)) {
@@ -208,7 +208,7 @@ class RogerthatPlugin : CordovaPlugin() {
 
     private fun getNewsStreamItems(
         callbackContext: CallbackContext,
-        request: GetNewsStreamItemsRequestTO
+        request: GetNewsStreamItemsRequestTO,
     ) {
         val requestId = UUID.randomUUID().toString()
         val handler = IntentResponseHandler<GetNewsStreamItemsResponseTO>(
@@ -503,7 +503,7 @@ class RogerthatPlugin : CordovaPlugin() {
         }
         getSystemPlugin().getUserInformation().observe(cordova.activity) {
             if (it.info == null) {
-                sendPluginResultError(callbackContext, it.error ?: "")
+                error(callbackContext, "unknown", it.error ?: "")
             } else {
                 sendPluginResult(callbackContext, JSONObject(it.info.toJSONMap()))
             }
@@ -512,12 +512,6 @@ class RogerthatPlugin : CordovaPlugin() {
 
     private fun sendPluginResult(callbackContext: CallbackContext?, result: JSONObject) {
         val pluginResult = PluginResult(PluginResult.Status.OK, result)
-        pluginResult.keepCallback = true
-        callbackContext!!.sendPluginResult(pluginResult)
-    }
-
-    private fun sendPluginResultError(callbackContext: CallbackContext?, error: String) {
-        val pluginResult = PluginResult(PluginResult.Status.ERROR, error)
         pluginResult.keepCallback = true
         callbackContext!!.sendPluginResult(pluginResult)
     }
@@ -625,7 +619,7 @@ class RogerthatPlugin : CordovaPlugin() {
 
     private fun doGetHomeScreen(
         communityId: Long,
-        homeScreenId: String
+        homeScreenId: String,
     ): LiveData<HomeScreenContentResult> {
         val model = ViewModelProvider(getServiceBoundActivity()).get(
             HomeScreenViewModel::class.java
@@ -752,8 +746,16 @@ class RogerthatPlugin : CordovaPlugin() {
                 NewsPlugin.GET_NEWS_GROUP_FAILED,
                 NewsPlugin.GET_NEWS_GROUPS_FAILED,
                 NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED,
-                IdentityStore.IDENTITY_CHANGED_INTENT,
                 -> {
+                    val err = intent.getSerializableExtra(IntentResponseHandler.ERROR) as Exception
+                    L.e(err)
+                    error(
+                        callbackContext,
+                        "unknown",
+                        getServiceBoundActivity().getString(R.string.unknown_error_occurred)
+                    )
+                }
+                IdentityStore.IDENTITY_CHANGED_INTENT -> {
                     reloadHomeScreen()
                     notifyProfileChanges()
                 }

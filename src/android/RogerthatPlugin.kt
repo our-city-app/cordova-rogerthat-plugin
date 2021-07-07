@@ -51,17 +51,13 @@ import com.mobicage.rogerthat.plugins.scan.ScanTabActivity
 import com.mobicage.rogerthat.plugins.system.SystemPlugin
 import com.mobicage.rogerthat.util.ActionScreenUtils
 import com.mobicage.rogerthat.util.JsonUtils
-import com.mobicage.rogerthat.util.RequestStore
 import com.mobicage.rogerthat.util.logging.L
 import com.mobicage.rogerthat.util.system.SafeRunnable
-import com.mobicage.rpc.IJSONable
 import com.mobicage.rpc.IncompleteMessageException
 import com.mobicage.rpc.IntentResponseHandler
 import com.mobicage.to.news.GetNewsGroupRequestTO
 import com.mobicage.to.news.GetNewsStreamItemsRequestTO
 import com.mobicage.to.news.GetNewsStreamItemsResponseTO
-import com.mobicage.to.system.GetUserInformationRequestTO
-import com.mobicage.to.system.GetUserInformationResponseTO
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.CordovaPlugin
 import org.apache.cordova.PluginResult
@@ -113,8 +109,6 @@ class RogerthatPlugin : CordovaPlugin() {
     private var homeScreenLiveData: LiveData<HomeScreenContentResult>? = null
     private var homeScreenObserver: Observer<HomeScreenContentResult>? = null
     private val userProfileCallbacks = mutableListOf<CallbackContext>()
-    private val userInformationCallbacks = mutableListOf<CallbackContext>()
-    private var cachedUserInformation: GetUserInformationResponseTO? = null
 
     override fun execute(
         action: String,
@@ -186,11 +180,7 @@ class RogerthatPlugin : CordovaPlugin() {
             "ui_hideKeyboard" -> hideKeyboard(callbackContext)
             "user_put" -> putUserData(callbackContext, args)
             "user_getProfile" -> getUserProfile(callbackContext)
-            "user_getUserInformation" -> getUserInformation(
-                callbackContext, GetUserInformationRequestTO.fromJSONMap(
-                    JsonUtils.toMap(args)
-                )
-            )
+            "user_getUserInformation" -> getUserInformation(callbackContext)
             "util_isConnectedToInternet" -> isConnectedToInternet(callbackContext)
             "util_open" -> openActivity(callbackContext, args)
             "util_playAudio" -> playAudio(callbackContext, args)
@@ -504,24 +494,28 @@ class RogerthatPlugin : CordovaPlugin() {
         sendPluginResult(callbackContext, JSONObject(getFriendsPlugin().userInfo))
     }
 
-    private fun getUserInformation(
-        callbackContext: CallbackContext,
-        request: GetUserInformationRequestTO
-    ) {
+    private fun getUserInformation(callbackContext: CallbackContext) {
         if (!rogerthatInterface.isEmbeddedApp()) {
             callbackContext.error("getUserInformation can only be called from embedded apps")
             return
         }
-        if (cachedUserInformation != null) {
-            sendPluginResult(callbackContext, JSONObject(cachedUserInformation!!.toJSONMap()))
-        } else {
-            getSystemPlugin().getUserInformation(request)
+        getSystemPlugin().getUserInformation().observe(cordova.activity) {
+            if (it.info == null) {
+                sendPluginResultError(callbackContext, it.error ?: "")
+            } else {
+                sendPluginResult(callbackContext, JSONObject(it.info.toJSONMap()))
+            }
         }
-        userInformationCallbacks.add(callbackContext)
     }
 
     private fun sendPluginResult(callbackContext: CallbackContext?, result: JSONObject) {
         val pluginResult = PluginResult(PluginResult.Status.OK, result)
+        pluginResult.keepCallback = true
+        callbackContext!!.sendPluginResult(pluginResult)
+    }
+
+    private fun sendPluginResultError(callbackContext: CallbackContext?, error: String) {
+        val pluginResult = PluginResult(PluginResult.Status.ERROR, error)
         pluginResult.keepCallback = true
         callbackContext!!.sendPluginResult(pluginResult)
     }
@@ -658,12 +652,6 @@ class RogerthatPlugin : CordovaPlugin() {
         homeScreenLiveData = liveData
     }
 
-    private fun refreshPersonalInfo() {
-        if (userInformationCallbacks.isNotEmpty()) {
-            getSystemPlugin().getUserInformation(GetUserInformationRequestTO())
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent) {
         L.i("RogerthatPlugin.onActivityResult requestCode -> $requestCode")
         if (requestCode == ScanTabActivity.QR_SCAN_RESULT) {
@@ -730,14 +718,7 @@ class RogerthatPlugin : CordovaPlugin() {
         filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS)
         filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED)
         filter.addAction(IdentityStore.IDENTITY_CHANGED_INTENT)
-        filter.addAction(SystemPlugin.GET_USER_INFORMATION_SUCCESS)
         filter.addAction(SystemPlugin.GET_USER_INFORMATION_FAILED)
-        filter.addAction(SystemPlugin.ADD_ADDRESSES_SUCCESS)
-        filter.addAction(SystemPlugin.EDIT_ADDRESSES_SUCCESS)
-        filter.addAction(SystemPlugin.DELETE_ADDRESSES_SUCCESS)
-        filter.addAction(SystemPlugin.ADD_PHONE_NUMBERS_SUCCESS)
-        filter.addAction(SystemPlugin.EDIT_PHONE_NUMBERS_SUCCESS)
-        filter.addAction(SystemPlugin.DELETE_PHONE_NUMBERS_SUCCESS)
         return filter
     }
 
@@ -754,14 +735,6 @@ class RogerthatPlugin : CordovaPlugin() {
                 NewsPlugin.GET_NEWS_GROUP_SUCCESS,
                 NewsPlugin.GET_NEWS_GROUPS_SUCCESS,
                 NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS,
-                SystemPlugin.GET_USER_INFORMATION_SUCCESS -> {
-                    val response = RequestStore.getResponse(requestId)
-                    val successObj = JSONObject(response!!.toJSONMap())
-                    cachedUserInformation = response as GetUserInformationResponseTO
-                    for (callback in userInformationCallbacks) {
-                        sendPluginResult(callback, successObj)
-                    }
-                }
                 NewsPlugin.GET_NEWS_GROUP_FAILED,
                 NewsPlugin.GET_NEWS_GROUPS_FAILED,
                 NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED,
@@ -779,12 +752,6 @@ class RogerthatPlugin : CordovaPlugin() {
                     reloadHomeScreen()
                     notifyProfileChanges()
                 }
-                SystemPlugin.ADD_ADDRESSES_SUCCESS,
-                SystemPlugin.EDIT_ADDRESSES_SUCCESS,
-                SystemPlugin.DELETE_ADDRESSES_SUCCESS,
-                SystemPlugin.ADD_PHONE_NUMBERS_SUCCESS,
-                SystemPlugin.EDIT_PHONE_NUMBERS_SUCCESS,
-                SystemPlugin.DELETE_PHONE_NUMBERS_SUCCESS -> refreshPersonalInfo()
             }
         }
     }

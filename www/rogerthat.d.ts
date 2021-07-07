@@ -271,7 +271,6 @@ export class Rogerthat {
     put: (data: any) => Promise<void>;
     getProfile: (resolve: (result: RogerthatUserInfo) => void, reject?: (error: string) => void) => void;
     getUserInformation: (
-      request: GetUserInformationRequestTO,
       resolve: (result: GetUserInformationResponseTO) => void,
       reject?: (error: string) => void,
     ) => void;

@@ -183,8 +183,8 @@ function RogerthatPlugin() {
         getProfile: function (resolve, reject) {
             utils.exec(resolve, reject, "user_getProfile", []);
         },
-        getUserInformation: function(request, resolve, reject) {
-            utils.exec(resolve, reject, 'user_getUserInformation', [request])
+        getUserInformation: function(resolve, reject) {
+            utils.exec(resolve, reject, 'user_getUserInformation', [])
         },
         put: function (data) {
             var crp = {};

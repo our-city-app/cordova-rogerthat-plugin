@@ -10,7 +10,6 @@ import {
   GetNewsGroupsResponseTO,
   GetNewsStreamItemsRequestTO,
   GetNewsStreamItemsResponseTO,
-  GetUserInformationRequestTO,
   GetUserInformationResponseTO,
   MapSectionTO,
   MessageEmbeddedAppTO,

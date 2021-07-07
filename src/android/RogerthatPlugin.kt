@@ -51,8 +51,10 @@ import com.mobicage.rogerthat.plugins.scan.ScanTabActivity
 import com.mobicage.rogerthat.plugins.system.SystemPlugin
 import com.mobicage.rogerthat.util.ActionScreenUtils
 import com.mobicage.rogerthat.util.JsonUtils
+import com.mobicage.rogerthat.util.RequestStore
 import com.mobicage.rogerthat.util.logging.L
 import com.mobicage.rogerthat.util.system.SafeRunnable
+import com.mobicage.rpc.IJSONable
 import com.mobicage.rpc.IncompleteMessageException
 import com.mobicage.rpc.IntentResponseHandler
 import com.mobicage.to.news.GetNewsGroupRequestTO
@@ -718,7 +720,6 @@ class RogerthatPlugin : CordovaPlugin() {
         filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS)
         filter.addAction(NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED)
         filter.addAction(IdentityStore.IDENTITY_CHANGED_INTENT)
-        filter.addAction(SystemPlugin.GET_USER_INFORMATION_FAILED)
         return filter
     }
 
@@ -728,27 +729,31 @@ class RogerthatPlugin : CordovaPlugin() {
             val action = intent.action ?: return
             val requestId = intent.getStringExtra(IntentResponseHandler.REQUEST_ID)
             var callbackContext: CallbackContext? = null
+            var response: IJSONable? = null
             if (requestId != null) {
                 callbackContext = callbackMap[requestId]
+                if (callbackContext == null) {
+                    // Some other activity may have executed this, ignore
+                    return
+                }
+                response = RequestStore.getResponse(requestId)
+                if (response == null) {
+                    return
+                }
             }
+
             when (action) {
                 NewsPlugin.GET_NEWS_GROUP_SUCCESS,
                 NewsPlugin.GET_NEWS_GROUPS_SUCCESS,
                 NewsPlugin.GET_NEWS_STREAM_ITEMS_SUCCESS,
+                -> callbackContext!!.success(
+                    JSONObject(response!!.toJSONMap())
+                )
                 NewsPlugin.GET_NEWS_GROUP_FAILED,
                 NewsPlugin.GET_NEWS_GROUPS_FAILED,
                 NewsPlugin.GET_NEWS_STREAM_ITEMS_FAILED,
-                SystemPlugin.GET_USER_INFORMATION_FAILED -> {
-                    val err =
-                        intent.getSerializableExtra(IntentResponseHandler.ERROR) as Exception
-                    L.e(err)
-                    error(
-                        callbackContext,
-                        "unknown",
-                        getServiceBoundActivity().getString(R.string.unknown_error_occurred)
-                    )
-                }
-                IdentityStore.IDENTITY_CHANGED_INTENT -> {
+                IdentityStore.IDENTITY_CHANGED_INTENT,
+                -> {
                     reloadHomeScreen()
                     notifyProfileChanges()
                 }

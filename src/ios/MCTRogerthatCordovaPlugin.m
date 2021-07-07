@@ -246,7 +246,12 @@
 - (void)user_getUserInformation:(CDVInvokedUrlCommand *)command
 {
     HERE();
-    // todo ruben check isEmbeddedApp
+    if (![self.helper isEmbeddedApp]) {
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                                 messageAsString:@"getUserInformation can only be called from embedded apps"]
+                                    callbackId:command.callbackId];
+        return;
+    }
     [self.helper getUserInformationWithResultHandler:[self getUserInformationResultHandlerWithCommand:command]
                                               params:[self getRequestParams:command]];
 }

@@ -327,7 +327,13 @@
 {
     __weak __typeof__(self) weakSelf = self;
     return ^(NSDictionary *result, NSString *error) {
-        [weakSelf sendDictionaryCallback:command.callbackId withResult:result withError:error];
+        if (error) {
+            [weakSelf.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                                         messageAsString:error]
+                                            callbackId:command.callbackId];
+        } else {
+            [weakSelf sendDictionaryCallback:command.callbackId withResult:result withError:nil];
+        }
     };
 }
 

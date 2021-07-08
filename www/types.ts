@@ -1,37 +1,39 @@
-// tslint:disable:no-empty-interface
+/* eslint-disable @typescript-eslint/no-empty-interface */
 export type AppSearchSuggestionTO =
   AppSearchSuggestionActionTO;
 
 export type FormComponentTO =
-  FileComponentTO
-  | TextInputComponentTO
-  | MultiSelectComponentTO
-  | DatetimeComponentTO
-  | ParagraphComponentTO
+  DatetimeComponentTO
+  | FileComponentTO
   | LocationComponentTO
-  | SingleSelectComponentTO;
+  | MultiSelectComponentTO
+  | ParagraphComponentTO
+  | PersonalInfoComponentTO
+  | SingleSelectComponentTO
+  | TextInputComponentTO;
 
 export type FormComponentValueTO =
-  SingleSelectComponentValueTO
-  | TextInputComponentValueTO
-  | MultiSelectComponentValueTO
-  | DatetimeComponentValueTO
+  DatetimeComponentValueTO
+  | FileComponentValueTO
   | LocationComponentValueTO
-  | FileComponentValueTO;
+  | MultiSelectComponentValueTO
+  | PersonalInfoComponentValueTO
+  | SingleSelectComponentValueTO
+  | TextInputComponentValueTO;
 
 export type FormValidatorTO =
-  RegexValidatorTO
-  | MinLengthValidatorTO
-  | MaxDateValidatorTO
-  | MinValidatorTO
+  MaxDateValidatorTO
   | MaxLengthValidatorTO
   | MaxValidatorTO
-  | RequiredValidatorTO
-  | MinDateValidatorTO;
+  | MinDateValidatorTO
+  | MinLengthValidatorTO
+  | MinValidatorTO
+  | RegexValidatorTO
+  | RequiredValidatorTO;
 
 export type JobOfferActionTO =
-  JobOfferOpenActionTO
-  | JobOfferChatActionTO;
+  JobOfferChatActionTO
+  | JobOfferOpenActionTO;
 
 export type MapActionChipTO =
   SearchSuggestionTO;
@@ -40,48 +42,48 @@ export type MapAnnouncementTO =
   TextAnnouncementTO;
 
 export type MapGeometryTO =
-  MultiLineStringGeometryTO
-  | LineStringGeometryTO
-  | PolygonGeometryTO
-  | MultiPolygonGeometryTO;
+  LineStringGeometryTO
+  | MultiLineStringGeometryTO
+  | MultiPolygonGeometryTO
+  | PolygonGeometryTO;
 
 export type MapItemLineTO =
   MapItemLineTextTO;
 
 export type MapListSectionItemTO =
-  OpeningHoursListSectionItemTO
-  | ToggleListSectionItemTO
+  ExpandableListSectionItemTO
   | LinkListSectionItemTO
-  | ExpandableListSectionItemTO
-  | OpeningHoursSectionItemTO;
+  | OpeningHoursListSectionItemTO
+  | OpeningHoursSectionItemTO
+  | ToggleListSectionItemTO;
 
 export type MapSearchSuggestionTO =
   MapSearchSuggestionItemTO
   | MapSearchSuggestionKeywordTO;
 
 export type MapSectionTO =
-  VoteSectionTO
-  | NewsItemSectionTO
-  | MediaSectionTO
-  | GeometrySectionTO
-  | TextSectionTO
-  | NewsSectionTO
+  GeometrySectionTO
   | ListSectionTO
-  | NewsGroupSectionTO;
+  | MediaSectionTO
+  | NewsGroupSectionTO
+  | NewsItemSectionTO
+  | NewsSectionTO
+  | TextSectionTO
+  | VoteSectionTO;
 
 export type NewFlowMessageTO =
-  MessageTO
-  | FormMessageTO;
+  FormMessageTO
+  | MessageTO;
 
 export type NextActionTO =
-  NextActionURLTO
+  NextActionDefaultTO
   | NextActionSectionTO
   | NextActionSubmitTO
-  | NextActionDefaultTO;
+  | NextActionURLTO;
 
 export type Step =
-  MessageFlowStepTO
-  | FormFlowStepTO;
+  FormFlowStepTO
+  | MessageFlowStepTO;
 
 
 export const enum AppSearchSuggestionType {
@@ -89,29 +91,30 @@ export const enum AppSearchSuggestionType {
 }
 
 export const enum FormComponentType {
-  TEXT_INPUT = 'text_input',
-  FILE = 'file',
-  MULTI_SELECT = 'multi_select',
   DATETIME = 'datetime',
-  PARAGRAPH = 'paragraph',
+  FILE = 'file',
   LOCATION = 'location',
+  MULTI_SELECT = 'multi_select',
+  PARAGRAPH = 'paragraph',
+  PERSONAL_INFO = 'personal_info',
   SINGLE_SELECT = 'single_select',
+  TEXT_INPUT = 'text_input',
 }
 
 export const enum FormValidatorType {
+  MAX = 'max',
+  MAXDATE = 'maxdate',
+  MAXLENGTH = 'maxlength',
+  MIN = 'min',
+  MINDATE = 'mindate',
+  MINLENGTH = 'minlength',
   REGEX = 'regex',
   REQUIRED = 'required',
-  MIN = 'min',
-  MAX = 'max',
-  MAXLENGTH = 'maxlength',
-  MINLENGTH = 'minlength',
-  MAXDATE = 'maxdate',
-  MINDATE = 'mindate',
 }
 
 export const enum JobOfferActionType {
-  OPEN = 0,
   CHAT = 1,
+  OPEN = 0,
 }
 
 export const enum MapActionChipType {
@@ -123,10 +126,10 @@ export const enum MapAnnouncementType {
 }
 
 export const enum MapGeometryType {
-  MULTI_POLYGON = 'MultiPolygon',
-  POLYGON = 'Polygon',
   LINE_STRING = 'LineString',
   MULTI_LINE_STRING = 'MultiLineString',
+  MULTI_POLYGON = 'MultiPolygon',
+  POLYGON = 'Polygon',
 }
 
 export const enum MapItemLineType {
@@ -134,10 +137,10 @@ export const enum MapItemLineType {
 }
 
 export const enum MapListSectionItemType {
-  OPENING_HOURS = 'opening_hours',
-  EXPANDABLE = 'expandable',
   DYNAMIC_OPENING_HOURS = 'opening-hours',
+  EXPANDABLE = 'expandable',
   LINK = 'link',
+  OPENING_HOURS = 'opening_hours',
   TOGGLE = 'toggle',
 }
 
@@ -147,19 +150,19 @@ export const enum MapSearchSuggestionType {
 }
 
 export const enum MapSectionType {
-  NEWS_GROUP = 'news-group',
   GEOMETRY = 'geometry',
-  MEDIA = 'media',
   LIST = 'list',
+  MEDIA = 'media',
+  NEWS = 'news',
+  NEWS_GROUP = 'news-group',
   NEWS_ITEM = 'news-item',
   TEXT = 'text',
   VOTE = 'vote',
-  NEWS = 'news',
 }
 
 export const enum MessageType {
-  MESSAGE = 'message_step',
   FORM = 'form_step',
+  MESSAGE = 'message_step',
 }
 
 export const enum NewMessageType {
@@ -168,10 +171,10 @@ export const enum NewMessageType {
 }
 
 export const enum NextActionType {
-  URL = 'url',
+  NEXT = 'next',
   SECTION = 'section',
   SUBMIT = 'submit',
-  NEXT = 'next',
+  URL = 'url',
 }
 
 
@@ -196,41 +199,19 @@ export interface AckMessageResponseTO {
 }
 
 export interface AddProfileAddressRequestTO {
-  geo_location: GeoPointTO;
-  bus_nr: string | null;
-  city: string | null;
-  distance: number;
-  house_nr: string | null;
-  label: string | null;
-  street_name: string | null;
-  type: number;
-  zip_code: string | null;
+  address: BaseProfileAddressTO;
 }
 
 export interface AddProfileAddressResponseTO {
-  geo_location: GeoPointTO;
-  bus_nr: string | null;
-  city: string | null;
-  distance: number;
-  house_nr: string | null;
-  label: string | null;
-  street_name: string | null;
-  type: number;
-  uid: string;
-  zip_code: string | null;
+  address: ProfileAddressTO;
 }
 
 export interface AddProfilePhoneNumberRequestTO {
-  label: string | null;
-  number: string;
-  type: number;
+  phone_number: BaseProfilePhoneNumberTO;
 }
 
 export interface AddProfilePhoneNumberResponseTO {
-  label: string | null;
-  number: string;
-  type: number;
-  uid: string;
+  phone_number: ProfilePhoneNumberTO;
 }
 
 export interface AdvancedOrderCategory {
@@ -375,6 +356,25 @@ export interface BasePaymentMethod {
   amount: number;
   currency: string | null;
   precision: number;
+}
+
+export interface BaseProfileAddressTO {
+  geo_location: GeoPointTO;
+  bus_nr: string | null;
+  city: string | null;
+  country: string | null;
+  distance: number;
+  house_nr: string | null;
+  label: string | null;
+  street_name: string | null;
+  type: number;
+  zip_code: string | null;
+}
+
+export interface BaseProfilePhoneNumberTO {
+  label: string | null;
+  number: string;
+  type: number;
 }
 
 export interface BreakFriendshipRequestTO {
@@ -525,7 +525,7 @@ export interface DatetimeComponentValueTO {
   minute: number;
   month: number;
   year: number;
-  id: string | null;
+  id: string;
   readonly type: FormComponentType.DATETIME;
 }
 
@@ -548,6 +548,7 @@ export interface DeleteProfileAddressesRequestTO {
 }
 
 export interface DeleteProfileAddressesResponseTO {
+  uids: string[];
 }
 
 export interface DeleteProfilePhoneNumbersRequestTO {
@@ -555,6 +556,7 @@ export interface DeleteProfilePhoneNumbersRequestTO {
 }
 
 export interface DeleteProfilePhoneNumbersResponseTO {
+  uids: string[];
 }
 
 export interface DisableNewsRequestTO {
@@ -615,8 +617,8 @@ export interface ExpandableListSectionItemTO {
 
 export interface FileComponentFileTO {
   file_type: string | null;
-  name: string | null;
-  value: string | null;
+  name: string;
+  value: string;
 }
 
 export interface FileComponentTO {
@@ -631,10 +633,7 @@ export interface FileComponentTO {
 
 export interface FileComponentValueTO {
   files: FileComponentFileTO[];
-  file_type: string | null;
-  name: string | null;
-  value: string | null;
-  id: string | null;
+  id: string;
   readonly type: FormComponentType.FILE;
 }
 
@@ -748,14 +747,22 @@ export interface FormSectionTO {
   components: FormComponentTO[];
   next_action: NextActionTO | null;
   description: string | null;
-  id: string | null;
+  id: string;
   next_button_caption: string | null;
   title: string | null;
 }
 
 export interface FormSectionValueTO {
   components: FormComponentValueTO[];
-  id: string | null;
+  id: string;
+}
+
+export interface FormSubmissionSectionTO {
+  branding: FormSectionBrandingTO | null;
+  components: FormComponentTO[];
+  description: string | null;
+  next_button_caption: string | null;
+  title: string | null;
 }
 
 export interface FormTO {
@@ -1025,7 +1032,7 @@ export interface GetFormRequestTO {
 
 export interface GetFormResponseTO {
   sections: FormSectionTO[];
-  submission_section: FormSectionTO | null;
+  submission_section: FormSubmissionSectionTO | null;
   id: number;
   max_submissions: number;
   title: string | null;
@@ -1273,6 +1280,13 @@ export interface GetProfileAddressesResponseTO {
   items: ProfileAddressTO[];
 }
 
+export interface GetProfileEmailsRequestTO {
+}
+
+export interface GetProfileEmailsResponseTO {
+  items: ProfileEmailTO[];
+}
+
 export interface GetProfilePhoneNumbersRequestTO {
 }
 
@@ -1314,6 +1328,15 @@ export interface GetServiceActionInfoResponseTO {
   type: number;
 }
 
+export interface GetSingleSignOnLinkRequestTO {
+  uid: string | null;
+}
+
+export interface GetSingleSignOnLinkResponseTO {
+  code: string;
+  data: string | null;
+}
+
 export interface GetStaticFlowRequestTO {
   coords: number[];
   service: string | null;
@@ -1341,6 +1364,15 @@ export interface GetUserInfoResponseTO {
   profileData: string | null;
   qualifiedIdentifier: string | null;
   type: number;
+}
+
+export interface GetUserInformationRequestTO {
+}
+
+export interface GetUserInformationResponseTO {
+  addresses: ProfileAddressTO[];
+  emails: ProfileEmailTO[];
+  phone_numbers: ProfilePhoneNumberTO[];
 }
 
 export interface GetUserLinkRequestTO {
@@ -1598,7 +1630,7 @@ export interface LocationComponentValueTO {
   address: PostalAddressTO | null;
   latitude: number;
   longitude: number;
-  id: string | null;
+  id: string;
   readonly type: FormComponentType.LOCATION;
 }
 
@@ -1924,7 +1956,7 @@ export interface MultiSelectComponentTO {
 
 export interface MultiSelectComponentValueTO {
   values: string[];
-  id: string | null;
+  id: string;
   readonly type: FormComponentType.MULTI_SELECT;
 }
 
@@ -2550,6 +2582,33 @@ export interface PaymentMethod {
   target: string | null;
 }
 
+export interface PersonalInfoComponentTO {
+  fields: PersonalInfoFieldTO[];
+  validators: FormValidatorTO[];
+  description: string | null;
+  id: string;
+  sensitive: boolean;
+  title: string | null;
+  readonly type: FormComponentType.PERSONAL_INFO;
+}
+
+export interface PersonalInfoComponentValueTO {
+  fields: PersonalInfoFieldValueTO[];
+  id: string;
+  readonly type: FormComponentType.PERSONAL_INFO;
+}
+
+export interface PersonalInfoFieldTO {
+  field: string;
+  fields: string[];
+  required: boolean;
+}
+
+export interface PersonalInfoFieldValueTO {
+  field: string;
+  value: string;
+}
+
 export interface PhotoUploadFormMessageTO {
   attachments: AttachmentTO[];
   form: PhotoUploadFormTO;
@@ -2641,6 +2700,7 @@ export interface ProfileAddressTO {
   geo_location: GeoPointTO;
   bus_nr: string | null;
   city: string | null;
+  country: string | null;
   distance: number;
   house_nr: string | null;
   label: string | null;
@@ -2648,6 +2708,13 @@ export interface ProfileAddressTO {
   type: number;
   uid: string;
   zip_code: string | null;
+}
+
+export interface ProfileEmailTO {
+  label: string | null;
+  type: number;
+  uid: string;
+  value: string;
 }
 
 export interface ProfilePhoneNumberTO {
@@ -3004,8 +3071,8 @@ export interface SingleSelectComponentTO {
 }
 
 export interface SingleSelectComponentValueTO {
-  value: string | null;
-  id: string | null;
+  value: string;
+  id: string;
   readonly type: FormComponentType.SINGLE_SELECT;
 }
 
@@ -3428,8 +3495,8 @@ export interface TextInputComponentTO {
 }
 
 export interface TextInputComponentValueTO {
-  value: string | null;
-  id: string | null;
+  value: string;
+  id: string;
   readonly type: FormComponentType.TEXT_INPUT;
 }
 
@@ -3797,43 +3864,19 @@ export interface UpdatePhotoUploadFormResponseTO {
 }
 
 export interface UpdateProfileAddressRequestTO {
-  geo_location: GeoPointTO;
-  bus_nr: string | null;
-  city: string | null;
-  distance: number;
-  house_nr: string | null;
-  label: string | null;
-  street_name: string | null;
-  type: number;
-  uid: string;
-  zip_code: string | null;
+  address: ProfileAddressTO;
 }
 
 export interface UpdateProfileAddressResponseTO {
-  geo_location: GeoPointTO;
-  bus_nr: string | null;
-  city: string | null;
-  distance: number;
-  house_nr: string | null;
-  label: string | null;
-  street_name: string | null;
-  type: number;
-  uid: string;
-  zip_code: string | null;
+  address: ProfileAddressTO;
 }
 
 export interface UpdateProfilePhoneNumberRequestTO {
-  label: string | null;
-  number: string;
-  type: number;
-  uid: string;
+  phone_number: ProfilePhoneNumberTO;
 }
 
 export interface UpdateProfilePhoneNumberResponseTO {
-  label: string | null;
-  number: string;
-  type: number;
-  uid: string;
+  phone_number: ProfilePhoneNumberTO;
 }
 
 export interface UpdateRangeSliderFormRequestTO {
@@ -3926,7 +3969,7 @@ export interface UpdateUserDataRequestTO {
   data: string | null;
   keys: string[];
   service: string;
-  type: string;
+  type: string | null;
   user_data: string | null;
   values: string[];
 }
@@ -3960,7 +4003,7 @@ export interface UserScannedResponseTO {
 export interface ValueTO {
   next_action: NextActionTO | null;
   image_url: string | null;
-  label: string | null;
+  label: string;
   value: string;
 }
 

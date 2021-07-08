@@ -108,9 +108,6 @@ function RogerthatPlugin() {
         exit: function () {
             utils.exec(null, null, "app_exit", []);
         },
-        exitWithResult: function (result) {
-            utils.exec(null, null, "app_exitWithResult", [{"result": result}]);
-        }
     };
     this.camera = {
         FRONT: "front",
@@ -185,6 +182,9 @@ function RogerthatPlugin() {
         data: {},
         getProfile: function (resolve, reject) {
             utils.exec(resolve, reject, "user_getProfile", []);
+        },
+        getUserInformation: function(resolve, reject) {
+            utils.exec(resolve, reject, 'user_getUserInformation', [])
         },
         put: function (data) {
             var crp = {};

@@ -169,13 +169,6 @@
     [self commandProcessed:command];
 }
 
-- (void)app_exitWithResult:(CDVInvokedUrlCommand *)command
-{
-    HERE();
-    [self.vc exitAppWithResult:[self getRequestParams:command]];
-    [self commandProcessed:command];
-}
-
 - (void)badges_list:(CDVInvokedUrlCommand *)command
 {
     HERE();
@@ -250,6 +243,19 @@
                                           params:[self getRequestParams:command]];
 }
 
+- (void)user_getUserInformation:(CDVInvokedUrlCommand *)command
+{
+    HERE();
+    if (![self.helper isEmbeddedApp]) {
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                                 messageAsString:@"getUserInformation can only be called from embedded apps"]
+                                    callbackId:command.callbackId];
+        return;
+    }
+    [self.helper getUserInformationWithResultHandler:[self getUserInformationResultHandlerWithCommand:command]
+                                              params:[self getRequestParams:command]];
+}
+
 - (void)util_isConnectedToInternet:(CDVInvokedUrlCommand *)command
 {
     HERE();
@@ -314,6 +320,20 @@
     __weak __typeof__(self) weakSelf = self;
     return ^(NSDictionary *result) {
         [weakSelf sendDictionaryCallback:command.callbackId withResult:result withError:nil];
+    };
+}
+
+- (MCTScreenBrandingGetUserInformationResultHandler)getUserInformationResultHandlerWithCommand:(CDVInvokedUrlCommand *)command
+{
+    __weak __typeof__(self) weakSelf = self;
+    return ^(NSDictionary *result, NSString *error) {
+        if (error) {
+            [weakSelf.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                                         messageAsString:error]
+                                            callbackId:command.callbackId];
+        } else {
+            [weakSelf sendDictionaryCallback:command.callbackId withResult:result withError:nil];
+        }
     };
 }
 
